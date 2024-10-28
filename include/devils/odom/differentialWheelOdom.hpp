@@ -57,84 +57,12 @@ namespace devils
             lastUpdateTimestamp = pros::millis();
         }
 
-        /**
-         * Updates the odometry from the left and right rotational values.
-         * @param leftRotations The left wheel rotations.
-         * @param rightRotations The right wheel rotations.
-         */
-        void _updateRotations(double leftRotations, double rightRotations)
-        {
-            // Get Delta Time
-            uint32_t deltaT = lastUpdateTimestamp - pros::millis();
-            lastUpdateTimestamp = pros::millis();
-
-            // Get Distance
-            double left = leftRotations * 2 * M_PI * wheelRadius;
-            double right = rightRotations * 2 * M_PI * wheelRadius;
-
-            // Get Delta Distance
-            double deltaLeft = left - lastLeft;
-            double deltaRight = right - lastRight;
-            lastLeft = left;
-            lastRight = right;
-
-            // Calculate Delta Distance
-            double deltaDistance = (deltaLeft + deltaRight) / 2;
-            double deltaRotation = (deltaLeft - deltaRight) / wheelBase;
-
-            // Calculate Delta X and Y
-            double deltaX = deltaDistance * std::cos(currentPose.rotation + deltaRotation / 2);
-            double deltaY = deltaDistance * std::sin(currentPose.rotation + deltaRotation / 2);
-
-            // Update X, Y, and Rotation
-            currentPose.x += deltaX;
-            currentPose.y += deltaY;
-            currentPose.rotation += deltaRotation;
-
-            // Update IMU
-            _updateIMU();
-        }
-
-        /**
-         * Updates the odometry from the left and right rotation sensors.
-         * @param leftSensor The left rotation sensor.
-         * @param rightSensor The right rotation sensor.
-         */
-        void _updateOdomWheels(RotationSensor &leftSensor, RotationSensor &rightSensor)
-        {
-            double leftRotations = (leftSensor.getAngle() / (2 * M_PI)) / ticksPerRevolution;
-            double rightRotations = (rightSensor.getAngle() / (2 * M_PI)) / ticksPerRevolution;
-            _updateRotations(leftRotations, rightRotations);
-        }
-
-        /**
-         * Updates the odometry from the left and right motor encoders of a tank chassis.
-         */
-        void _updateChassis(TankChassis &chassis)
-        {
-            double leftPosition = chassis.getLeftMotors().getPosition() / ticksPerRevolution;
-            double rightPosition = chassis.getRightMotors().getPosition() / ticksPerRevolution;
-            _updateRotations(leftPosition, rightPosition);
-        }
-
         void update() override
         {
             if (chassis != nullptr)
-                _updateChassis(*chassis);
+                updateChassis(*chassis);
             else if (leftSensor != nullptr && rightSensor != nullptr)
-                _updateOdomWheels(*leftSensor, *rightSensor);
-        }
-
-        /**
-         * Updates the rotation from an IMU specified in `useIMU`.
-         */
-        void _updateIMU()
-        {
-            if (imu == nullptr)
-                return;
-            double heading = imu->getHeading();
-            if (heading != PROS_ERR_F)
-                currentPose.rotation = heading;
+                updateOdomWheels(*leftSensor, *rightSensor);
         }
 
         /**
@@ -176,6 +104,79 @@ namespace devils
         }
 
     private:
+        /**
+         * Updates the odometry from the left and right rotation sensors.
+         * @param leftSensor The left rotation sensor.
+         * @param rightSensor The right rotation sensor.
+         */
+        void updateOdomWheels(RotationSensor &leftSensor, RotationSensor &rightSensor)
+        {
+            double leftRotations = (leftSensor.getAngle() / (2 * M_PI)) / ticksPerRevolution;
+            double rightRotations = (rightSensor.getAngle() / (2 * M_PI)) / ticksPerRevolution;
+            updateRotations(leftRotations, rightRotations);
+        }
+
+        /**
+         * Updates the odometry from the left and right motor encoders of a tank chassis.
+         * @param chassis The chassis to use for odometry.
+         */
+        void updateChassis(TankChassis &chassis)
+        {
+            double leftPosition = chassis.getLeftMotors().getPosition() / ticksPerRevolution;
+            double rightPosition = chassis.getRightMotors().getPosition() / ticksPerRevolution;
+            updateRotations(leftPosition, rightPosition);
+        }
+
+        /**
+         * Updates the odometry from the left and right rotational values.
+         * @param leftRotations The left wheel rotations.
+         * @param rightRotations The right wheel rotations.
+         */
+        void updateRotations(double leftRotations, double rightRotations)
+        {
+            // Get Delta Time
+            uint32_t deltaT = lastUpdateTimestamp - pros::millis();
+            lastUpdateTimestamp = pros::millis();
+
+            // Get Distance
+            double left = leftRotations * 2 * M_PI * wheelRadius;
+            double right = rightRotations * 2 * M_PI * wheelRadius;
+
+            // Get Delta Distance
+            double deltaLeft = left - lastLeft;
+            double deltaRight = right - lastRight;
+            lastLeft = left;
+            lastRight = right;
+
+            // Calculate Delta Distance
+            double deltaDistance = (deltaLeft + deltaRight) / 2;
+            double deltaRotation = (deltaLeft - deltaRight) / wheelBase;
+
+            // Calculate Delta X and Y
+            double deltaX = deltaDistance * std::cos(currentPose.rotation + deltaRotation / 2);
+            double deltaY = deltaDistance * std::sin(currentPose.rotation + deltaRotation / 2);
+
+            // Update X, Y, and Rotation
+            currentPose.x += deltaX;
+            currentPose.y += deltaY;
+            currentPose.rotation += deltaRotation;
+
+            // Update IMU
+            updateIMU();
+        }
+
+        /**
+         * Updates the rotation from an IMU specified in `useIMU`.
+         */
+        void updateIMU()
+        {
+            if (imu == nullptr)
+                return;
+            double heading = imu->getHeading();
+            if (heading != PROS_ERR_F)
+                currentPose.rotation = heading;
+        }
+
         const double wheelRadius;
         const double wheelBase;
 

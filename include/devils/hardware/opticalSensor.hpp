@@ -4,6 +4,8 @@
 #include "pros/error.h"
 #include "../utils/logger.hpp"
 #include "../geometry/units.hpp"
+#include "../network/networkObject.hpp"
+#include "../network/networkTables.hpp"
 #include <string>
 
 namespace devils
@@ -11,7 +13,7 @@ namespace devils
     /**
      * Represents a V5 optical sensor unit.
      */
-    class OpticalSensor
+    class OpticalSensor : private INetworkObject
     {
     public:
         /**
@@ -37,6 +39,17 @@ namespace devils
             if (proximity == PROS_ERR && LOGGING_ENABLED)
                 Logger::error(name + ": optical sensor get proximity failed");
             return proximity == PROS_ERR ? 0.0 : proximity / 255.0;
+        }
+
+        void serialize() override
+        {
+            // Get Prefix
+            std::string networkTableKey = NetworkTables::GetHardwareKey(sensor.get_port());
+
+            // Update Network Table
+            NetworkTables::UpdateValue(networkTableKey + "/name", name);
+            NetworkTables::UpdateValue(networkTableKey + "/type", "OpticalSensor");
+            NetworkTables::UpdateValue(networkTableKey + "/proximity", std::to_string(getProximity()));
         }
 
     private:

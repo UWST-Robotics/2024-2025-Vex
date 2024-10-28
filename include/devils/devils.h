@@ -22,22 +22,6 @@
 #include "chassis/tankChassis.hpp"
 #include "chassis/dummyChassis.hpp"
 
-// Display
-// DEPRICATED in favor of BlueBox
-// #include "display/display.hpp"
-// #include "display/odomRenderer.hpp"
-// #include "display/pathRenderer.hpp"
-// #include "display/controlRenderer.hpp"
-// #include "display/displayUtils.hpp"
-// #include "display/fieldRenderer.hpp"
-// #include "display/gridRenderer.hpp"
-// #include "display/polygonRenderer.hpp"
-// #include "display/gameObjectRenderer.hpp"
-// #include "display/autoPickerRenderer.hpp"
-// #include "display/occupancyRenderer.hpp"
-// #include "display/statsRenderer.hpp"
-// #include "display/poseRenderer.hpp"
-
 // Hardware
 #include "hardware/gps.hpp"
 #include "hardware/imu.hpp"
@@ -76,3 +60,7 @@
 #include "utils/joystickCurve.hpp"
 #include "utils/pid.hpp"
 #include "utils/eventTimer.hpp"
+
+// Network
+#include "network/networkTables.hpp"
+#include "network/networkOdom.hpp"

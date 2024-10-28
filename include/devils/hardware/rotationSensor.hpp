@@ -2,6 +2,8 @@
 #include "pros/rotation.hpp"
 #include "../utils/logger.hpp"
 #include "../geometry/units.hpp"
+#include "../network/networkObject.hpp"
+#include "../network/networkTables.hpp"
 #include <string>
 
 namespace devils
@@ -9,7 +11,7 @@ namespace devils
     /**
      * Represents a V5 rotational sensor.
      */
-    class RotationSensor
+    class RotationSensor : private INetworkObject
     {
     public:
         /**
@@ -48,6 +50,18 @@ namespace devils
             if (velocity == PROS_ERR_F && LOGGING_ENABLED)
                 Logger::error(name + ": rotation sensor get velocity failed");
             return velocity == PROS_ERR_F ? 0 : Units::centidegToRad(velocity);
+        }
+
+        void serialize() override
+        {
+            // Get Prefix
+            std::string networkTableKey = NetworkTables::GetHardwareKey(rotationSensor.get_port());
+
+            // Update Network Table
+            NetworkTables::UpdateValue(networkTableKey + "/name", name);
+            NetworkTables::UpdateValue(networkTableKey + "/type", "RotationSensor");
+            NetworkTables::UpdateValue(networkTableKey + "/position", std::to_string(getAngle()));
+            NetworkTables::UpdateValue(networkTableKey + "/velocity", std::to_string(getVelocity()));
         }
 
     private:

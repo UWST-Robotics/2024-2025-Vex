@@ -2,6 +2,7 @@
 #include <string>
 #include "motor.hpp"
 #include "smartMotor.hpp"
+#include "pros/error.h"
 
 namespace devils
 {
@@ -49,10 +50,30 @@ namespace devils
          */
         double getPosition() override
         {
+            // Iterate through motors and get average position
+            int motorCount = 0;
             double position = 0;
             for (auto motor : motors)
-                position += motor->getPosition();
-            return position / motors.size();
+            {
+                double motorPosition = motor->getPosition();
+
+                // Skip motors that fail to return position
+                if (motorPosition == PROS_ERR_F)
+                    continue;
+
+                position += motorPosition;
+                motorCount++;
+            }
+
+            // Log if no motors returned position
+            if (motorCount == 0)
+            {
+                Logger::warn(name + ": no motors returned position");
+                return 0;
+            }
+
+            // Return the mean position
+            return position / motorCount;
         }
 
         /**
@@ -66,18 +87,24 @@ namespace devils
             // Iterate through motors and get average speed
             int motorCount = 0;
             double speed = 0;
-            for (auto motor : motors) {
-                try {
-                    speed += motor->getVelocity();
-                    motorCount++;
-                } catch (const std::runtime_error &e) {
-                    // Ignore motors that fail to get velocity
-                }
+            for (auto motor : motors)
+            {
+                double motorSpeed = motor->getVelocity();
+
+                // Skip motors that fail to return velocity
+                if (motorSpeed == PROS_ERR_F)
+                    continue;
+
+                speed += motorSpeed;
+                motorCount++;
             }
 
-            // Throw error if no motors returned velocity
+            // Log if no motors returned velocity
             if (motorCount == 0)
-                throw std::runtime_error(name + ": no motors returned velocity");
+            {
+                Logger::warn(name + ": no motors returned velocity");
+                return 0;
+            }
 
             // Return the mean speed
             return speed / motorCount;

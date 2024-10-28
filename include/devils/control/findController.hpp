@@ -8,7 +8,6 @@
 #include "../gameobject/gameObjectManager.hpp"
 #include "../control/pursuitController.hpp"
 #include "../control/directController.hpp"
-#include "../hardware/opticalSensor.hpp"
 
 namespace devils
 {

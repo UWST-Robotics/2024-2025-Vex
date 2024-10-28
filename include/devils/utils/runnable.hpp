@@ -6,8 +6,12 @@ namespace devils
     /**
      * Represents a runnable object w/ an update loop.
      */
-    struct Runnable
+    class Runnable
     {
+    public:
+        Runnable() = default;
+        Runnable(int updateInterval) : updateInterval(updateInterval) {}
+
         /**
          * Update function that is called periodically.
          */
@@ -21,7 +25,7 @@ namespace devils
             while (true)
             {
                 update();
-                pros::delay(20);
+                pros::delay(updateInterval);
             }
         }
 
@@ -31,9 +35,12 @@ namespace devils
          */
         virtual pros::Task runAsync()
         {
-            return pros::Task([=]
+            return pros::Task([=, this]
                               { runSync(); });
         }
+
+    private:
+        int updateInterval = 20;
     };
 
     /**

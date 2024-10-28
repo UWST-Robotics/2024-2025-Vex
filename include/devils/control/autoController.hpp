@@ -79,7 +79,7 @@ namespace devils
          */
         pros::Task runAsync()
         {
-            return pros::Task([=]
+            return pros::Task([=, this]
                               { runSync(); });
         }
 
