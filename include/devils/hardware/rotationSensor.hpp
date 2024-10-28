@@ -55,7 +55,7 @@ namespace devils
         void serialize() override
         {
             // Get Prefix
-            std::string networkTableKey = NetworkTables::GetHardwareKey(rotationSensor.get_port());
+            std::string networkTableKey = NetworkTables::GetHardwareKey("vex", rotationSensor.get_port());
 
             // Update Network Table
             NetworkTables::UpdateValue(networkTableKey + "/name", name);

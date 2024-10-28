@@ -7,6 +7,7 @@
 #include "../geometry/perspective.hpp"
 #include "../gameobject/gameObject.hpp"
 #include "../utils/visionObject.hpp"
+#include "../network/networkObject.hpp"
 #include <string>
 
 namespace devils
@@ -14,7 +15,7 @@ namespace devils
     /**
      * Represents a vision sensor object. All events are logged.
      */
-    class VisionSensor
+    class VisionSensor : INetworkObject
     {
     public:
         // Thank you James Pearman for these measurements
@@ -109,6 +110,16 @@ namespace devils
             auto status = sensor.clear_led();
             if (status == PROS_ERR && LOGGING_ENABLED)
                 Logger::error(name + ": failed to reset LED color");
+        }
+
+        void serialize() override
+        {
+            // Get Prefix
+            std::string networkTableKey = NetworkTables::GetHardwareKey("vex", sensor.get_port());
+
+            // Update Network Table
+            NetworkTables::UpdateValue(networkTableKey + "/name", name);
+            NetworkTables::UpdateValue(networkTableKey + "/type", "VisionSensor");
         }
 
     private:

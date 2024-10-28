@@ -56,12 +56,12 @@ namespace devils
 
         /**
          * Gets the current position of the motor in encoder ticks.
-         * 
+         *
          * \note
-         * 1800 ticks/rev with 36:1 gears (red cartridge), 
+         * 1800 ticks/rev with 36:1 gears (red cartridge),
          * 900 ticks/rev with 18:1 gears (green cartridge),
          * 300 ticks/rev with 6:1 gears (blue cartridge)
-         * 
+         *
          * @return The current position of the motor in encoder ticks or `PROS_ERR_F` if the position could not be retrieved.
          * @throws std::runtime_error if the position could not be retrieved.
          */
@@ -120,7 +120,7 @@ namespace devils
             checkHealth();
 
             // Get Prefix
-            std::string networkTableKey = NetworkTables::GetHardwareKey(motor.get_port());
+            std::string networkTableKey = NetworkTables::GetHardwareKey("vex", motor.get_port());
 
             // Update Network Table
             NetworkTables::UpdateValue(networkTableKey + "/name", name);
@@ -166,7 +166,7 @@ namespace devils
 
         // Network Table
         std::string name;
-        
+
         // Motor State
         bool isOverTemp = false;
         bool isDriverFault = false;

@@ -56,14 +56,14 @@ namespace devils
 
         /**
          * Gets the network table key of a hardware device.
+         * @param portType The type of the port (e.g. "adi", "vex", etc.)
          * @param port The port index of the hardware.
          * @return The network table key for the hardware.
          */
-        static std::string GetHardwareKey(int8_t port)
+        static std::string GetHardwareKey(std::string portType, int8_t port)
         {
-            return "_hardware/port" + std::to_string((uint8_t)port);
+            return "_hardware/" + portType + std::to_string((uint8_t)port);
         }
-
         /**
          * Gets the network table cache.
          * @return The network table cache.

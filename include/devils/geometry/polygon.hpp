@@ -38,14 +38,6 @@ namespace devils
         }
 
         /**
-         * Randomly sets the seed for the random number generator.
-         */
-        void _setRandomSeed()
-        {
-            srand(pros::millis());
-        }
-
-        /**
          * Gets a random point within the polygon.
          * @return A random point within the polygon.
          */
@@ -68,9 +60,11 @@ namespace devils
                 maxY = std::max(maxY, point.y);
             }
 
+            // Randomize Seed
+            srand(pros::millis());
+
             // Randomly select a point within the bounding box until it is within the polygon
             Vector2 pose = Vector2();
-            _setRandomSeed();
             do
             {
                 double rand1 = (rand() % 1000) / 1000.0;

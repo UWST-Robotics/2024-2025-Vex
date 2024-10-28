@@ -1,14 +1,16 @@
 #pragma once
 #include "pros/adi.hpp"
 #include "../utils/logger.hpp"
+#include "../network/networkObject.hpp"
 #include <string>
 
 namespace devils
 {
     /**
-     * Represents a non-V5 pneumatic valve controlled by a legacy motor controller on the ADI ports.
+     * Represents a non-V5 pneumatic valve controlled by ADI ports.
+     * See https://github.com/msoe-vex/pcb-design/tree/main/VEX%20Solenoid%20Driver%20V2%20Complete
      */
-    class ScuffPneumatic
+    class ScuffPneumatic : private INetworkObject
     {
     public:
         /**
@@ -17,7 +19,8 @@ namespace devils
          * @param port The ADI port of the motor controller (from 1 to 8)
          */
         ScuffPneumatic(std::string name, uint8_t port)
-            : name(name),
+            : port(port),
+              name(name),
               controller(port)
         {
             if (errno != 0 && LOGGING_ENABLED)
@@ -55,11 +58,23 @@ namespace devils
             return isExtended;
         }
 
+        void serialize() override
+        {
+            // Get Prefix
+            std::string networkTableKey = NetworkTables::GetHardwareKey("adi", port);
+
+            // Update Network Table
+            NetworkTables::UpdateValue(networkTableKey + "/name", name);
+            NetworkTables::UpdateValue(networkTableKey + "/type", "ScuffPneumatic");
+            NetworkTables::UpdateValue(networkTableKey + "/isExtended", std::to_string(isExtended));
+        }
+
     private:
         static constexpr bool LOGGING_ENABLED = true;
 
+        uint8_t port;
         std::string name;
-        pros::ADIDigitalOut controller;
+        pros::adi::DigitalOut controller;
         bool isExtended = false;
     };
 }

@@ -63,5 +63,6 @@ namespace devils
 
         // Additional Network Objects
         NetworkOdom networkOdom = NetworkOdom("Prototype.Odom", wheelOdom);
+        NetworkRobotState networkRobotState = NetworkRobotState();
     };
 }
