@@ -2,6 +2,7 @@
 #include "../utils/runnable.hpp"
 #include <vector>
 #include "networkObject.hpp"
+#include "networkTables.hpp"
 
 namespace devils
 {
@@ -26,6 +27,10 @@ namespace devils
          */
         void update() override
         {
+            // Send a heartbeat
+            NetworkTables::SendHeartbeat();
+
+            // Serialize all network objects
             NetworkObjectList &allNetworkObjects = INetworkObject::GetAllNetworkObjects();
             for (int i = 0; i < allNetworkObjects.size(); i++)
                 allNetworkObjects[i]->serialize();
@@ -40,7 +45,7 @@ namespace devils
         }
 
         // Constants
-        static constexpr int UPDATE_INTERVAL = 200; // ms
+        static constexpr int UPDATE_INTERVAL = 100; // ms
         static constexpr bool NETWORK_SERVICE_ENABLED = true;
 
     public:

@@ -15,7 +15,7 @@ namespace devils
     /**
      * Represents a vision sensor object. All events are logged.
      */
-    class VisionSensor : INetworkObject
+    class VisionSensor : private INetworkObject
     {
     public:
         // Thank you James Pearman for these measurements
@@ -120,6 +120,7 @@ namespace devils
             // Update Network Table
             NetworkTables::UpdateValue(networkTableKey + "/name", name);
             NetworkTables::UpdateValue(networkTableKey + "/type", "VisionSensor");
+            NetworkTables::UpdateValue(networkTableKey + "/isConnected", std::to_string(sensor.is_installed()));
         }
 
     private:

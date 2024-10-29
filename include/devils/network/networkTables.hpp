@@ -22,17 +22,16 @@ namespace devils
             GetCache().clear();
 
             // Send the reset message over serial
-            printf("RESET\n");
+            printf("__NTRESET__\n");
         }
 
         /**
-         * Logs a message to the network table log.
-         * @param message The message to log.
+         * Sends a heartbeat message to the network table.
          */
-        static void LogMessage(std::string message)
+        static void SendHeartbeat()
         {
-            // Send the log message over serial
-            printf("LOG %s\n", message.c_str());
+            // Send the heartbeat message over serial
+            printf("__NTHEARTBEAT__\n");
         }
 
         /**
@@ -51,7 +50,7 @@ namespace devils
             networkTableCache[key] = value;
 
             // Send the update over serial
-            printf("UPDATE %s %s\n", key.c_str(), value.c_str());
+            printf("__NTUPDATE__ %s %s\n", key.c_str(), value.c_str());
         }
 
         /**

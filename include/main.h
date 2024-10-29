@@ -18,6 +18,7 @@
 
 // Add each robot definition here
 #include "devils/2025/prototypeRobot.hpp"
+#include "devils/2025/testbedRobot.hpp"
 
 using namespace devils;
 

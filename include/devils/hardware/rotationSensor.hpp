@@ -62,10 +62,11 @@ namespace devils
             NetworkTables::UpdateValue(networkTableKey + "/type", "RotationSensor");
             NetworkTables::UpdateValue(networkTableKey + "/position", std::to_string(getAngle()));
             NetworkTables::UpdateValue(networkTableKey + "/velocity", std::to_string(getVelocity()));
+            NetworkTables::UpdateValue(networkTableKey + "/isConnected", std::to_string(rotationSensor.is_installed()));
         }
 
     private:
-        static constexpr bool LOGGING_ENABLED = true;
+        static constexpr bool LOGGING_ENABLED = false;
 
         std::string name;
         pros::Rotation rotationSensor;

@@ -68,7 +68,8 @@ namespace devils
             // Log if no motors returned position
             if (motorCount == 0)
             {
-                Logger::warn(name + ": no motors returned position");
+                if (LOGGING_ENABLED)
+                    Logger::warn(name + ": no motors returned position");
                 return 0;
             }
 
@@ -102,7 +103,8 @@ namespace devils
             // Log if no motors returned velocity
             if (motorCount == 0)
             {
-                Logger::warn(name + ": no motors returned velocity");
+                if (LOGGING_ENABLED)
+                    Logger::warn(name + ": no motors returned velocity");
                 return 0;
             }
 
@@ -138,6 +140,8 @@ namespace devils
         }
 
     private:
+        static constexpr bool LOGGING_ENABLED = false;
+
         const std::string name;
         std::vector<std::shared_ptr<SmartMotor>> motors;
     };

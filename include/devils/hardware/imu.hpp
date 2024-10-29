@@ -2,6 +2,7 @@
 #include "pros/imu.hpp"
 #include "pros/error.h"
 #include "../utils/logger.hpp"
+#include "../network/networkObject.hpp"
 #include "../geometry/units.hpp"
 #include "../geometry/vector3.hpp"
 #include "../odom/odomSource.hpp"
@@ -12,7 +13,7 @@ namespace devils
     /**
      * Represents a V5 inertial measurement unit.
      */
-    class IMU : public OdomSource
+    class IMU : public OdomSource, private INetworkObject
     {
     public:
         /**
@@ -88,7 +89,31 @@ namespace devils
             double pitch = imu.get_pitch();
             if (pitch == PROS_ERR_F && LOGGING_ENABLED)
                 Logger::error(name + ": imu get pitch failed");
-            return pitch;
+            return pitch == PROS_ERR_F ? PROS_ERR_F : Units::degToRad(pitch);
+        }
+
+        /**
+         * Gets the current roll of the IMU in radians.
+         * @return The current roll of the IMU in radians or `PROS_ERR_F` if the operation failed.
+         */
+        double getRoll()
+        {
+            double roll = imu.get_roll();
+            if (roll == PROS_ERR_F && LOGGING_ENABLED)
+                Logger::error(name + ": imu get roll failed");
+            return roll == PROS_ERR_F ? PROS_ERR_F : Units::degToRad(roll);
+        }
+
+        /**
+         * Gets the current yaw of the IMU in radians.
+         * @return The current yaw of the IMU in radians or `PROS_ERR_F` if the operation failed.
+         */
+        double getYaw()
+        {
+            double yaw = imu.get_yaw();
+            if (yaw == PROS_ERR_F && LOGGING_ENABLED)
+                Logger::error(name + ": imu get yaw failed");
+            return yaw == PROS_ERR_F ? PROS_ERR_F : Units::degToRad(yaw);
         }
 
         /**
@@ -134,11 +159,46 @@ namespace devils
                 pros::delay(20);
         }
 
+        void serialize() override
+        {
+            checkHealth();
+
+            // Get Prefix
+            std::string networkTableKey = NetworkTables::GetHardwareKey("vex", imu.get_port());
+
+            // Update Network Table
+            NetworkTables::UpdateValue(networkTableKey + "/name", name);
+            NetworkTables::UpdateValue(networkTableKey + "/type", "IMU");
+            NetworkTables::UpdateValue(networkTableKey + "/heading", std::to_string(Units::radToDeg(getHeading())));
+            NetworkTables::UpdateValue(networkTableKey + "/pitch", std::to_string(Units::radToDeg(getPitch())));
+            NetworkTables::UpdateValue(networkTableKey + "/roll", std::to_string(Units::radToDeg(getRoll())));
+            NetworkTables::UpdateValue(networkTableKey + "/yaw", std::to_string(Units::radToDeg(getYaw())));
+            NetworkTables::UpdateValue(networkTableKey + "/accel", std::to_string(getAverageAcceleration()));
+            NetworkTables::UpdateValue(networkTableKey + "/isCalibrating", std::to_string(isCalibrating));
+            NetworkTables::UpdateValue(networkTableKey + "/isErrored", std::to_string(isErrored));
+            NetworkTables::UpdateValue(networkTableKey + "/isConnected", std::to_string(imu.is_installed()));
+        }
+
     private:
+        /**
+         * Checks and logs the current health of the IMU.
+         */
+        void checkHealth()
+        {
+            pros::ImuStatus imuStatus = imu.get_status();
+            isCalibrating = imuStatus == pros::ImuStatus::calibrating;
+            isErrored = imuStatus == pros::ImuStatus::error;
+
+            if (isErrored && LOGGING_ENABLED)
+                Logger::error(name + ": imu is in an error state");
+        }
+
         static constexpr bool CALIBRATE_ON_START = false;
-        static constexpr bool LOGGING_ENABLED = true;
+        static constexpr bool LOGGING_ENABLED = false;
 
         double headingOffset = 0;
+        bool isCalibrating = false;
+        bool isErrored = false;
 
         std::string name;
         pros::IMU imu;

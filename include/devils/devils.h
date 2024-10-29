@@ -63,5 +63,6 @@
 
 // Network
 #include "network/networkTables.hpp"
+#include "network/networkService.hpp"
 #include "network/networkOdom.hpp"
 #include "network/networkRobotState.hpp"

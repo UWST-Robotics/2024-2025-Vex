@@ -38,7 +38,43 @@ namespace devils
             std::int32_t proximity = sensor.get_proximity();
             if (proximity == PROS_ERR && LOGGING_ENABLED)
                 Logger::error(name + ": optical sensor get proximity failed");
-            return proximity == PROS_ERR ? 0.0 : proximity / 255.0;
+            return proximity == PROS_ERR ? PROS_ERR : (proximity / 255.0);
+        }
+
+        /**
+         * Gets the current hue of the Optical Sensor.
+         * @return The current hue of the Optical Sensor as a value from 0 to 360.
+         */
+        double getHue()
+        {
+            std::int32_t hue = sensor.get_hue();
+            if (hue == PROS_ERR && LOGGING_ENABLED)
+                Logger::error(name + ": optical sensor get hue failed");
+            return hue == PROS_ERR ? PROS_ERR : hue;
+        }
+
+        /**
+         * Gets the current saturation of the Optical Sensor.
+         * @return The current saturation of the Optical Sensor as an percentage value from 0 to 1.
+         */
+        double getSaturation()
+        {
+            std::int32_t saturation = sensor.get_saturation();
+            if (saturation == PROS_ERR && LOGGING_ENABLED)
+                Logger::error(name + ": optical sensor get saturation failed");
+            return saturation == PROS_ERR ? PROS_ERR : saturation;
+        }
+
+        /**
+         * Gets the current brightness of the Optical Sensor.
+         * @return The current brightness of the Optical Sensor as an percentage value from 0 to 1.
+         */
+        double getBrightness()
+        {
+            std::int32_t brightness = sensor.get_brightness();
+            if (brightness == PROS_ERR && LOGGING_ENABLED)
+                Logger::error(name + ": optical sensor get brightness failed");
+            return brightness == PROS_ERR ? PROS_ERR : brightness;
         }
 
         void serialize() override
@@ -49,11 +85,15 @@ namespace devils
             // Update Network Table
             NetworkTables::UpdateValue(networkTableKey + "/name", name);
             NetworkTables::UpdateValue(networkTableKey + "/type", "OpticalSensor");
-            NetworkTables::UpdateValue(networkTableKey + "/proximity", std::to_string(getProximity()));
+            NetworkTables::UpdateValue(networkTableKey + "/proximity", std::to_string(getProximity() * 100));
+            NetworkTables::UpdateValue(networkTableKey + "/colorHue", std::to_string(getHue()));
+            NetworkTables::UpdateValue(networkTableKey + "/colorSaturation", std::to_string(getSaturation() * 100));
+            NetworkTables::UpdateValue(networkTableKey + "/colorBrightness", std::to_string(getBrightness() * 100));
+            NetworkTables::UpdateValue(networkTableKey + "/isConnected", std::to_string(sensor.is_installed()));
         }
 
     private:
-        static constexpr bool LOGGING_ENABLED = true;
+        static constexpr bool LOGGING_ENABLED = false;
 
         std::string name;
         pros::Optical sensor;

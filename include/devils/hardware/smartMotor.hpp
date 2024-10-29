@@ -24,7 +24,7 @@ namespace devils
             : name(name),
               motor(port)
         {
-            if (errno != 0)
+            if (errno != 0 && LOGGING_ENABLED)
                 Logger::error(name + ": motor creation failed");
         }
 
@@ -37,7 +37,7 @@ namespace devils
         {
             // Move Motor
             int32_t status = motor.move(voltage * 127);
-            if (status != 1)
+            if (status != 1 && LOGGING_ENABLED)
                 Logger::error(name + ": motor move failed");
             checkHealth();
         }
@@ -49,7 +49,7 @@ namespace devils
         void stop() override
         {
             int32_t status = motor.brake();
-            if (status != 1)
+            if (status != 1 && LOGGING_ENABLED)
                 Logger::error(name + ": motor stop failed");
             checkHealth();
         }
@@ -68,7 +68,7 @@ namespace devils
         double getPosition() override
         {
             double position = motor.get_position();
-            if (position == PROS_ERR_F)
+            if (position == PROS_ERR_F && LOGGING_ENABLED)
                 Logger::error(name + ": motor get position failed");
             return position;
         }
@@ -80,7 +80,7 @@ namespace devils
         double getVelocity()
         {
             double velocity = motor.get_actual_velocity();
-            if (velocity == PROS_ERR_F)
+            if (velocity == PROS_ERR_F && LOGGING_ENABLED)
                 Logger::error(name + ": motor get velocity failed");
             return velocity;
         }
@@ -92,7 +92,7 @@ namespace devils
         double getTemperature()
         {
             double temperature = motor.get_temperature();
-            if (temperature == PROS_ERR_F)
+            if (temperature == PROS_ERR_F && LOGGING_ENABLED)
                 Logger::error(name + ": get temperature failed");
             return temperature;
         }
@@ -110,7 +110,7 @@ namespace devils
         void setBrakeMode(bool useBrakeMode)
         {
             int32_t status = motor.set_brake_mode(useBrakeMode ? pros::E_MOTOR_BRAKE_BRAKE : pros::E_MOTOR_BRAKE_COAST);
-            if (status != 1)
+            if (status != 1 && LOGGING_ENABLED)
                 Logger::error(name + ": motor set brake mode failed");
         }
 
@@ -129,6 +129,7 @@ namespace devils
             NetworkTables::UpdateValue(networkTableKey + "/isDriverFault", std::to_string(isDriverFault));
             NetworkTables::UpdateValue(networkTableKey + "/isOverCurrent", std::to_string(isOverCurrent));
             NetworkTables::UpdateValue(networkTableKey + "/isDriverOverCurrent", std::to_string(isDriverOverCurrent));
+            NetworkTables::UpdateValue(networkTableKey + "/isConnected", std::to_string(isConnected));
             NetworkTables::UpdateValue(networkTableKey + "/temperature", std::to_string(getTemperature()));
             NetworkTables::UpdateValue(networkTableKey + "/position", std::to_string(getPosition()));
             NetworkTables::UpdateValue(networkTableKey + "/velocity", std::to_string(getVelocity()));
@@ -141,6 +142,14 @@ namespace devils
          */
         void checkHealth()
         {
+            // Check if Motor is Connected
+            isConnected = motor.is_installed();
+            if (!isConnected && LOGGING_ENABLED)
+                Logger::error(name + ": motor is not connected");
+
+            if (!isConnected)
+                return;
+
             // Get Motor Fault Bitmark
             uint32_t motorFaults = motor.get_faults();
             isOverTemp = motorFaults & 0x01;
@@ -172,5 +181,6 @@ namespace devils
         bool isDriverFault = false;
         bool isOverCurrent = false;
         bool isDriverOverCurrent = false;
+        bool isConnected = true;
     };
 }

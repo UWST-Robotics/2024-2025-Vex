@@ -39,6 +39,23 @@ namespace devils
             return result;
         }
 
+        static std::string replace(std::string inputText, char character, char replacementChar)
+        {
+            std::string result = "";
+            for (int i = 0; i < inputText.length(); i++)
+            {
+                if (inputText[i] == character)
+                {
+                    result += replacementChar;
+                }
+                else
+                {
+                    result += inputText[i];
+                }
+            }
+            return result;
+        }
+
     private:
         // Private constructor to prevent instantiation
         StringUtils() = delete;
