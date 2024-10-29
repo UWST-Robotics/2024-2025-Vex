@@ -24,13 +24,14 @@ namespace devils
             NetworkTables::UpdateValue(networkTableKey + "/isCompetition", std::to_string(pros::competition::is_connected()));
 
             // Controller
-            NetworkTables::UpdateValue(networkTableKey + "/mainControllerConnected", std::to_string(mainController.is_connected()));
-            NetworkTables::UpdateValue(networkTableKey + "/mainControllerBatteryVoltage", std::to_string(mainController.get_battery_capacity()));
-            NetworkTables::UpdateValue(networkTableKey + "/mainControllerBatteryLevel", std::to_string(mainController.get_battery_level()));
+            // Disabled due to performance overflow
+            // NetworkTables::UpdateValue(networkTableKey + "/mainControllerConnected", std::to_string(mainController.is_connected()));
+            // NetworkTables::UpdateValue(networkTableKey + "/mainControllerBatteryVoltage", std::to_string(mainController.get_battery_capacity()));
+            // NetworkTables::UpdateValue(networkTableKey + "/mainControllerBatteryLevel", std::to_string(mainController.get_battery_level()));
 
-            NetworkTables::UpdateValue(networkTableKey + "/partnerControllerConnected", std::to_string(partnerController.is_connected()));
-            NetworkTables::UpdateValue(networkTableKey + "/partnerControllerBatteryVoltage", std::to_string(partnerController.get_battery_capacity()));
-            NetworkTables::UpdateValue(networkTableKey + "/partnerControllerBatteryLevel", std::to_string(partnerController.get_battery_level()));
+            // NetworkTables::UpdateValue(networkTableKey + "/partnerControllerConnected", std::to_string(partnerController.is_connected()));
+            // NetworkTables::UpdateValue(networkTableKey + "/partnerControllerBatteryVoltage", std::to_string(partnerController.get_battery_capacity()));
+            // NetworkTables::UpdateValue(networkTableKey + "/partnerControllerBatteryLevel", std::to_string(partnerController.get_battery_level()));
 
             // SD Card
             NetworkTables::UpdateValue(networkTableKey + "/isSDCardInstalled", std::to_string(pros::usd::is_installed()));

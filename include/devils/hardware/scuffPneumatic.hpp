@@ -70,7 +70,7 @@ namespace devils
         }
 
     private:
-        static constexpr bool LOGGING_ENABLED = true;
+        static constexpr bool LOGGING_ENABLED = false;
 
         uint8_t port;
         std::string name;

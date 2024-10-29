@@ -124,7 +124,7 @@ namespace devils
         }
 
     private:
-        static constexpr bool LOGGING_ENABLED = true;
+        static constexpr bool LOGGING_ENABLED = false;
         static constexpr double MIN_OBJECT_AREA = 3 * 3; // px^2
 
         std::string name;

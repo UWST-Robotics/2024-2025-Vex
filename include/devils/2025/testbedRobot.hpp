@@ -19,7 +19,7 @@ namespace devils
             wheelOdom.setTicksPerRevolution(TICKS_PER_REVOLUTION);
             wheelOdom.runAsync();
 
-            // networkOdom.setSize(18.0, 18.0);
+            networkOdom.setSize(18.0, 18.0);
         }
 
         void autonomous() override
@@ -54,8 +54,8 @@ namespace devils
         }
 
         // V5 Ports
-        static constexpr std::initializer_list<int8_t> L_MOTOR_PORTS = {11, 13, 15, 17};
-        static constexpr std::initializer_list<int8_t> R_MOTOR_PORTS = {12, 14, 16, 18};
+        static constexpr std::initializer_list<int8_t> L_MOTOR_PORTS = {11};
+        static constexpr std::initializer_list<int8_t> R_MOTOR_PORTS = {12};
         static constexpr double TICKS_PER_REVOLUTION = 300.0 * (48.0 / 36.0); // ticks
         static constexpr double WHEEL_RADIUS = 1.625;                         // in
         static constexpr double WHEEL_BASE = 12.0;                            // in
@@ -65,14 +65,14 @@ namespace devils
         DifferentialWheelOdometry wheelOdom = DifferentialWheelOdometry(chassis, WHEEL_RADIUS, WHEEL_BASE);
 
         // RotationSensor rotationSensor = RotationSensor("RotationSensor", 10);
-        // IMU imu = IMU("IMU", 9);
-        // OpticalSensor opticalSensor = OpticalSensor("OpticalSensor", 8);
-        // VisionSensor visionSensor = VisionSensor("VisionSensor", 7);
-        // ScuffPneumatic scuffPneumatic = ScuffPneumatic("ScuffPneumatic", 6);
+        IMU imu = IMU("IMU", 9);
+        OpticalSensor opticalSensor = OpticalSensor("OpticalSensor", 8);
+        VisionSensor visionSensor = VisionSensor("VisionSensor", 7);
+        ScuffPneumatic scuffPneumatic = ScuffPneumatic("ScuffPneumatic", 6);
 
         // Additional Network Objects
         NetworkService &networkService = NetworkService::getInstance();
-        // NetworkOdom networkOdom = NetworkOdom("Odom", imu);
+        NetworkOdom networkOdom = NetworkOdom("Odom", wheelOdom);
         NetworkRobotState networkRobotState = NetworkRobotState();
     };
 }
