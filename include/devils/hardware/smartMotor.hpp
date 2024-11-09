@@ -125,14 +125,22 @@ namespace devils
             // Update Network Table
             NetworkTables::UpdateValue(networkTableKey + "/name", name);
             NetworkTables::UpdateValue(networkTableKey + "/type", "SmartMotor");
-            NetworkTables::UpdateValue(networkTableKey + "/isOverTemp", std::to_string(isOverTemp));
-            NetworkTables::UpdateValue(networkTableKey + "/isDriverFault", std::to_string(isDriverFault));
-            NetworkTables::UpdateValue(networkTableKey + "/isOverCurrent", std::to_string(isOverCurrent));
-            NetworkTables::UpdateValue(networkTableKey + "/isDriverOverCurrent", std::to_string(isDriverOverCurrent));
-            NetworkTables::UpdateValue(networkTableKey + "/isConnected", std::to_string(isConnected));
             NetworkTables::UpdateValue(networkTableKey + "/temperature", std::to_string(getTemperature()));
             NetworkTables::UpdateValue(networkTableKey + "/position", std::to_string(getPosition()));
             NetworkTables::UpdateValue(networkTableKey + "/velocity", std::to_string(getVelocity()));
+
+            if (!isConnected)
+                NetworkTables::UpdateValue(networkTableKey + "/faults", "Disconnected");
+            else if (isOverTemp)
+                NetworkTables::UpdateValue(networkTableKey + "/faults", "Over Temperature");
+            else if (isDriverFault)
+                NetworkTables::UpdateValue(networkTableKey + "/faults", "Driver Fault");
+            else if (isOverCurrent)
+                NetworkTables::UpdateValue(networkTableKey + "/faults", "Over Current");
+            else if (isDriverOverCurrent)
+                NetworkTables::UpdateValue(networkTableKey + "/faults", "Driver Over Current");
+            else
+                NetworkTables::UpdateValue(networkTableKey + "/faults", "");
         }
 
     private:

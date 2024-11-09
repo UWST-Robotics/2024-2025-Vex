@@ -174,9 +174,15 @@ namespace devils
             NetworkTables::UpdateValue(networkTableKey + "/roll", std::to_string(Units::radToDeg(getRoll())));
             NetworkTables::UpdateValue(networkTableKey + "/yaw", std::to_string(Units::radToDeg(getYaw())));
             NetworkTables::UpdateValue(networkTableKey + "/accel", std::to_string(getAverageAcceleration()));
-            NetworkTables::UpdateValue(networkTableKey + "/isCalibrating", std::to_string(isCalibrating));
-            NetworkTables::UpdateValue(networkTableKey + "/isErrored", std::to_string(isErrored));
-            NetworkTables::UpdateValue(networkTableKey + "/isConnected", std::to_string(imu.is_installed()));
+
+            if (!isConnected)
+                NetworkTables::UpdateValue(networkTableKey + "/faults", "Disconnected");
+            else if (isCalibrating)
+                NetworkTables::UpdateValue(networkTableKey + "/faults", "Calibrating");
+            else if (isErrored)
+                NetworkTables::UpdateValue(networkTableKey + "/faults", "Unknown Error");
+            else
+                NetworkTables::UpdateValue(networkTableKey + "/faults", "");
         }
 
     private:
@@ -185,6 +191,15 @@ namespace devils
          */
         void checkHealth()
         {
+            // Check if IMU is Connected
+            isConnected = imu.is_installed();
+            if (!isConnected && LOGGING_ENABLED)
+                Logger::error(name + ": imu is not connected");
+
+            if (!isConnected)
+                return;
+
+            // Status Check
             pros::ImuStatus imuStatus = imu.get_status();
             isCalibrating = imuStatus == pros::ImuStatus::calibrating;
             isErrored = imuStatus == pros::ImuStatus::error;
@@ -199,6 +214,7 @@ namespace devils
         double headingOffset = 0;
         bool isCalibrating = false;
         bool isErrored = false;
+        bool isConnected = false;
 
         std::string name;
         pros::IMU imu;

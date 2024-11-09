@@ -89,7 +89,11 @@ namespace devils
             NetworkTables::UpdateValue(networkTableKey + "/colorHue", std::to_string(getHue()));
             NetworkTables::UpdateValue(networkTableKey + "/colorSaturation", std::to_string(getSaturation() * 100));
             NetworkTables::UpdateValue(networkTableKey + "/colorBrightness", std::to_string(getBrightness() * 100));
-            NetworkTables::UpdateValue(networkTableKey + "/isConnected", std::to_string(sensor.is_installed()));
+
+            if (!sensor.is_installed())
+                NetworkTables::UpdateValue(networkTableKey + "/faults", "Disconnected");
+            else
+                NetworkTables::UpdateValue(networkTableKey + "/faults", "");
         }
 
     private:

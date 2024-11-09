@@ -9,7 +9,7 @@ namespace devils
     /**
      * Singleton service for managing network objects.
      */
-    class NetworkService : public Runnable
+    class NetworkService : public AutoRunnable
     {
     public:
         /**
@@ -33,20 +33,13 @@ namespace devils
             // Serialize all network objects
             NetworkObjectList &allNetworkObjects = INetworkObject::GetAllNetworkObjects();
             for (int i = 0; i < allNetworkObjects.size(); i++)
-                allNetworkObjects[i]->serialize();
+                if (allNetworkObjects[i]->isDirty())
+                    allNetworkObjects[i]->runSerialization();
         }
 
     private:
         // Singleton Constructor
-        NetworkService() : Runnable(UPDATE_INTERVAL)
-        {
-            if (NETWORK_SERVICE_ENABLED)
-                runAsync();
-        }
-
-        // Constants
-        static constexpr int UPDATE_INTERVAL = 100; // ms
-        static constexpr bool NETWORK_SERVICE_ENABLED = true;
+        NetworkService() : AutoRunnable() {}
 
     public:
         // Prevent copying

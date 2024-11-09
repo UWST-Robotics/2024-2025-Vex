@@ -64,11 +64,11 @@ namespace devils
         TankChassis chassis = TankChassis("Chassis", L_MOTOR_PORTS, R_MOTOR_PORTS);
         DifferentialWheelOdometry wheelOdom = DifferentialWheelOdometry(chassis, WHEEL_RADIUS, WHEEL_BASE);
 
-        // RotationSensor rotationSensor = RotationSensor("RotationSensor", 10);
-        IMU imu = IMU("IMU", 9);
-        OpticalSensor opticalSensor = OpticalSensor("OpticalSensor", 8);
-        VisionSensor visionSensor = VisionSensor("VisionSensor", 7);
-        ScuffPneumatic scuffPneumatic = ScuffPneumatic("ScuffPneumatic", 6);
+        RotationSensor rotationSensor = RotationSensor("RotationSensor", 5);
+        // IMU imu = IMU("IMU", 9);
+        // OpticalSensor opticalSensor = OpticalSensor("OpticalSensor", 8);
+        // VisionSensor visionSensor = VisionSensor("VisionSensor", 7);
+        // ScuffPneumatic scuffPneumatic = ScuffPneumatic("ScuffPneumatic", 6);
 
         // Additional Network Objects
         NetworkService &networkService = NetworkService::getInstance();

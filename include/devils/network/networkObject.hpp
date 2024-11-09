@@ -9,8 +9,14 @@ namespace devils
     /**
      * Represents a netowrk object that can be serialized and sent over serial.
      */
-    struct INetworkObject
+    class INetworkObject
     {
+    public:
+        // Disable copy constructor
+        INetworkObject(INetworkObject const &) = delete;
+
+        // Disable assignment operator
+        INetworkObject &operator=(INetworkObject const &) = delete;
 
         // Register the network object
         INetworkObject()
@@ -28,15 +34,6 @@ namespace devils
                 allNetworkObjects.end());
         }
 
-        // Disable copy constructor
-        INetworkObject(INetworkObject const &) = delete;
-
-        /**
-         * Serializes the object to send over serial.
-         * Should call the `NetworkTable::UpdateValue` method to send the data.
-         */
-        virtual void serialize() = 0;
-
         /**
          * Gets a list of all alive network objects.
          * @return A list of all alive network objects.
@@ -46,5 +43,46 @@ namespace devils
             static NetworkObjectList allNetworkObjects;
             return allNetworkObjects;
         }
+
+        /**
+         * Sets the rate at which the object should be serialized.
+         * Increasing the rate will decrease the frequency of serialization for lower priority objects.
+         * @param maxSerializeTime The rate at which the object should be serialized in milliseconds.
+         */
+        void setSerializationRate(int maxSerializeTime)
+        {
+            this->maxSerializeTime = maxSerializeTime;
+        }
+
+        /**
+         * Checks if the object is dirty
+         * @return True if the object is dirty, false otherwise.
+         */
+        bool isDirty()
+        {
+            return pros::millis() - lastSerializationTime > maxSerializeTime;
+        }
+
+        /**
+         * Runs the serialization of the object.
+         * Updates the last serialization time to clean the object.
+         * Usually called automatically in `NetworkService::update`.
+         */
+        void runSerialization()
+        {
+            serialize();
+            lastSerializationTime = pros::millis();
+        }
+
+    protected:
+        /**
+         * Should be implemented by child classes to serialize the object.
+         * Child classes can call the `NetworkTable::UpdateValue` method to update the data.
+         */
+        virtual void serialize() = 0;
+
+    private:
+        int maxSerializeTime = 50; // ms
+        int lastSerializationTime = -1;
     };
 }

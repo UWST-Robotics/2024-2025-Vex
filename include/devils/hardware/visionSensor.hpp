@@ -120,7 +120,11 @@ namespace devils
             // Update Network Table
             NetworkTables::UpdateValue(networkTableKey + "/name", name);
             NetworkTables::UpdateValue(networkTableKey + "/type", "VisionSensor");
-            NetworkTables::UpdateValue(networkTableKey + "/isConnected", std::to_string(sensor.is_installed()));
+
+            if (!sensor.is_installed())
+                NetworkTables::UpdateValue(networkTableKey + "/faults", "Disconnected");
+            else
+                NetworkTables::UpdateValue(networkTableKey + "/faults", "");
         }
 
     private:
