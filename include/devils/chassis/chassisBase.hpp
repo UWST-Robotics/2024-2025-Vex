@@ -4,9 +4,9 @@
 namespace devils
 {
     /**
-     * Represents a base chassis. A chassis is a robot's drivetrain.
+     * Represents a chassis base. A chassis is a robot's drivetrain.
      */
-    struct BaseChassis
+    struct ChassisBase
     {
         /**
          * Moves the robot in a direction using voltage.

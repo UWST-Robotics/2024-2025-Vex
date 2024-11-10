@@ -27,9 +27,6 @@ namespace devils
          */
         void update() override
         {
-            // Send a heartbeat
-            NetworkTables::SendHeartbeat();
-
             // Serialize all network objects
             NetworkObjectList &allNetworkObjects = INetworkObject::GetAllNetworkObjects();
             for (int i = 0; i < allNetworkObjects.size(); i++)

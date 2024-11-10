@@ -1,5 +1,5 @@
 #pragma once
-#include "chassis.hpp"
+#include "chassisBase.hpp"
 #include "../hardware/smartMotorGroup.hpp"
 #include <vector>
 #include <iostream>
@@ -10,7 +10,7 @@ namespace devils
     /**
      * Represents a chassis driven by the differential of two sets of wheels.
      */
-    class TankChassis : public BaseChassis
+    class TankChassis : public ChassisBase
     {
     public:
         /**

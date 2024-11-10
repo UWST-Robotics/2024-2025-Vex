@@ -89,7 +89,7 @@ namespace devils
             Pose bcd = quadraticPoints(b, c, d, t);
             return linearPoints(abc, bcd, t);
         }
-        
+
     private:
         Lerp() = delete;
     };

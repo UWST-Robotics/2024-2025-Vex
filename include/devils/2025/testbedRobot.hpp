@@ -16,8 +16,8 @@ namespace devils
         {
             NetworkTables::Reset();
 
-            wheelOdom.setTicksPerRevolution(TICKS_PER_REVOLUTION);
-            wheelOdom.runAsync();
+            // wheelOdom.setTicksPerRevolution(TICKS_PER_REVOLUTION);
+            // wheelOdom.runAsync();
 
             networkOdom.setSize(18.0, 18.0);
         }
@@ -39,6 +39,9 @@ namespace devils
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1);
                 leftX = JoystickCurve::curve(leftX, 3.0, 0.05);
 
+                NetworkTables::UpdateValue("Controls/LeftY", leftY);
+                NetworkTables::UpdateValue("Controls/LeftX", leftX);
+
                 // Move Chassis
                 chassis.move(leftY, leftX);
 
@@ -54,15 +57,14 @@ namespace devils
         }
 
         // V5 Ports
-        static constexpr std::initializer_list<int8_t> L_MOTOR_PORTS = {11};
-        static constexpr std::initializer_list<int8_t> R_MOTOR_PORTS = {12};
-        static constexpr double TICKS_PER_REVOLUTION = 300.0 * (48.0 / 36.0); // ticks
-        static constexpr double WHEEL_RADIUS = 1.625;                         // in
-        static constexpr double WHEEL_BASE = 12.0;                            // in
+        // static constexpr double TICKS_PER_REVOLUTION = 300.0 * (48.0 / 36.0); // ticks
+        // static constexpr double WHEEL_RADIUS = 1.625;                         // in
+        // static constexpr double WHEEL_BASE = 12.0;                            // in
 
         // Subsystems
-        TankChassis chassis = TankChassis("Chassis", L_MOTOR_PORTS, R_MOTOR_PORTS);
-        DifferentialWheelOdometry wheelOdom = DifferentialWheelOdometry(chassis, WHEEL_RADIUS, WHEEL_BASE);
+        // TankChassis chassis = TankChassis("Chassis", L_MOTOR_PORTS, R_MOTOR_PORTS);
+        // DifferentialWheelOdometry wheelOdom = DifferentialWheelOdometry(chassis, WHEEL_RADIUS, WHEEL_BASE);
+        DummyChassis chassis = DummyChassis();
 
         RotationSensor rotationSensor = RotationSensor("RotationSensor", 5);
         // IMU imu = IMU("IMU", 9);
@@ -72,7 +74,7 @@ namespace devils
 
         // Additional Network Objects
         NetworkService &networkService = NetworkService::getInstance();
-        NetworkOdom networkOdom = NetworkOdom("Odom", wheelOdom);
         NetworkRobotState networkRobotState = NetworkRobotState();
+        NetworkOdom networkOdom = NetworkOdom("DummyOdom", chassis);
     };
 }

@@ -7,18 +7,8 @@
  *      Headers defined in this file are accessible from anywhere in the project.
  */
 
-// Autonomous
-#include "control/pursuitController.hpp"
-#include "control/linearController.hpp"
-#include "control/findController.hpp"
-#include "control/directController.hpp"
-#include "control/timeController.hpp"
-#include "control/chaseController.hpp"
-#include "control/collectionController.hpp"
-#include "control/controllerList.hpp"
-
 // Chassis
-#include "chassis/chassis.hpp"
+#include "chassis/chassisBase.hpp"
 #include "chassis/tankChassis.hpp"
 #include "chassis/dummyChassis.hpp"
 
@@ -42,10 +32,6 @@
 #include "path/pathFinder.hpp"
 #include "path/occupancyGrid.hpp"
 #include "path/occupancyFileReader.hpp"
-
-// Game Object
-#include "gameobject/gameObject.hpp"
-#include "gameobject/gameObjectManager.hpp"
 
 // Geometry
 #include "geometry/perspectiveFactory.hpp"

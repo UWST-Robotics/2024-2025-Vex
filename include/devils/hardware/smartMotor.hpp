@@ -1,10 +1,12 @@
 #pragma once
+#include <string>
+#include <cmath>
 #include "pros/motors.hpp"
+#include "pros/error.h"
 #include "motor.hpp"
 #include "../utils/logger.hpp"
 #include "../network/networkObject.hpp"
 #include "../network/networkTables.hpp"
-#include <string>
 
 namespace devils
 {

@@ -1,10 +1,11 @@
 #pragma once
-#include "chassis.hpp"
+#include "chassisBase.hpp"
 #include "../hardware/smartMotorGroup.hpp"
 #include <vector>
 #include <iostream>
 #include "../utils/logger.hpp"
 #include "../odom/odomSource.hpp"
+#include "../utils/runnable.hpp"
 
 namespace devils
 {
@@ -13,7 +14,7 @@ namespace devils
      * This is useful for testing autonomous routines without a physical robot.
      * Can be used as an OdomSource.
      */
-    class DummyChassis : public BaseChassis, OdomSource, AutoRunnable
+    class DummyChassis : public ChassisBase, public OdomSource, public AutoRunnable
     {
     public:
         void move(double forward, double turn, double strafe = 0) override
@@ -52,9 +53,9 @@ namespace devils
         }
 
     private:
-        static constexpr double TRANSLATION_ACCEL = 0.3; // in/s^2
-        static constexpr double ROTATION_ACCEL = 0.15; // rad/s^2
-        static constexpr double DRAG = 0.2; // %
+        static constexpr double TRANSLATION_ACCEL = 0.5; // in/s^2
+        static constexpr double ROTATION_ACCEL = 0.05;   // rad/s^2
+        static constexpr double DRAG = 0.2;              // %
 
         double lastForward = 0;
         double lastTurn = 0;

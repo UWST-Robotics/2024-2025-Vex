@@ -19,6 +19,9 @@ namespace devils
 
         void serialize() override
         {
+            // Send Heartbeat
+            NetworkTables::SendHeartbeat();
+
             // Get Prefix
             std::string networkTableKey = "_hardware/robot";
 

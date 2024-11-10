@@ -54,6 +54,16 @@ namespace devils
         }
 
         /**
+         * Sends a message to the to update a value.
+         * @param key The key to update including the full path. (e.g. "/devils/robot/position/x")
+         * @param value The value to update.
+         */
+        static void UpdateValue(std::string key, double value)
+        {
+            UpdateValue(key, std::to_string(value));
+        }
+
+        /**
          * Gets the network table key of a hardware device.
          * @param portType The type of the port (e.g. "adi", "vex", etc.)
          * @param port The port index of the hardware.
@@ -61,7 +71,7 @@ namespace devils
          */
         static std::string GetHardwareKey(std::string portType, int8_t port)
         {
-            return "_hardware/" + portType + std::to_string((uint8_t)port);
+            return "_hardware/" + portType + std::to_string(abs(port));
         }
         /**
          * Gets the network table cache.
