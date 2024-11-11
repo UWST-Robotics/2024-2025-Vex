@@ -100,13 +100,7 @@ namespace devils
                 double turnSpeed = options.rotationGain * angleDiff;
 
                 // Debug
-                NetworkTables::UpdateValue("AutoDriveStep/Speed", speed);
-                NetworkTables::UpdateValue("AutoDriveStep/TurnSpeed", turnSpeed);
-                NetworkTables::UpdateValue("AutoDriveStep/DistanceToStart", distanceToStart);
-                NetworkTables::UpdateValue("AutoDriveStep/DistanceToTarget", distanceToTarget);
-                NetworkTables::UpdateValue("AutoDriveStep/TargetAngle", targetAngleRads);
-                NetworkTables::UpdateValue("AutoDriveStep/AngleDiff", angleDiff);
-                NetworkTables::UpdateValue("AutoDriveStep/Dot", dot);
+                NetworkTables::UpdateValue("AutoStepSpeed", speed);
 
                 // Check if we are at the target
                 if (fabs(distanceToTarget) < options.goalDist)

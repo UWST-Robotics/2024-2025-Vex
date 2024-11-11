@@ -187,6 +187,8 @@ namespace devils
         std::string name;
 
         // Motor State
+        bool isPortOutOfRange = false;
+        bool isPortTaken = false;
         bool isOverTemp = false;
         bool isDriverFault = false;
         bool isOverCurrent = false;

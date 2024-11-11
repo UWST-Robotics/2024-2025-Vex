@@ -1,18 +1,22 @@
 #pragma once
 
 #include "../devils.h"
+#include "subsystems/ConveyorSystem.hpp"
+#include "subsystems/IntakeSystem.hpp"
+#include "autoSteps/ConveyorStep.hpp"
+#include "autoSteps/IntakeStep.hpp"
 
 namespace devils
 {
     /**
-     * Represents a prototype robot and all of its subsystems.
+     * Represents a blaze robot and all of its subsystems.
      */
-    struct PrototypeRobot : public Robot
+    struct BlazeRobot : public Robot
     {
         /**
-         * Creates a new instance of PepperJack.
+         * Creates a new instance of Blaze.
          */
-        PrototypeRobot()
+        BlazeRobot()
         {
             NetworkTables::Reset();
             wheelOdom.setTicksPerRevolution(TICKS_PER_REVOLUTION);
@@ -33,39 +37,25 @@ namespace devils
                 // Take Controller Inputs
                 double leftY = mainController.get_analog(ANALOG_LEFT_Y) / 127.0;
                 double leftX = mainController.get_analog(ANALOG_LEFT_X) / 127.0;
-                double conveyor = mainController.get_analog(ANALOG_RIGHT_Y) / 127.0;
-
-                bool intakeIn = mainController.get_digital(DIGITAL_R1);
-                bool intakeOut = mainController.get_digital(DIGITAL_R2);
-
+                double intakeInput = mainController.get_analog(ANALOG_RIGHT_Y) / 127.0;
                 bool intakeSpeedUp = mainController.get_digital_new_press(DIGITAL_UP);
                 bool intakeSpeedDown = mainController.get_digital_new_press(DIGITAL_DOWN);
 
                 // Curve Joystick Inputs
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1);
                 leftX = JoystickCurve::curve(leftX, 3.0, 0.05);
-                conveyor = JoystickCurve::curve(conveyor, 3.0, 0.1);
+                intakeInput = JoystickCurve::curve(intakeInput, 3.0, 0.1);
 
-                // Move Conveyor
-                conveyorMotorA.moveVoltage(conveyor);
-                conveyorMotorB.moveVoltage(conveyor);
+                // Move Conveyor/Intkae
+                conveyor.tryMove(intakeInput);
+                intake.move(intakeInput);
 
-                // Change Intake Speed
+                // Debug Intake Speed
                 if (intakeSpeedUp)
                     intakeSpeed += 0.05;
                 else if (intakeSpeedDown)
                     intakeSpeed -= 0.05;
-
-                // Print Intake Speed
                 mainController.print(0, 0, "Intake Speed: %f", intakeSpeed);
-
-                // Move Intake
-                if (intakeIn)
-                    intakeMotor.moveVoltage(intakeSpeed);
-                else if (intakeOut)
-                    intakeMotor.moveVoltage(-intakeSpeed);
-                else
-                    intakeMotor.stop();
 
                 // Move Chassis
                 chassis.move(leftY, leftX);
@@ -89,16 +79,16 @@ namespace devils
         static constexpr double WHEEL_BASE = 12.0;                            // in
 
         // Subsystems
-        TankChassis chassis = TankChassis("Prototype.Chassis", L_MOTOR_PORTS, R_MOTOR_PORTS);
+        TankChassis chassis = TankChassis("Chassis", L_MOTOR_PORTS, R_MOTOR_PORTS);
+        IntakeSystem intake = IntakeSystem({6});
+        ConveyorSystem conveyor = ConveyorSystem({-9, 10}, 1);
+
+        // Autonomous
         DifferentialWheelOdometry wheelOdom = DifferentialWheelOdometry(chassis, WHEEL_RADIUS, WHEEL_BASE);
 
-        SmartMotor intakeMotor = SmartMotor("Intake", 6);
-        SmartMotor conveyorMotorA = SmartMotor("ConveyorA", -9);
-        SmartMotor conveyorMotorB = SmartMotor("ConveyorB", 10);
-
-        // Additional Network Objects
+        // Debug
         NetworkService &networkService = NetworkService::getInstance();
-        NetworkOdom networkOdom = NetworkOdom("Prototype.Odom", wheelOdom);
         NetworkRobotState networkRobotState = NetworkRobotState();
+        NetworkOdom networkOdom = NetworkOdom("WheelOdom", wheelOdom);
     };
 }

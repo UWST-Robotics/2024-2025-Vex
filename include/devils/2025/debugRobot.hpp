@@ -5,20 +5,17 @@
 namespace devils
 {
     /**
-     * Represents a prototype robot and all of its subsystems.
+     * Represents a debugging robot and all of its subsystems.
+     * Designed to be used without any physical hardware.
      */
-    struct TestbedRobot : public Robot
+    struct DebugRobot : public Robot
     {
         /**
-         * Creates a new instance of PepperJack.
+         * Creates a new instance of the debug robot.
          */
-        TestbedRobot()
+        DebugRobot()
         {
             NetworkTables::Reset();
-
-            // wheelOdom.setTicksPerRevolution(TICKS_PER_REVOLUTION);
-            // wheelOdom.runAsync();
-
             networkOdom.setSize(18.0, 18.0);
         }
 
@@ -66,38 +63,16 @@ namespace devils
         DummyChassis chassis = DummyChassis();
 
         // Test Autonomous
-        AutoRotateStep step1 = AutoRotateStep(chassis, chassis, M_PI / 4.0 + M_PI + M_PI + M_PI + M_PI);
-        AutoDriveStep step2 = AutoDriveStep(chassis, chassis, 24.0);
-        AutoRotateStep step3 = AutoRotateStep(chassis, chassis, M_PI / 4.0);
-        AutoDriveStep step4 = AutoDriveStep(chassis, chassis, 24.0);
-        AutoDriveStep step5 = AutoDriveStep(chassis, chassis, -24.0);
-        AutoRotateStep step6 = AutoRotateStep(chassis, chassis, -M_PI / 4.0);
-        AutoDriveStep step7 = AutoDriveStep(chassis, chassis, -24.0);
-        AutoRotateToStep step8 = AutoRotateToStep(chassis, chassis, 0);
+        AutoJumpToStep jumpStep = AutoJumpToStep(chassis, -60.0, 24.0, 0.0);
+        AutoDriveStep driveStep = AutoDriveStep(chassis, chassis, 24.0);
+        AutoRotateStep rotateStep = AutoRotateStep(chassis, chassis, M_PI / 4.0);
+        AutoPauseStep pauseStep = AutoPauseStep(chassis, 3000);
 
-        AutoStepList testList = AutoStepList({
-            &step1,
-            &step2,
-            &step3,
-            &step4,
-            &step5,
-            &step6,
-            &step7,
-            &step8,
-        });
-        AutoStepList autoRoutine = AutoStepList({
-            &testList,
-            &testList,
-            &testList,
-            &testList,
-            &testList,
-            &testList,
-            &testList,
-            &testList,
-        });
-
-        // Hardware
-        RotationSensor rotationSensor = RotationSensor("RotationSensor", 5);
+        AutoStepList autoRoutine = AutoStepList({&jumpStep,
+                                                 &driveStep,
+                                                 &pauseStep,
+                                                 &rotateStep,
+                                                 &pauseStep});
 
         // Additional Network Objects
         NetworkService &networkService = NetworkService::getInstance();

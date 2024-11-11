@@ -10,8 +10,13 @@ namespace devils
     class AutoStepList : public IAutoStep
     {
     public:
-        AutoStepList(std::initializer_list<IAutoStep *> steps)
-            : steps(steps)
+        /**
+         * Creates a new instance of AutoStepList.
+         * @param steps The steps to execute.
+         * @param loopCount The number of times to loop through the steps.
+         */
+        AutoStepList(std::initializer_list<IAutoStep *> steps, int loopCount = 1)
+            : steps(steps), loopCount(loopCount)
         {
         }
 
@@ -21,15 +26,20 @@ namespace devils
          */
         void doStep() override
         {
-            for (int i = 0; i < steps.size(); i++)
+            for (int i = 0; i < loopCount; i++)
             {
-                // Debug
-                NetworkTables::UpdateValue("CurrentStep", i);
-                steps[i]->doStep();
+                for (int o = 0; o < steps.size(); o++)
+                {
+                    // Debug
+                    NetworkTables::UpdateValue("CurrentStep", o);
+                    NetworkTables::UpdateValue("CurrentLoop", i);
+                    steps[o]->doStep();
+                }
             }
         }
 
     private:
         std::vector<IAutoStep *> steps;
+        int loopCount = 1;
     };
 }

@@ -70,12 +70,7 @@ namespace devils
                     options.maxSpeed);
 
                 // Debug
-                NetworkTables::UpdateValue("AutoRotateStep/DistanceToStart", distanceToStart);
-                NetworkTables::UpdateValue("AutoRotateStep/DistanceToTarget", fabs(distanceToTarget));
-                NetworkTables::UpdateValue("AutoRotateStep/CurrentAngle", currentAngle);
-                NetworkTables::UpdateValue("AutoRotateStep/TargetAngle", targetAngle);
-                NetworkTables::UpdateValue("AutoRotateStep/StartAngle", startAngle);
-                NetworkTables::UpdateValue("AutoRotateStep/Speed", speed);
+                NetworkTables::UpdateValue("AutoStepSpeed", speed);
 
                 // Check if we are at the target
                 if (fabs(distanceToTarget) < options.goalDist)

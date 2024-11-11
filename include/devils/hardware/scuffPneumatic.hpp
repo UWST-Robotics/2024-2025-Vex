@@ -18,13 +18,33 @@ namespace devils
          * @param name The name of the pneumatic (for logging purposes)
          * @param port The ADI port of the motor controller (from 1 to 8)
          */
-        ScuffPneumatic(std::string name, uint8_t port)
+        ScuffPneumatic(std::string name, int8_t port)
             : port(port),
               name(name),
-              controller(port)
+              controller(abs(port))
         {
+            isInverted = port < 0;
             if (errno != 0 && LOGGING_ENABLED)
                 Logger::error(name + ": adi port is invalid");
+        }
+
+        /**
+         * Sets the state of the pneumatic.
+         * @param isExtended True to extend the pneumatic, false to retract it.
+         */
+        void setExtended(bool isExtended)
+        {
+            // Invert the value if the port is inverted
+            if (isInverted)
+                isExtended = !isExtended;
+            this->isExtended = isExtended;
+
+            // Set the value and check for errors
+            int32_t status = controller.set_value(isExtended);
+
+            // Check for errors
+            if (status != 1 && LOGGING_ENABLED)
+                Logger::error(name + ": pneumatic failed");
         }
 
         /**
@@ -32,10 +52,7 @@ namespace devils
          */
         void extend()
         {
-            int32_t status = controller.set_value(true);
-            isExtended = true;
-            if (status != 1 && LOGGING_ENABLED)
-                Logger::error(name + ": pneumatic extend failed");
+            setExtended(true);
         }
 
         /**
@@ -43,10 +60,7 @@ namespace devils
          */
         void retract()
         {
-            int32_t status = controller.set_value(false);
-            isExtended = false;
-            if (status != 1 && LOGGING_ENABLED)
-                Logger::error(name + ": pneumatic retract failed");
+            setExtended(false);
         }
 
         /**
@@ -76,5 +90,6 @@ namespace devils
         std::string name;
         pros::adi::DigitalOut controller;
         bool isExtended = false;
+        bool isInverted = false;
     };
 }

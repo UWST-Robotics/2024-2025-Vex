@@ -17,8 +17,9 @@
 #define PROS_USE_LITERALS     // Allows us to use 200_ms instead of pros::c::millisecond_t(200)
 
 // Add each robot definition here
-#include "devils/2025/prototypeRobot.hpp"
-#include "devils/2025/testbedRobot.hpp"
+#include "devils/2025/blazeRobot.hpp"
+#include "devils/2025/pjRobot.hpp"
+#include "devils/2025/debugRobot.hpp"
 
 using namespace devils;
 
