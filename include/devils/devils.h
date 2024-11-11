@@ -52,3 +52,12 @@
 #include "network/networkService.hpp"
 #include "network/networkOdom.hpp"
 #include "network/networkRobotState.hpp"
+
+// AutoSteps
+#include "autoSteps/common/autoStep.hpp"
+#include "autoSteps/common/autoStepList.hpp"
+#include "autoSteps/autoDriveStep.hpp"
+#include "autoSteps/autoRotateStep.hpp"
+#include "autoSteps/autoRotateToStep.hpp"
+#include "autoSteps/autoPauseStep.hpp"
+#include "autoSteps/autoJumpToStep.hpp"

@@ -10,11 +10,7 @@ namespace devils
     class AutoStepList : public IAutoStep
     {
     public:
-        /**
-         * Creates a new instance of AutoStepList.
-         * @param steps The steps to execute.
-         */
-        AutoStepList(IAutoStep **steps)
+        AutoStepList(std::initializer_list<IAutoStep *> steps)
             : steps(steps)
         {
         }
@@ -25,11 +21,15 @@ namespace devils
          */
         void doStep() override
         {
-            for (int i = 0; steps[i] != nullptr; i++)
+            for (int i = 0; i < steps.size(); i++)
+            {
+                // Debug
+                NetworkTables::UpdateValue("CurrentStep", i);
                 steps[i]->doStep();
+            }
         }
 
     private:
-        IAutoStep **steps;
+        std::vector<IAutoStep *> steps;
     };
 }

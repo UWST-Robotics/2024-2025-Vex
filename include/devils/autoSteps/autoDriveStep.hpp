@@ -2,6 +2,7 @@
 #include <string>
 #include "pros/rtos.hpp"
 #include "common/autoStep.hpp"
+#include "devils/utils/math.hpp"
 #include "devils/odom/odomSource.hpp"
 #include "devils/chassis/chassisBase.hpp"
 
@@ -16,22 +17,22 @@ namespace devils
         struct Options
         {
             /// @brief The distance to start accelerating in inches
-            double accelDist = 12.0;
+            double accelDist = 4.0;
 
             /// @brief The distance to start decelerating in inches
-            double decelDist = 12.0;
+            double decelDist = 24.0;
 
             /// @brief The maximum speed in %
-            double maxSpeed = 0.8;
+            double maxSpeed = 0.4;
 
             /// @brief The minimum speed in %
-            double minSpeed = 0.1;
+            double minSpeed = 0.05;
 
             /// @brief The gain for rotation in %/rad
             double rotationGain = 2.0;
 
             /// @brief The distance to the goal in inches
-            double goalDist = 3.0;
+            double goalDist = 0.5;
         };
 
         /**
@@ -39,13 +40,11 @@ namespace devils
          * @param chassis The chassis to control.
          * @param odomSource The odometry source to use.
          * @param distance The distance to drive in inches.
-         * @param options The options for the drive step.
          */
-        AutoDriveStep(ChassisBase &chassis, OdomSource &odomSource, double distance, Options options = Options())
+        AutoDriveStep(ChassisBase &chassis, OdomSource &odomSource, double distance)
             : chassis(chassis),
               odomSource(odomSource),
-              distance(distance),
-              options(options)
+              distance(distance)
         {
         }
 
@@ -67,23 +66,51 @@ namespace devils
                 double distanceToStart = currentPose.distanceTo(startPose);
                 double distanceToTarget = currentPose.distanceTo(targetPose);
 
-                // Check if we are at the target
-                if (distanceToTarget < options.goalDist)
-                    break;
+                // Calculate Dot Product
+                double dot = cos(currentPose.rotation) *
+                                 (targetPose.x - currentPose.x) +
+                             sin(currentPose.rotation) *
+                                 (targetPose.y - currentPose.y);
+
+                // Reverse if needed
+                distanceToTarget *= std::copysign(1.0, dot);
 
                 // Calculate Speed
-                // Uses a trapezoidal motion profile
-                double accelPercent = std::clamp(distanceToStart / options.accelDist, 0.0, 1.0);  // Percent of distance to start
-                double decelPercent = std::clamp(distanceToTarget / options.decelDist, 0.0, 1.0); // Percent of distance to target
-                double speedPercent = std::min(accelPercent, decelPercent);                       // Use the smaller of the two
-                double speed = std::lerp(options.minSpeed, options.maxSpeed, speedPercent);       // Lerp between min and max speed
+                double speed = Math::trapezoidProfile(
+                    distanceToStart,
+                    distanceToTarget,
+                    options.accelDist,
+                    options.decelDist,
+                    options.minSpeed,
+                    options.maxSpeed);
 
                 // Calculate Angle
                 double targetAngleRads = std::atan2(
                     targetPose.y - currentPose.y,
                     targetPose.x - currentPose.x);
-                double angleDiff = targetAngleRads - currentPose.rotation;
+
+                // Apply direction
+                if (dot < 0)
+                    targetAngleRads += M_PI;
+
+                // Calculate Angle Difference
+                double angleDiff = Math::angleDiff(targetAngleRads, currentPose.rotation);
+
+                // Calculate Turn Speed
                 double turnSpeed = options.rotationGain * angleDiff;
+
+                // Debug
+                NetworkTables::UpdateValue("AutoDriveStep/Speed", speed);
+                NetworkTables::UpdateValue("AutoDriveStep/TurnSpeed", turnSpeed);
+                NetworkTables::UpdateValue("AutoDriveStep/DistanceToStart", distanceToStart);
+                NetworkTables::UpdateValue("AutoDriveStep/DistanceToTarget", distanceToTarget);
+                NetworkTables::UpdateValue("AutoDriveStep/TargetAngle", targetAngleRads);
+                NetworkTables::UpdateValue("AutoDriveStep/AngleDiff", angleDiff);
+                NetworkTables::UpdateValue("AutoDriveStep/Dot", dot);
+
+                // Check if we are at the target
+                if (fabs(distanceToTarget) < options.goalDist)
+                    break;
 
                 // Move Chassis
                 chassis.move(speed, turnSpeed);
@@ -101,9 +128,9 @@ namespace devils
             return options;
         }
 
-    private:
+    protected:
         // Options
-        Options options;
+        Options options = Options();
 
         // Robot Base
         ChassisBase &chassis;

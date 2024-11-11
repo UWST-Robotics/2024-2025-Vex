@@ -19,6 +19,7 @@ namespace devils
         {
             // Get Pose
             Pose &pose = odomSource.getPose();
+            Vector3 velocity = calculateVelocity();
 
             // Get Prefix
             std::string networkTableKey = "_poses/" + name;
@@ -27,6 +28,9 @@ namespace devils
             NetworkTables::UpdateValue(networkTableKey + "/x", std::to_string(pose.x));
             NetworkTables::UpdateValue(networkTableKey + "/y", std::to_string(pose.y));
             NetworkTables::UpdateValue(networkTableKey + "/rotation", std::to_string(Units::radToDeg(pose.rotation)));
+            NetworkTables::UpdateValue(networkTableKey + "/velocityX", std::to_string(velocity.x));
+            NetworkTables::UpdateValue(networkTableKey + "/velocityY", std::to_string(velocity.y));
+            NetworkTables::UpdateValue(networkTableKey + "/velocityRotation", std::to_string(velocity.z));
         }
 
         /**
@@ -41,6 +45,27 @@ namespace devils
         }
 
     private:
+        Pose lastPose;
+        double lastTime;
+
+        Vector3 calculateVelocity()
+        {
+            // Get Pose
+            Pose &pose = odomSource.getPose();
+
+            // Calculate Velocity
+            double dt = pros::millis() - lastTime;
+            double dx = pose.x - lastPose.x;
+            double dy = pose.y - lastPose.y;
+            double dr = pose.rotation - lastPose.rotation;
+
+            // Update Last Pose
+            lastPose = pose;
+            lastTime = pros::millis();
+
+            return Vector3(dx / dt, dy / dt, dr / dt);
+        }
+
         std::string name;
         OdomSource &odomSource;
     };

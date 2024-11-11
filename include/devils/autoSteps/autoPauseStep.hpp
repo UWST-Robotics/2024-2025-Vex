@@ -31,7 +31,7 @@ namespace devils
             pros::delay(duration);
         }
 
-    private:
+    protected:
         ChassisBase &chassis;
         double duration = 0;
     };

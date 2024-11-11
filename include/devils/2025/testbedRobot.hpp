@@ -24,6 +24,12 @@ namespace devils
 
         void autonomous() override
         {
+            Logger::info("Starting Autonomous");
+            autoRoutine.doStep();
+
+            // Stop the robot
+            Logger::info("Stopping Autonomous");
+            chassis.stop();
         }
 
         void opcontrol() override
@@ -56,21 +62,42 @@ namespace devils
             chassis.stop();
         }
 
-        // V5 Ports
-        // static constexpr double TICKS_PER_REVOLUTION = 300.0 * (48.0 / 36.0); // ticks
-        // static constexpr double WHEEL_RADIUS = 1.625;                         // in
-        // static constexpr double WHEEL_BASE = 12.0;                            // in
-
-        // Subsystems
-        // TankChassis chassis = TankChassis("Chassis", L_MOTOR_PORTS, R_MOTOR_PORTS);
-        // DifferentialWheelOdometry wheelOdom = DifferentialWheelOdometry(chassis, WHEEL_RADIUS, WHEEL_BASE);
+        // Dummy Chassis
         DummyChassis chassis = DummyChassis();
 
+        // Test Autonomous
+        AutoRotateStep step1 = AutoRotateStep(chassis, chassis, M_PI / 4.0 + M_PI + M_PI + M_PI + M_PI);
+        AutoDriveStep step2 = AutoDriveStep(chassis, chassis, 24.0);
+        AutoRotateStep step3 = AutoRotateStep(chassis, chassis, M_PI / 4.0);
+        AutoDriveStep step4 = AutoDriveStep(chassis, chassis, 24.0);
+        AutoDriveStep step5 = AutoDriveStep(chassis, chassis, -24.0);
+        AutoRotateStep step6 = AutoRotateStep(chassis, chassis, -M_PI / 4.0);
+        AutoDriveStep step7 = AutoDriveStep(chassis, chassis, -24.0);
+        AutoRotateToStep step8 = AutoRotateToStep(chassis, chassis, 0);
+
+        AutoStepList testList = AutoStepList({
+            &step1,
+            &step2,
+            &step3,
+            &step4,
+            &step5,
+            &step6,
+            &step7,
+            &step8,
+        });
+        AutoStepList autoRoutine = AutoStepList({
+            &testList,
+            &testList,
+            &testList,
+            &testList,
+            &testList,
+            &testList,
+            &testList,
+            &testList,
+        });
+
+        // Hardware
         RotationSensor rotationSensor = RotationSensor("RotationSensor", 5);
-        // IMU imu = IMU("IMU", 9);
-        // OpticalSensor opticalSensor = OpticalSensor("OpticalSensor", 8);
-        // VisionSensor visionSensor = VisionSensor("VisionSensor", 7);
-        // ScuffPneumatic scuffPneumatic = ScuffPneumatic("ScuffPneumatic", 6);
 
         // Additional Network Objects
         NetworkService &networkService = NetworkService::getInstance();

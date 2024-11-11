@@ -25,10 +25,12 @@ namespace devils
             double minSpeed,
             double maxSpeed)
         {
-            double accelPercent = std::clamp(distanceToStart / accelDistance, 0.0, 1.0); // Percent of distance to start
-            double decelPercent = std::clamp(distanceToEnd / decelDistance, 0.0, 1.0);   // Percent of distance to target
-            double speedPercent = std::min(accelPercent, decelPercent);                  // Use the smaller of the two
-            double speed = std::lerp(minSpeed, maxSpeed, speedPercent);                  // Lerp between min and max speed
+            double accelPercent = std::clamp(distanceToStart / accelDistance, -1.0, 1.0); // Percent of distance to start
+            double decelPercent = std::clamp(distanceToEnd / decelDistance, -1.0, 1.0);   // Percent of distance to target
+            double speedPercent = std::min(fabs(accelPercent), fabs(decelPercent));       // Use the smaller of the two
+            double speed = std::lerp(minSpeed, maxSpeed, speedPercent);                   // Lerp between min and max speed
+            speed *= std::copysign(1.0, distanceToEnd);                                   // Apply direction
+            return speed;
         }
 
         /**

@@ -8,7 +8,7 @@ namespace devils
     /**
      * Represents a pause step in an autonomous routine.
      */
-    class AutoPauseStep : public IAutoStep
+    class AutoJumpToStep : public IAutoStep
     {
     public:
         /**
@@ -18,7 +18,7 @@ namespace devils
          * @param y The y position to jump to in inches.
          * @param heading The heading to jump to in radians.
          */
-        AutoPauseStep(OdomSource &odom, double x, double y, double heading)
+        AutoJumpToStep(OdomSource &odom, double x, double y, double heading)
             : odom(odom),
               targetPose(x, y, heading)
         {
@@ -29,7 +29,7 @@ namespace devils
             odom.setPose(targetPose);
         }
 
-    private:
+    protected:
         OdomSource &odom;
         Pose targetPose;
     };
