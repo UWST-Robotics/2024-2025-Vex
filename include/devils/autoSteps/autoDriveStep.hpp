@@ -17,16 +17,16 @@ namespace devils
         struct Options
         {
             /// @brief The distance to start accelerating in inches
-            double accelDist = 4.0;
+            double accelDist = 3.0;
 
             /// @brief The distance to start decelerating in inches
-            double decelDist = 24.0;
+            double decelDist = 18.0;
 
             /// @brief The maximum speed in %
-            double maxSpeed = 0.4;
+            double maxSpeed = 0.5;
 
             /// @brief The minimum speed in %
-            double minSpeed = 0.05;
+            double minSpeed = 0.1;
 
             /// @brief The gain for rotation in %/rad
             double rotationGain = 2.0;

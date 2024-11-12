@@ -16,16 +16,16 @@ namespace devils
         struct Options
         {
             /// @brief The distance to start accelerating in rads
-            double accelDist = 0.5;
+            double accelDist = M_PI * 0.1;
 
             /// @brief The distance to start decelerating in rads
-            double decelDist = 3.0;
+            double decelDist = M_PI * 0.4;
 
             /// @brief The maximum speed in %
-            double maxSpeed = 0.5;
+            double maxSpeed = 0.4;
 
             /// @brief The minimum speed in %
-            double minSpeed = 0.02;
+            double minSpeed = 0.15;
 
             /// @brief The distance to the goal in radians
             double goalDist = 0.005;
@@ -70,7 +70,12 @@ namespace devils
                     options.maxSpeed);
 
                 // Debug
+                NetworkTables::UpdateValue("StartAngle", startAngle);
+                NetworkTables::UpdateValue("CurrentAngle", currentAngle);
+                NetworkTables::UpdateValue("TargetAngle", targetAngle);
                 NetworkTables::UpdateValue("AutoStepSpeed", speed);
+                NetworkTables::UpdateValue("DistanceToTarget", distanceToTarget);
+                NetworkTables::UpdateValue("DistanceToStart", distanceToStart);
 
                 // Check if we are at the target
                 if (fabs(distanceToTarget) < options.goalDist)

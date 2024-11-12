@@ -5,21 +5,21 @@
 
 namespace devils
 {
-    class ConveyorStep : public IAutoStep
+    class AutoConveyorStep : public IAutoStep
     {
     public:
-        ConveyorStep(ConveyorSystem *conveyor, double intakeSpeed = 0.5)
+        AutoConveyorStep(ConveyorSystem &conveyor, double intakeSpeed = 0.5)
             : conveyor(conveyor), intakeSpeed(intakeSpeed)
         {
         }
 
         void doStep() override
         {
-            conveyor->tryMove(intakeSpeed);
+            conveyor.tryMove(intakeSpeed);
         }
 
     private:
         double intakeSpeed;
-        ConveyorSystem *conveyor;
+        ConveyorSystem &conveyor;
     };
 }

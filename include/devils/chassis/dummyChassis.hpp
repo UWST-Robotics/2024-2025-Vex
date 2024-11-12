@@ -40,6 +40,7 @@ namespace devils
 
             // Update Pose
             currentPose = currentPose + currentAcceleration;
+            currentPose.rotation = std::fmod(currentPose.rotation, 2 * M_PI);
         }
 
         void setPose(Pose &pose) override

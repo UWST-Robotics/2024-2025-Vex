@@ -63,16 +63,8 @@ namespace devils
         DummyChassis chassis = DummyChassis();
 
         // Test Autonomous
-        AutoJumpToStep jumpStep = AutoJumpToStep(chassis, -60.0, 24.0, 0.0);
-        AutoDriveStep driveStep = AutoDriveStep(chassis, chassis, 24.0);
-        AutoRotateStep rotateStep = AutoRotateStep(chassis, chassis, M_PI / 4.0);
-        AutoPauseStep pauseStep = AutoPauseStep(chassis, 3000);
-
-        AutoStepList autoRoutine = AutoStepList({&jumpStep,
-                                                 &driveStep,
-                                                 &pauseStep,
-                                                 &rotateStep,
-                                                 &pauseStep});
+        AutoStepList autoRoutine = AutoStepList({new AutoDriveStep(chassis, chassis, 24.0),
+                                                 new AutoRotateToStep(chassis, chassis, M_PI / 2.0)});
 
         // Additional Network Objects
         NetworkService &networkService = NetworkService::getInstance();

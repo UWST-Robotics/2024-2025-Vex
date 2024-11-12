@@ -69,12 +69,12 @@ namespace devils
         }
 
         /**
-         * Gets the current heading of the IMU in radians.
+         * Gets the current heading of the IMU in radians, unbounded.
          * @return The current heading of the IMU in radians or `PROS_ERR_F` if the operation failed.
          */
         double getHeading()
         {
-            double heading = imu.get_heading();
+            double heading = imu.get_rotation();
             if (heading == PROS_ERR_F && LOGGING_ENABLED)
                 Logger::error(name + ": imu get heading failed");
             return heading == PROS_ERR_F ? PROS_ERR_F : Units::degToRad(heading);
@@ -122,7 +122,7 @@ namespace devils
          */
         void setHeading(double heading)
         {
-            int32_t result = imu.set_heading(Units::radToDeg(heading + headingOffset));
+            int32_t result = imu.set_rotation(Units::radToDeg(heading + headingOffset));
             if (result == PROS_ERR && LOGGING_ENABLED)
                 Logger::error(name + ": imu set heading failed");
         }
@@ -155,8 +155,7 @@ namespace devils
          */
         void waitUntilCalibrated()
         {
-            while (imu.is_calibrating())
-                pros::delay(20);
+            imu.reset(true);
         }
 
         void serialize() override

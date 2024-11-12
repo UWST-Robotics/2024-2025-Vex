@@ -3,8 +3,8 @@
 #include "../devils.h"
 #include "subsystems/ConveyorSystem.hpp"
 #include "subsystems/IntakeSystem.hpp"
-#include "autoSteps/ConveyorStep.hpp"
-#include "autoSteps/IntakeStep.hpp"
+#include "autoSteps/AutoConveyorStep.hpp"
+#include "autoSteps/AutoIntakeStep.hpp"
 
 namespace devils
 {
@@ -19,12 +19,18 @@ namespace devils
         BlazeRobot()
         {
             NetworkTables::Reset();
+            networkOdom.setSize(15.0, 15.0);
+
+            imu.waitUntilCalibrated();
+
+            wheelOdom.useIMU(imu);
             wheelOdom.setTicksPerRevolution(TICKS_PER_REVOLUTION);
             wheelOdom.runAsync();
         }
 
         void autonomous() override
         {
+            autoRoutine.doStep();
         }
 
         void opcontrol() override
@@ -47,7 +53,7 @@ namespace devils
                 intakeInput = JoystickCurve::curve(intakeInput, 3.0, 0.1);
 
                 // Move Conveyor/Intkae
-                conveyor.tryMove(intakeInput);
+                // conveyor.tryMove(intakeInput);
                 intake.move(intakeInput);
 
                 // Debug Intake Speed
@@ -72,19 +78,46 @@ namespace devils
         }
 
         // V5 Ports
-        static constexpr std::initializer_list<int8_t> L_MOTOR_PORTS = {11, 18, -20, -12};
-        static constexpr std::initializer_list<int8_t> R_MOTOR_PORTS = {-19, -14, 17, 13};
+        static constexpr std::initializer_list<int8_t> L_MOTOR_PORTS = {6, 12, -7, -11};
+        static constexpr std::initializer_list<int8_t> R_MOTOR_PORTS = {-2, -8, 9, 1};
+        static constexpr std::initializer_list<int8_t> INTAKE_PORTS = {5};
+        static constexpr uint8_t IMU_PORT = 3;
+
+        // static constexpr std::initializer_list<int8_t> CONVEYOR_PORTS = {-9, 10};
+        // static constexpr int8_t GRABBER_PORT = 1;
         static constexpr double TICKS_PER_REVOLUTION = 300.0 * (48.0 / 36.0); // ticks
         static constexpr double WHEEL_RADIUS = 1.625;                         // in
         static constexpr double WHEEL_BASE = 12.0;                            // in
 
         // Subsystems
+        IMU imu = IMU("IMU", IMU_PORT);
         TankChassis chassis = TankChassis("Chassis", L_MOTOR_PORTS, R_MOTOR_PORTS);
-        IntakeSystem intake = IntakeSystem({6});
-        ConveyorSystem conveyor = ConveyorSystem({-9, 10}, 1);
+        IntakeSystem intake = IntakeSystem(INTAKE_PORTS);
+        // ConveyorSystem conveyor = ConveyorSystem(CONVEYOR_PORTS, GRABBER_PORT);
 
         // Autonomous
         DifferentialWheelOdometry wheelOdom = DifferentialWheelOdometry(chassis, WHEEL_RADIUS, WHEEL_BASE);
+        AutoStepList autoRoutine = AutoStepList({
+            // Section 1
+            new AutoJumpToStep(wheelOdom, -64, -48, 0),
+            new AutoDriveStep(chassis, wheelOdom, 18.0),
+            new AutoRotateToStep(chassis, wheelOdom, -M_PI),
+            new AutoDriveStep(chassis, wheelOdom, -24.0),
+            new AutoRotateToStep(chassis, wheelOdom, -M_PI * 0.9),
+            new AutoDriveStep(chassis, wheelOdom, 35.0),
+            new AutoDriveStep(chassis, wheelOdom, -20.0),
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.35),
+            new AutoDriveStep(chassis, wheelOdom, 52.0),
+            new AutoRotateStep(chassis, wheelOdom, M_PI * 0.1),
+            new AutoDriveStep(chassis, wheelOdom, 12.0),
+            new AutoRotateStep(chassis, wheelOdom, -M_PI * 0.2),
+            new AutoDriveStep(chassis, wheelOdom, 17.0),
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.3),
+            new AutoDriveStep(chassis, wheelOdom, -95.0),
+
+            // new AutoJumpToStep(wheelOdom, -53, -53, M_PI * 0.3),
+
+        });
 
         // Debug
         NetworkService &networkService = NetworkService::getInstance();

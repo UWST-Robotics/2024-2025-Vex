@@ -10,7 +10,8 @@ void initialize()
 {
 	Logger::init();
 	Logger::info("==== Initialize ====");
-	robot = std::make_shared<DebugRobot>(); // <-- Change this to the target robot
+	robot = std::make_shared<BlazeRobot>(); // <-- Change this to the target robot
+	Logger::info("Robot created");
 }
 
 /**
@@ -22,6 +23,7 @@ void disabled()
 {
 	Logger::info("==== Disabled ====");
 	robot->disabled();
+	Logger::info("Robot disabled");
 }
 
 /**
@@ -37,6 +39,7 @@ void competition_initialize()
 {
 	Logger::info("==== Competition Initialize ====");
 	robot->competition();
+	Logger::info("Competition initialized");
 }
 
 /**
@@ -54,6 +57,7 @@ void autonomous()
 {
 	Logger::info("==== Autonomous ====");
 	robot->autonomous();
+	Logger::info("Autonomous complete");
 }
 
 /**
@@ -73,4 +77,5 @@ void opcontrol()
 {
 	Logger::info("==== Teleoperated ====");
 	robot->opcontrol();
+	Logger::info("Teleoperated complete");
 }

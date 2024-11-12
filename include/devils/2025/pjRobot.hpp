@@ -3,8 +3,8 @@
 #include "../devils.h"
 #include "subsystems/ConveyorSystem.hpp"
 #include "subsystems/IntakeSystem.hpp"
-#include "autoSteps/ConveyorStep.hpp"
-#include "autoSteps/IntakeStep.hpp"
+#include "autoSteps/AutoConveyorStep.hpp"
+#include "autoSteps/AutoIntakeStep.hpp"
 
 namespace devils
 {
@@ -25,6 +25,7 @@ namespace devils
 
         void autonomous() override
         {
+            autoRoutine.doStep();
         }
 
         void opcontrol() override
@@ -74,17 +75,25 @@ namespace devils
         // V5 Ports
         static constexpr std::initializer_list<int8_t> L_MOTOR_PORTS = {11, 18, -20, -12};
         static constexpr std::initializer_list<int8_t> R_MOTOR_PORTS = {-19, -14, 17, 13};
+        static constexpr std::initializer_list<int8_t> CONVEYOR_PORTS = {-9, 10};
+        static constexpr std::initializer_list<int8_t> INTAKE_PORTS = {6};
+
+        // ADI Port
+        static constexpr int8_t GRABBER_PORT = 1;
+
+        // Constants
         static constexpr double TICKS_PER_REVOLUTION = 300.0 * (48.0 / 36.0); // ticks
         static constexpr double WHEEL_RADIUS = 1.625;                         // in
         static constexpr double WHEEL_BASE = 12.0;                            // in
 
         // Subsystems
         TankChassis chassis = TankChassis("Chassis", L_MOTOR_PORTS, R_MOTOR_PORTS);
-        IntakeSystem intake = IntakeSystem({6});
-        ConveyorSystem conveyor = ConveyorSystem({-9, 10}, 1);
+        IntakeSystem intake = IntakeSystem(INTAKE_PORTS);
+        ConveyorSystem conveyor = ConveyorSystem(CONVEYOR_PORTS, GRABBER_PORT);
 
         // Autonomous
         DifferentialWheelOdometry wheelOdom = DifferentialWheelOdometry(chassis, WHEEL_RADIUS, WHEEL_BASE);
+        AutoStepList autoRoutine = AutoStepList({new AutoDriveStep(chassis, wheelOdom, 24.0)});
 
         // Debug
         NetworkService &networkService = NetworkService::getInstance();
