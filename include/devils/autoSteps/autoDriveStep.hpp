@@ -20,7 +20,7 @@ namespace devils
             double accelDist = 3.0;
 
             /// @brief The distance to start decelerating in inches
-            double decelDist = 18.0;
+            double decelDist = 16.0;
 
             /// @brief The maximum speed in %
             double maxSpeed = 0.5;

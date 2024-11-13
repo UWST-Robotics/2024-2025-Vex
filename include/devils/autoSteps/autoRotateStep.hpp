@@ -19,7 +19,7 @@ namespace devils
             double accelDist = M_PI * 0.1;
 
             /// @brief The distance to start decelerating in rads
-            double decelDist = M_PI * 0.4;
+            double decelDist = M_PI * 0.6;
 
             /// @brief The maximum speed in %
             double maxSpeed = 0.4;

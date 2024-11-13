@@ -93,7 +93,65 @@ namespace devils
 
         // Autonomous
         DifferentialWheelOdometry wheelOdom = DifferentialWheelOdometry(chassis, WHEEL_RADIUS, WHEEL_BASE);
-        AutoStepList autoRoutine = AutoStepList({new AutoDriveStep(chassis, wheelOdom, 24.0)});
+        AutoStepList autoRoutine = AutoStepList({
+
+            // Section 1
+            new AutoDriveStep(chassis, wheelOdom, 15.0),
+            new AutoDriveStep(chassis, wheelOdom, -15.0),
+            // Score Ring
+            new AutoPauseStep(chassis, 2000),
+
+            // Section 2
+            new AutoDriveStep(chassis, wheelOdom, 15.0),
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.5),
+            new AutoDriveStep(chassis, wheelOdom, 48.0),
+            new AutoRotateToStep(chassis, wheelOdom, M_PI),
+            new AutoDriveStep(chassis, wheelOdom, -24.0),
+            // Pickup Mogo
+            // Score Ring
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.5),
+            new AutoDriveStep(chassis, wheelOdom, 24.0),
+            // Score Ring
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.25),
+            new AutoDriveStep(chassis, wheelOdom, 34.0),
+            // Score Ring
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.5),
+            new AutoDriveStep(chassis, wheelOdom, 10.0),
+            // Score Ring
+            new AutoRotateToStep(chassis, wheelOdom, M_PI),
+            new AutoDriveStep(chassis, wheelOdom, 60.0),
+            // Score Ring
+            new AutoDriveStep(chassis, wheelOdom, -10.0),
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.1),
+            new AutoDriveStep(chassis, wheelOdom, -10.0),
+            // Drop Mogo
+
+            // Section 3
+            new AutoDriveStep(chassis, wheelOdom, 84.0),
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.5),
+            new AutoDriveStep(chassis, wheelOdom, -25.0),
+            // Pickup Mogo
+            // Score Ring
+            new AutoRotateToStep(chassis, wheelOdom, 0),
+            new AutoDriveStep(chassis, wheelOdom, 24.0),
+            // Score Ring
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.5),
+            new AutoDriveStep(chassis, wheelOdom, 24.0),
+            // Score Ring
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.75),
+            new AutoDriveStep(chassis, wheelOdom, -12.0),
+            // Drop Mogo
+
+            // Section 4
+            new AutoDriveStep(chassis, wheelOdom, 40.0),
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.25),
+            new AutoDriveStep(chassis, wheelOdom, 34.0),
+            new AutoRotateToStep(chassis, wheelOdom, M_PI),
+            new AutoDriveStep(chassis, wheelOdom, -5.0),
+            // Score Rings
+            new AutoPauseStep(chassis, 2000),
+            new AutoDriveStep(chassis, wheelOdom, 10.0),
+        });
 
         // Debug
         NetworkService &networkService = NetworkService::getInstance();

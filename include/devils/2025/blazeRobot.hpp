@@ -36,6 +36,12 @@ namespace devils
         void opcontrol() override
         {
             double intakeSpeed = 0.5;
+            // pros::Task autoTask = pros::Task(
+            //     [](void *param)
+            //     {
+            //         BlazeRobot *robot = (BlazeRobot *)param;
+            //         robot->autoRoutine.doStep();
+            //     });
 
             // Loop
             while (true)
@@ -98,25 +104,66 @@ namespace devils
         // Autonomous
         DifferentialWheelOdometry wheelOdom = DifferentialWheelOdometry(chassis, WHEEL_RADIUS, WHEEL_BASE);
         AutoStepList autoRoutine = AutoStepList({
-            // Section 1
+            // Start
             new AutoJumpToStep(wheelOdom, -64, -48, 0),
-            new AutoDriveStep(chassis, wheelOdom, 18.0),
-            new AutoRotateToStep(chassis, wheelOdom, -M_PI),
+
+            // Section 1
+            new AutoDriveStep(chassis, wheelOdom, 16.0),
+            new AutoRotateToStep(chassis, wheelOdom, M_PI),
             new AutoDriveStep(chassis, wheelOdom, -24.0),
-            new AutoRotateToStep(chassis, wheelOdom, -M_PI * 0.9),
-            new AutoDriveStep(chassis, wheelOdom, 35.0),
-            new AutoDriveStep(chassis, wheelOdom, -20.0),
-            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.35),
-            new AutoDriveStep(chassis, wheelOdom, 52.0),
-            new AutoRotateStep(chassis, wheelOdom, M_PI * 0.1),
-            new AutoDriveStep(chassis, wheelOdom, 12.0),
-            new AutoRotateStep(chassis, wheelOdom, -M_PI * 0.2),
-            new AutoDriveStep(chassis, wheelOdom, 17.0),
-            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.3),
-            new AutoDriveStep(chassis, wheelOdom, -95.0),
+            // Pickup Mogo
+            // Score Ring
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.5),
+            new AutoDriveStep(chassis, wheelOdom, 24.0),
+            // Score Ring
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.75),
+            new AutoDriveStep(chassis, wheelOdom, 44.0),
+            // Score Ring
+            new AutoDriveStep(chassis, wheelOdom, -12.0),
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.25),
+            new AutoDriveStep(chassis, wheelOdom, -14.0),
+            // Drop Mogo
+            new AutoDriveStep(chassis, wheelOdom, 11.0),
 
-            // new AutoJumpToStep(wheelOdom, -53, -53, M_PI * 0.3),
+            // Section 2
+            new AutoRotateToStep(chassis, wheelOdom, 0),
+            new AutoDriveStep(chassis, wheelOdom, 48.0),
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.5),
+            new AutoDriveStep(chassis, wheelOdom, -12.0),
+            // Score Ring
+            new AutoPauseStep(chassis, 2000),
 
+            // Section 3
+            new AutoDriveStep(chassis, wheelOdom, 14.0),
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.75),
+            new AutoDriveStep(chassis, wheelOdom, -34.0),
+            // Pickup Mogo
+            // Score Ring
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.75),
+            new AutoDriveStep(chassis, wheelOdom, 34.0),
+            // Score Rings
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.25),
+            // Score Rings
+            // Drop Mogo
+
+            // Section 4
+            new AutoDriveStep(chassis, wheelOdom, 34.0),
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.75),
+            new AutoDriveStep(chassis, wheelOdom, -33.0),
+            // Pickup Mogo
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.5),
+            new AutoDriveStep(chassis, wheelOdom, 24.0),
+            // Score Rings
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.75),
+            new AutoDriveStep(chassis, wheelOdom, 32.0),
+            // Score Rings
+            new AutoRotateToStep(chassis, wheelOdom, 0),
+            new AutoDriveStep(chassis, wheelOdom, 23.0),
+            // Score Rings
+            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.75),
+            new AutoDriveStep(chassis, wheelOdom, -16.0),
+            // Drop Mogo
+            new AutoDriveStep(chassis, wheelOdom, 16.0),
         });
 
         // Debug
