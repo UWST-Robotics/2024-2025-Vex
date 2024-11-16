@@ -45,13 +45,9 @@ namespace devils
             for (int i = 0; i < inputText.length(); i++)
             {
                 if (inputText[i] == character)
-                {
                     result += replacementChar;
-                }
                 else
-                {
                     result += inputText[i];
-                }
             }
             return result;
         }

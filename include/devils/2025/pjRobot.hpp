@@ -19,12 +19,21 @@ namespace devils
         PJRobot()
         {
             NetworkTables::Reset();
+            networkOdom.setSize(15.0, 15.0);
+
+            // Initialize Subsystems
+            conveyor.useSensor(&opticalSensor);
+
+            imu.calibrate();
+
+            wheelOdom.useIMU(imu);
             wheelOdom.setTicksPerRevolution(TICKS_PER_REVOLUTION);
             wheelOdom.runAsync();
         }
 
         void autonomous() override
         {
+            imu.waitUntilCalibrated();
             autoRoutine.doStep();
         }
 
@@ -75,8 +84,10 @@ namespace devils
         // V5 Ports
         static constexpr std::initializer_list<int8_t> L_MOTOR_PORTS = {11, 18, -20, -12};
         static constexpr std::initializer_list<int8_t> R_MOTOR_PORTS = {-19, -14, 17, 13};
-        static constexpr std::initializer_list<int8_t> CONVEYOR_PORTS = {-9, 10};
+        static constexpr std::initializer_list<int8_t> CONVEYOR_PORTS = {9, -10};
         static constexpr std::initializer_list<int8_t> INTAKE_PORTS = {6};
+        static constexpr int8_t IMU_PORT = 1;
+        static constexpr int8_t OPTICAL_SENSOR_PORT = 4;
 
         // ADI Port
         static constexpr int8_t GRABBER_PORT = 1;
@@ -90,6 +101,8 @@ namespace devils
         TankChassis chassis = TankChassis("Chassis", L_MOTOR_PORTS, R_MOTOR_PORTS);
         IntakeSystem intake = IntakeSystem(INTAKE_PORTS);
         ConveyorSystem conveyor = ConveyorSystem(CONVEYOR_PORTS, GRABBER_PORT);
+        IMU imu = IMU("IMU", IMU_PORT);
+        OpticalSensor opticalSensor = OpticalSensor("OpticalSensor", OPTICAL_SENSOR_PORT);
 
         // Autonomous
         DifferentialWheelOdometry wheelOdom = DifferentialWheelOdometry(chassis, WHEEL_RADIUS, WHEEL_BASE);
@@ -97,12 +110,12 @@ namespace devils
 
             // Section 1
             new AutoDriveStep(chassis, wheelOdom, 15.0),
-            new AutoDriveStep(chassis, wheelOdom, -15.0),
+            new AutoDriveStep(chassis, wheelOdom, -14.0),
             // Score Ring
             new AutoPauseStep(chassis, 2000),
 
             // Section 2
-            new AutoDriveStep(chassis, wheelOdom, 15.0),
+            new AutoDriveStep(chassis, wheelOdom, 14.0),
             new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.5),
             new AutoDriveStep(chassis, wheelOdom, 48.0),
             new AutoRotateToStep(chassis, wheelOdom, M_PI),
@@ -116,10 +129,10 @@ namespace devils
             new AutoDriveStep(chassis, wheelOdom, 34.0),
             // Score Ring
             new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.5),
-            new AutoDriveStep(chassis, wheelOdom, 10.0),
+            new AutoDriveStep(chassis, wheelOdom, 6.0),
             // Score Ring
             new AutoRotateToStep(chassis, wheelOdom, M_PI),
-            new AutoDriveStep(chassis, wheelOdom, 60.0),
+            new AutoDriveStep(chassis, wheelOdom, 50.0),
             // Score Ring
             new AutoDriveStep(chassis, wheelOdom, -10.0),
             new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.1),

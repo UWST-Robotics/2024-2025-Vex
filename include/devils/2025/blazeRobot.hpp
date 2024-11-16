@@ -21,7 +21,7 @@ namespace devils
             NetworkTables::Reset();
             networkOdom.setSize(15.0, 15.0);
 
-            imu.waitUntilCalibrated();
+            imu.calibrate();
 
             wheelOdom.useIMU(imu);
             wheelOdom.setTicksPerRevolution(TICKS_PER_REVOLUTION);
@@ -30,6 +30,7 @@ namespace devils
 
         void autonomous() override
         {
+            imu.waitUntilCalibrated();
             autoRoutine.doStep();
         }
 

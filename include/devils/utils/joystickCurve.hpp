@@ -10,77 +10,82 @@ namespace devils
     struct JoystickCurve
     {
         /**
-         * Linearly interpolates a value with a deadzone
+         * Applies a deadzone to a joystick input.
          * @param deadzone The deadzone of the joystick.
-         * @param min The minimum value of the joystick.
-         * @param max The maximum value of the joystick.
-         * @param val The value of the joystick.
-         * @return The interpolated value.
+         * @param val The value of the joystick. Must be between -1 and 1.
+         * @return Value between deadzone and 1. Negative values are preserved.
          */
-        static double dlerp(double deadzone, double min, double max, double val)
+        static double deadzone(
+            double deadzone,
+            double val)
         {
-            if (val > -deadzone && val < deadzone)
+            // Check if the value is within the deadzone
+            double absVal = std::abs(val);
+            if (absVal < deadzone)
                 return 0;
-            return lerp(min, max, val);
+            if (absVal > 1)
+                return std::copysign(1, val);
+
+            // Correct the value so it starts at 0 instead of deadzone
+            double correctedVal = (absVal - deadzone) / (1 - deadzone);
+
+            // Apply the sign back to the value
+            return std::copysign(correctedVal, val);
         }
 
         /**
-         * Linearly interpolates a value.
-         * @param a The minimum value.
-         * @param b The maximum value.
-         * @param t The value to interpolate (0 - 1).
-         * @return The interpolated value.
-         */
-        static double lerp(double a, double b, double t)
-        {
-            if (t< 0)
-                return ((1 + t) * a - t * b) * -1;
-            return (1 - t) * a + t * b;
-        }
-
-        /**
-         * Curves on an arbitrary power curve.
-         * @param val The value to curve.
-         * @param power The power to curve by.
-         * @return The curved value.
+         * Applies an exponential curve to a joystick input.
+         * @param val The value of the joystick. Must be between -1 and 1.
+         * @param power The power of the curve.
          */
         static double pow(double val, double power)
         {
-            return std::pow(std::abs(val), power) * (val < 0 ? -1 : 1);
+            double absVal = std::abs(val);
+            double exponent = std::pow(absVal, power);
+            return std::copysign(exponent, val);
         }
 
         /**
-         * Curves on an arbitrary curve with a deadzone.
-         * @param val The value to curve.
-         * @param power The power to curve by.
-         * @param deadzone The range of which the joystick is considered 0.
-         * @return The curved value.
+         * Lerp that maintains the sign of the value.
+         * @param min The minimum value.
+         * @param max The maximum value.
+         * @param val The value to lerp.
+         * @return The lerped value. If val is negative, the result will be negative.
          */
-        static double curve(double val, double power, double deadzone)
+        static double lerp(int min, int max, double val)
         {
-            if (val > -deadzone && val < deadzone)
+            double absVal = std::abs(val);
+            double lerpVal = std::lerp(min, max, absVal);
+            return std::copysign(lerpVal, val);
+        }
+
+        /**
+         * Applies a curve to a joystick input.
+         * @param val The value of the joystick. Must be between -1 and 1.
+         * @param power The power of the curve.
+         * @param deadzone The deadzone of the joystick.
+         * @param min The minimum output value
+         * @param max The maximum output value
+         */
+        static double curve(
+            double val,
+            double power,
+            double deadzone,
+            double min = 0.0,
+            double max = 1.0)
+        {
+            // Deadzone
+            double newVal = JoystickCurve::deadzone(deadzone, val);
+
+            // Avoid remaining calculations if the value is 0
+            if (newVal == 0)
                 return 0;
-            return pow(val, power);
-        }
 
-        /**
-         * Curves on a square curve.
-         * @param val The value to curve.
-         * @return The curved value.
-         */
-        static double square(double val)
-        {
-            return val * val * (val < 0 ? -1 : 1);
-        }
+            // Apply curve
+            newVal = JoystickCurve::pow(newVal, power);
 
-        /**
-         * Curves on a cubic curve.
-         * @param val The value to curve.
-         * @return The curved value.
-         */
-        static double cubic(double val)
-        {
-            return val * val * val;
+            // Lerp
+            return JoystickCurve::lerp(min, max, newVal);
         }
 
     private:

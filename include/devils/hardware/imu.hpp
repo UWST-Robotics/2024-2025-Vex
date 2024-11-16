@@ -155,7 +155,8 @@ namespace devils
          */
         void waitUntilCalibrated()
         {
-            imu.reset(true);
+            while (imu.is_calibrating())
+                pros::delay(20);
         }
 
         void serialize() override

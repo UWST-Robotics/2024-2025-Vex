@@ -57,6 +57,7 @@
 #include "autoSteps/common/autoStep.hpp"
 #include "autoSteps/common/autoStepList.hpp"
 #include "autoSteps/autoDriveStep.hpp"
+#include "autoSteps/autoDriveToStep.hpp"
 #include "autoSteps/autoRotateStep.hpp"
 #include "autoSteps/autoRotateToStep.hpp"
 #include "autoSteps/autoPauseStep.hpp"

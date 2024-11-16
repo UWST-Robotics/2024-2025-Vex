@@ -23,13 +23,19 @@ namespace devils
         void tryMove(double voltage)
         {
             // Check if a ring is detected and if the grabber is extended
-            bool isRingDetected = !(sensor != nullptr && sensor->getProximity() < PROXIMITY_THRESHOLD); // <-- True if the sensor is not present
-            bool isGrabberExtended = grabberPneumatic.getExtended();
+            bool isRingDetected = true;
+            if (sensor != nullptr)
+            {
+                double proximity = sensor->getProximity();
+                isRingDetected = proximity > PROXIMITY_THRESHOLD;
+                NetworkTables::UpdateValue("RingDetected", isRingDetected);
+                NetworkTables::UpdateValue("Proximity", proximity);
+            }
             bool isForwards = voltage > 0; // <-- Allows the conveyor to run in reverse
 
             // Stop the conveyor system if a ring is detected
             // and we don't have a mogo grabbed
-            if (isRingDetected && isGrabberExtended && isForwards)
+            if (isRingDetected && isForwards)
             {
                 conveyorMotors.stop();
                 return;
@@ -77,6 +83,6 @@ namespace devils
 
         SmartMotorGroup conveyorMotors;
         ScuffPneumatic grabberPneumatic;
-        OpticalSensor *sensor;
+        OpticalSensor *sensor = nullptr;
     };
 }
