@@ -20,7 +20,7 @@ namespace devils
          * Runs the conveyor system at a given voltage. Automatically stops the conveyor system if a ring is detected.
          * @param voltage The voltage to run the conveyor system at, from -1 to 1.
          */
-        void tryMove(double voltage)
+        void runAutomatic()
         {
             // Check if a ring is detected and if the grabber is extended
             bool isRingDetected = true;
@@ -31,18 +31,18 @@ namespace devils
                 NetworkTables::UpdateValue("RingDetected", isRingDetected);
                 NetworkTables::UpdateValue("Proximity", proximity);
             }
-            bool isForwards = voltage > 0; // <-- Allows the conveyor to run in reverse
+            bool isGrabbed = isGoalGrabbed();
 
             // Stop the conveyor system if a ring is detected
             // and we don't have a mogo grabbed
-            if (isRingDetected && isForwards)
+            if (isRingDetected && !isGrabbed)
             {
                 conveyorMotors.stop();
                 return;
             }
 
             // Run the conveyor system
-            conveyorMotors.moveVoltage(voltage);
+            conveyorMotors.moveVoltage(isGrabbed ? MOGO_CONVEYOR_SPEED : NO_MOGO_CONVEYOR_SPEED);
         }
 
         /**
@@ -78,8 +78,19 @@ namespace devils
             grabberPneumatic.retract();
         }
 
+        /**
+         * Returns whether a mogo is currently grabbed.
+         * @return True if a mogo is grabbed, false otherwise.
+         */
+        bool isGoalGrabbed()
+        {
+            return grabberPneumatic.getExtended();
+        }
+
     private:
-        static constexpr double PROXIMITY_THRESHOLD = 0.5;
+        static constexpr double PROXIMITY_THRESHOLD = 0.3;
+        static constexpr double NO_MOGO_CONVEYOR_SPEED = 0.5;
+        static constexpr double MOGO_CONVEYOR_SPEED = 1.0;
 
         SmartMotorGroup conveyorMotors;
         ScuffPneumatic grabberPneumatic;

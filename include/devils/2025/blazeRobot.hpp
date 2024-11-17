@@ -9,7 +9,7 @@
 namespace devils
 {
     /**
-     * Represents a blaze robot and all of its subsystems.
+     * Represents a Blaze robot (24x24) and all of its subsystems.
      */
     struct BlazeRobot : public Robot
     {
@@ -19,19 +19,19 @@ namespace devils
         BlazeRobot()
         {
             NetworkTables::Reset();
-            networkOdom.setSize(15.0, 15.0);
+            // networkOdom.setSize(15.0, 15.0);
 
             imu.calibrate();
 
-            wheelOdom.useIMU(imu);
-            wheelOdom.setTicksPerRevolution(TICKS_PER_REVOLUTION);
-            wheelOdom.runAsync();
+            // wheelOdom.useIMU(imu);
+            // wheelOdom.setTicksPerRevolution(TICKS_PER_REVOLUTION);
+            // wheelOdom.runAsync();
         }
 
         void autonomous() override
         {
             imu.waitUntilCalibrated();
-            autoRoutine.doStep();
+            // autoRoutine.doStep();
         }
 
         void opcontrol() override
@@ -43,6 +43,7 @@ namespace devils
             //         BlazeRobot *robot = (BlazeRobot *)param;
             //         robot->autoRoutine.doStep();
             //     });
+            intakeLauncher.extend();
 
             // Loop
             while (true)
@@ -53,6 +54,7 @@ namespace devils
                 double intakeInput = mainController.get_analog(ANALOG_RIGHT_Y) / 127.0;
                 bool intakeSpeedUp = mainController.get_digital_new_press(DIGITAL_UP);
                 bool intakeSpeedDown = mainController.get_digital_new_press(DIGITAL_DOWN);
+                bool grabInput = mainController.get_digital_new_press(DIGITAL_A);
 
                 // Curve Joystick Inputs
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1);
@@ -60,8 +62,17 @@ namespace devils
                 intakeInput = JoystickCurve::curve(intakeInput, 3.0, 0.1);
 
                 // Move Conveyor/Intkae
-                // conveyor.tryMove(intakeInput);
+                conveyor.runAutomatic();
                 intake.move(intakeInput);
+
+                // Grab Mogo
+                if (grabInput)
+                {
+                    if (conveyor.isGoalGrabbed())
+                        conveyor.releaseGoal();
+                    else
+                        conveyor.grabGoal();
+                }
 
                 // Debug Intake Speed
                 if (intakeSpeedUp)
@@ -82,94 +93,99 @@ namespace devils
         {
             // Stop the robot
             chassis.stop();
+            intakeLauncher.retract();
         }
 
         // V5 Ports
-        static constexpr std::initializer_list<int8_t> L_MOTOR_PORTS = {6, 12, -7, -11};
-        static constexpr std::initializer_list<int8_t> R_MOTOR_PORTS = {-2, -8, 9, 1};
-        static constexpr std::initializer_list<int8_t> INTAKE_PORTS = {5};
-        static constexpr uint8_t IMU_PORT = 3;
+        static constexpr std::initializer_list<int8_t> L_MOTOR_PORTS = {20, -11, 5, -6};
+        static constexpr std::initializer_list<int8_t> R_MOTOR_PORTS = {-1, 2, 3, -4};
+        static constexpr std::initializer_list<int8_t> INTAKE_PORTS = {18};
+        static constexpr std::initializer_list<int8_t> CONVEYOR_PORTS = {-9, 10};
+        static constexpr uint8_t IMU_PORT = 15;
+        static constexpr uint8_t OPTICAL_SENSOR_PORT = 8;
 
-        // static constexpr std::initializer_list<int8_t> CONVEYOR_PORTS = {-9, 10};
-        // static constexpr int8_t GRABBER_PORT = 1;
+        static constexpr int8_t GRABBER_PORT = 1;
+        static constexpr int8_t INTAKE_LAUNCHER_PORT = 2;
+
         static constexpr double TICKS_PER_REVOLUTION = 300.0 * (48.0 / 36.0); // ticks
         static constexpr double WHEEL_RADIUS = 1.625;                         // in
         static constexpr double WHEEL_BASE = 12.0;                            // in
 
         // Subsystems
+        ScuffPneumatic intakeLauncher = ScuffPneumatic("IntakeLauncher", INTAKE_LAUNCHER_PORT);
         IMU imu = IMU("IMU", IMU_PORT);
         TankChassis chassis = TankChassis("Chassis", L_MOTOR_PORTS, R_MOTOR_PORTS);
         IntakeSystem intake = IntakeSystem(INTAKE_PORTS);
-        // ConveyorSystem conveyor = ConveyorSystem(CONVEYOR_PORTS, GRABBER_PORT);
+        ConveyorSystem conveyor = ConveyorSystem(CONVEYOR_PORTS, GRABBER_PORT);
 
         // Autonomous
-        DifferentialWheelOdometry wheelOdom = DifferentialWheelOdometry(chassis, WHEEL_RADIUS, WHEEL_BASE);
-        AutoStepList autoRoutine = AutoStepList({
-            // Start
-            new AutoJumpToStep(wheelOdom, -64, -48, 0),
+        // DifferentialWheelOdometry wheelOdom = DifferentialWheelOdometry(chassis, WHEEL_RADIUS, WHEEL_BASE);
+        // AutoStepList autoRoutine = AutoStepList({
+        //     // Start
+        //     new AutoJumpToStep(wheelOdom, -64, -48, 0),
 
-            // Section 1
-            new AutoDriveStep(chassis, wheelOdom, 16.0),
-            new AutoRotateToStep(chassis, wheelOdom, M_PI),
-            new AutoDriveStep(chassis, wheelOdom, -24.0),
-            // Pickup Mogo
-            // Score Ring
-            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.5),
-            new AutoDriveStep(chassis, wheelOdom, 24.0),
-            // Score Ring
-            new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.75),
-            new AutoDriveStep(chassis, wheelOdom, 44.0),
-            // Score Ring
-            new AutoDriveStep(chassis, wheelOdom, -12.0),
-            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.25),
-            new AutoDriveStep(chassis, wheelOdom, -14.0),
-            // Drop Mogo
-            new AutoDriveStep(chassis, wheelOdom, 11.0),
+        //     // Section 1
+        //     new AutoDriveStep(chassis, wheelOdom, 16.0),
+        //     new AutoRotateToStep(chassis, wheelOdom, M_PI),
+        //     new AutoDriveStep(chassis, wheelOdom, -24.0),
+        //     // Pickup Mogo
+        //     // Score Ring
+        //     new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.5),
+        //     new AutoDriveStep(chassis, wheelOdom, 24.0),
+        //     // Score Ring
+        //     new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.75),
+        //     new AutoDriveStep(chassis, wheelOdom, 44.0),
+        //     // Score Ring
+        //     new AutoDriveStep(chassis, wheelOdom, -12.0),
+        //     new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.25),
+        //     new AutoDriveStep(chassis, wheelOdom, -14.0),
+        //     // Drop Mogo
+        //     new AutoDriveStep(chassis, wheelOdom, 11.0),
 
-            // Section 2
-            new AutoRotateToStep(chassis, wheelOdom, 0),
-            new AutoDriveStep(chassis, wheelOdom, 48.0),
-            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.5),
-            new AutoDriveStep(chassis, wheelOdom, -12.0),
-            // Score Ring
-            new AutoPauseStep(chassis, 2000),
+        //     // Section 2
+        //     new AutoRotateToStep(chassis, wheelOdom, 0),
+        //     new AutoDriveStep(chassis, wheelOdom, 48.0),
+        //     new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.5),
+        //     new AutoDriveStep(chassis, wheelOdom, -12.0),
+        //     // Score Ring
+        //     new AutoPauseStep(chassis, 2000),
 
-            // Section 3
-            new AutoDriveStep(chassis, wheelOdom, 14.0),
-            new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.75),
-            new AutoDriveStep(chassis, wheelOdom, -34.0),
-            // Pickup Mogo
-            // Score Ring
-            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.75),
-            new AutoDriveStep(chassis, wheelOdom, 34.0),
-            // Score Rings
-            new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.25),
-            // Score Rings
-            // Drop Mogo
+        //     // Section 3
+        //     new AutoDriveStep(chassis, wheelOdom, 14.0),
+        //     new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.75),
+        //     new AutoDriveStep(chassis, wheelOdom, -34.0),
+        //     // Pickup Mogo
+        //     // Score Ring
+        //     new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.75),
+        //     new AutoDriveStep(chassis, wheelOdom, 34.0),
+        //     // Score Rings
+        //     new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.25),
+        //     // Score Rings
+        //     // Drop Mogo
 
-            // Section 4
-            new AutoDriveStep(chassis, wheelOdom, 34.0),
-            new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.75),
-            new AutoDriveStep(chassis, wheelOdom, -33.0),
-            // Pickup Mogo
-            new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.5),
-            new AutoDriveStep(chassis, wheelOdom, 24.0),
-            // Score Rings
-            new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.75),
-            new AutoDriveStep(chassis, wheelOdom, 32.0),
-            // Score Rings
-            new AutoRotateToStep(chassis, wheelOdom, 0),
-            new AutoDriveStep(chassis, wheelOdom, 23.0),
-            // Score Rings
-            new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.75),
-            new AutoDriveStep(chassis, wheelOdom, -16.0),
-            // Drop Mogo
-            new AutoDriveStep(chassis, wheelOdom, 16.0),
-        });
+        //     // Section 4
+        //     new AutoDriveStep(chassis, wheelOdom, 34.0),
+        //     new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.75),
+        //     new AutoDriveStep(chassis, wheelOdom, -33.0),
+        //     // Pickup Mogo
+        //     new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.5),
+        //     new AutoDriveStep(chassis, wheelOdom, 24.0),
+        //     // Score Rings
+        //     new AutoRotateToStep(chassis, wheelOdom, M_PI * -0.75),
+        //     new AutoDriveStep(chassis, wheelOdom, 32.0),
+        //     // Score Rings
+        //     new AutoRotateToStep(chassis, wheelOdom, 0),
+        //     new AutoDriveStep(chassis, wheelOdom, 23.0),
+        //     // Score Rings
+        //     new AutoRotateToStep(chassis, wheelOdom, M_PI * 0.75),
+        //     new AutoDriveStep(chassis, wheelOdom, -16.0),
+        //     // Drop Mogo
+        //     new AutoDriveStep(chassis, wheelOdom, 16.0),
+        // });
 
         // Debug
         NetworkService &networkService = NetworkService::getInstance();
         NetworkRobotState networkRobotState = NetworkRobotState();
-        NetworkOdom networkOdom = NetworkOdom("WheelOdom", wheelOdom);
+        // NetworkOdom networkOdom = NetworkOdom("WheelOdom", wheelOdom);
     };
 }

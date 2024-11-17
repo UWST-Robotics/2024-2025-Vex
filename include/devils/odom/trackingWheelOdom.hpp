@@ -62,9 +62,6 @@ namespace devils
             // Update X, Y, and Rotation
             currentPose.x += deltaX;
             currentPose.y += deltaY;
-
-            // Update IMU
-            _updateIMU();
         }
 
         /**
@@ -77,28 +74,6 @@ namespace devils
             double vertical = verticalSensor.getAngle() / (M_PI * 2);
             double horizontal = horizontalSensor.getAngle() / (M_PI * 2);
             update(vertical, horizontal);
-        }
-
-        /**
-         * Updates the rotation from an IMU specified in `useIMU`.
-         */
-        void _updateIMU()
-        {
-            if (imu == nullptr)
-                return;
-
-            double imuHeading = imu->getHeading();
-            if (imuHeading != PROS_ERR_F)
-                currentPose.rotation = imuHeading;
-        }
-
-        /**
-         * Enables the IMU for the odometry.
-         * @param imu The IMU to use.
-         */
-        void useIMU(IMU &imu)
-        {
-            this->imu = &imu;
         }
 
         /**
@@ -116,8 +91,6 @@ namespace devils
         void setPose(Pose &pose) override
         {
             currentPose = pose;
-            if (imu != nullptr)
-                imu->setHeading(pose.rotation);
         }
 
     private:
@@ -130,8 +103,5 @@ namespace devils
         double lastRight = 0;
         double lastVertical = 0;
         double lastHorizontal = 0;
-
-        // IMU
-        IMU *imu = nullptr;
     };
 }

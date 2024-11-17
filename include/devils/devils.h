@@ -25,13 +25,6 @@
 #include "odom/complementaryFilterOdom.hpp"
 #include "odom/trackingWheelOdom.hpp"
 #include "odom/differentialWheelOdom.hpp"
-#include "odom/transformOdom.hpp"
-
-// Path
-#include "path/pathGenerator.hpp"
-#include "path/pathFinder.hpp"
-#include "path/occupancyGrid.hpp"
-#include "path/occupancyFileReader.hpp"
 
 // Geometry
 #include "geometry/perspectiveFactory.hpp"
@@ -44,7 +37,6 @@
 
 // Utils
 #include "utils/joystickCurve.hpp"
-#include "utils/pid.hpp"
 #include "utils/eventTimer.hpp"
 
 // Network
