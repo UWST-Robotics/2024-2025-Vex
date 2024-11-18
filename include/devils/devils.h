@@ -40,11 +40,25 @@
 #include "utils/joystickCurve.hpp"
 #include "utils/eventTimer.hpp"
 
+// Path
+#include "path/path.hpp"
+#include "path/linearPath.hpp"
+#include "path/splinePath.hpp"
+#include "path/structs/splinePose.hpp"
+#include "path/autoDevilDeserializer.hpp"
+
+// Trajectory
+#include "trajectory/trajectory.hpp"
+#include "trajectory/trajectoryGenerator.hpp"
+#include "trajectory/structs/trajectoryConstraints.hpp"
+#include "trajectory/structs/trajectoryState.hpp"
+
 // Network
 #include "nt/networkTables.hpp"
 #include "nt/ntService.hpp"
+#include "nt/ntObjectBase.hpp"
 #include "nt/objects/ntOdom.hpp"
-#include "nt/objects/ntRobot.hpp"
+#include "nt/objects/ntPath.hpp"
 #include "nt/objects/ntHardware.hpp"
 
 // AutoSteps

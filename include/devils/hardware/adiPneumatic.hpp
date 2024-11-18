@@ -74,7 +74,7 @@ namespace devils
     protected:
         void serializeHardware(std::string &ntPrefix) override
         {
-            NetworkTables::UpdateValue(ntPrefix + "/isExtended", isExtended);
+            NetworkTables::updateValue(ntPrefix + "/isExtended", isExtended);
         }
 
         void checkHealth() override

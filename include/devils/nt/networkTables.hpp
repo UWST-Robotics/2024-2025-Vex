@@ -17,10 +17,10 @@ namespace devils
          * Resets all values in the network table.
          * Should be called at the start of runtime.
          */
-        static void Reset()
+        static void reset()
         {
             // Clear the cache
-            GetCache().clear();
+            getCache().clear();
 
             // Send the reset message over serial
             printf("__NTRESET__\n");
@@ -29,7 +29,7 @@ namespace devils
         /**
          * Sends a heartbeat message to the network table.
          */
-        static void SendHeartbeat()
+        static void sendHeartbeat()
         {
             // Send the heartbeat message over serial
             printf("__NTHEARTBEAT__\n");
@@ -40,10 +40,10 @@ namespace devils
          * @param key The key to update including the full path. (e.g. "/devils/robot/position/x")
          * @param value The value to update.
          */
-        static void UpdateValue(std::string key, std::string value)
+        static void updateValue(std::string key, std::string value)
         {
             // Check if the value has changed
-            NetworkTableCache &networkTableCache = GetCache();
+            NetworkTableCache &networkTableCache = getCache();
             if (networkTableCache[key] == value)
                 return;
 
@@ -59,9 +59,9 @@ namespace devils
          * @param key The key to update including the full path. (e.g. "/devils/robot/position/x")
          * @param value The value to update.
          */
-        static void UpdateValue(std::string key, double value)
+        static void updateValue(std::string key, double value)
         {
-            UpdateValue(key, std::to_string(value));
+            updateValue(key, std::to_string(value));
         }
 
         /**
@@ -69,9 +69,9 @@ namespace devils
          * @param key The key to update including the full path. (e.g. "/devils/robot/position/x")
          * @param value The value to update.
          */
-        static void UpdateValue(std::string key, int value)
+        static void updateValue(std::string key, int value)
         {
-            UpdateValue(key, std::to_string(value));
+            updateValue(key, std::to_string(value));
         }
 
         /**
@@ -79,16 +79,16 @@ namespace devils
          * @param key The key to update including the full path. (e.g. "/devils/robot/position/x")
          * @param value The value to update.
          */
-        static void UpdateValue(std::string key, bool value)
+        static void updateValue(std::string key, bool value)
         {
-            UpdateValue(key, value ? "true" : "false");
+            updateValue(key, value ? "true" : "false");
         }
 
         /**
          * Gets the network table cache.
          * @return The network table cache.
          */
-        static NetworkTableCache &GetCache()
+        static NetworkTableCache &getCache()
         {
             static NetworkTableCache networkTableCache;
             return networkTableCache;

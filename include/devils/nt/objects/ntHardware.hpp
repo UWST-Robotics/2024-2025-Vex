@@ -27,9 +27,9 @@ namespace devils
             checkHealth();
 
             // Update network table
-            NetworkTables::UpdateValue(ntPrefix + "/name", name);
-            NetworkTables::UpdateValue(ntPrefix + "/type", type);
-            NetworkTables::UpdateValue(ntPrefix + "/port", std::to_string(port));
+            NetworkTables::updateValue(ntPrefix + "/name", name);
+            NetworkTables::updateValue(ntPrefix + "/type", type);
+            NetworkTables::updateValue(ntPrefix + "/port", std::to_string(port));
 
             // Serialize hardware
             serializeHardware(ntPrefix);
@@ -46,7 +46,7 @@ namespace devils
         void reportFault(std::string fault)
         {
             isFaulted = true;
-            NetworkTables::UpdateValue(ntPrefix + "/faults", fault);
+            NetworkTables::updateValue(ntPrefix + "/faults", fault);
             if (LOGGING_ENABLED)
                 Logger::error(name + ": " + fault);
         }
@@ -57,7 +57,7 @@ namespace devils
         void clearFaults()
         {
             isFaulted = false;
-            NetworkTables::UpdateValue(ntPrefix + "/faults", "");
+            NetworkTables::updateValue(ntPrefix + "/faults", "");
         }
 
         /**

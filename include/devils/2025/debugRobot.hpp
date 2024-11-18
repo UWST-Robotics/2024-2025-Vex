@@ -15,7 +15,8 @@ namespace devils
          */
         DebugRobot()
         {
-            NetworkTables::Reset();
+            // Reset Network Tables
+            NetworkTables::reset();
             networkOdom.setSize(18.0, 18.0);
         }
 
@@ -42,8 +43,8 @@ namespace devils
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1);
                 leftX = JoystickCurve::curve(leftX, 3.0, 0.05);
 
-                NetworkTables::UpdateValue("Controls/LeftY", leftY);
-                NetworkTables::UpdateValue("Controls/LeftX", leftX);
+                NetworkTables::updateValue("Controls/LeftY", leftY);
+                NetworkTables::updateValue("Controls/LeftX", leftX);
 
                 // Move Chassis
                 chassis.move(leftY, leftX);
@@ -66,7 +67,19 @@ namespace devils
         AutoStepList autoRoutine = AutoStepList({new AutoDriveStep(chassis, chassis, 24.0),
                                                  new AutoRotateToStep(chassis, chassis, M_PI / 2.0)});
 
+        // Test Pose
+        std::vector<SplinePose> splinePoses = {
+            SplinePose(0, 0, 0, 12, 12),
+            SplinePose(24, 24, M_PI / 2.0, 12, 12),
+            SplinePose(0, 48, M_PI, 12, 12),
+            SplinePose(-24, 24, -M_PI / 2.0, 12, 12),
+            SplinePose(0, 0, 0, 12, 12)};
+
+        SplinePath path = SplinePath(splinePoses);
+        NTPath networkPath = NTPath("TestPath", path);
+
         // Additional Network Objects
         NTOdom networkOdom = NTOdom("DummyOdom", chassis);
+        // NTRobot ntRobot = NTRobot();
     };
 }

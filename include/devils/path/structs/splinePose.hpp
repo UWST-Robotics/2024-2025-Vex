@@ -1,11 +1,23 @@
 #pragma once
 
-#include "../geometry/pose.hpp"
+#include "../../geometry/pose.hpp"
 
 namespace devils
 {
     struct SplinePose : public Pose
     {
+        SplinePose() : Pose() {}
+
+        SplinePose(
+            double x,
+            double y,
+            double rotation,
+            double entryDelta,
+            double exitDelta)
+            : Pose(x, y, rotation),
+              entryDelta(entryDelta),
+              exitDelta(exitDelta) {}
+
         /// @brief Distance of anchor point in inches from the start of the spline
         double entryDelta = 0;
 
@@ -19,8 +31,8 @@ namespace devils
         Pose getEntryAnchor()
         {
             return Pose(
-                x + std::cos(rotation) * entryDelta,
-                y + std::sin(rotation) * entryDelta,
+                x + std::cos(rotation) * -entryDelta,
+                y + std::sin(rotation) * -entryDelta,
                 rotation);
         }
 

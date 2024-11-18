@@ -18,7 +18,7 @@ namespace devils
          */
         PJRobot()
         {
-            NetworkTables::Reset();
+            NetworkTables::reset();
             networkOdom.setSize(15.0, 15.0);
 
             // Initialize Subsystems

@@ -31,8 +31,8 @@ namespace devils
                 for (int o = 0; o < steps.size(); o++)
                 {
                     // Debug
-                    NetworkTables::UpdateValue("CurrentStep", o);
-                    NetworkTables::UpdateValue("CurrentLoop", i);
+                    NetworkTables::updateValue("CurrentStep", o);
+                    NetworkTables::updateValue("CurrentLoop", i);
                     steps[o]->doStep();
                 }
             }

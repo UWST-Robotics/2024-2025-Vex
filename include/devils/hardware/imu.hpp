@@ -80,7 +80,9 @@ namespace devils
                 reportFault("Get IMU heading failed");
                 return 0;
             }
-            return Units::degToRad(heading);
+
+            // Apply scale/offset
+            return Units::degToRad(heading) * headingScale + headingOffset;
         }
 
         /**
@@ -134,9 +136,17 @@ namespace devils
          */
         void setHeading(double heading)
         {
-            int32_t result = imu.set_rotation(Units::radToDeg(heading + headingOffset));
-            if (result == PROS_ERR)
-                reportFault("Set IMU heading failed");
+            headingOffset = heading - getHeading();
+        }
+
+        /**
+         * Scales the heading by a given factor.
+         * Used to fix consistent heading drift after rotation.
+         * @param scale The scale to multiply the heading by.
+         */
+        void setHeadingScale(double scale)
+        {
+            headingScale = scale;
         }
 
         /**
@@ -154,7 +164,7 @@ namespace devils
          */
         void waitUntilCalibrated()
         {
-            while (imu.is_calibrating())
+            while (imu.is_calibrating() && imu.is_installed())
                 pros::delay(20);
         }
 
@@ -163,13 +173,13 @@ namespace devils
         {
             auto acceleration = getAccel();
 
-            NetworkTables::UpdateValue(ntPrefix + "/heading", Units::radToDeg(getHeading()));
-            NetworkTables::UpdateValue(ntPrefix + "/pitch", Units::radToDeg(getPitch()));
-            NetworkTables::UpdateValue(ntPrefix + "/roll", Units::radToDeg(getRoll()));
-            NetworkTables::UpdateValue(ntPrefix + "/yaw", Units::radToDeg(getYaw()));
-            NetworkTables::UpdateValue(ntPrefix + "/accelX", acceleration.x);
-            NetworkTables::UpdateValue(ntPrefix + "/accelY", acceleration.y);
-            NetworkTables::UpdateValue(ntPrefix + "/accelZ", acceleration.z);
+            NetworkTables::updateValue(ntPrefix + "/heading", Units::radToDeg(getHeading()));
+            NetworkTables::updateValue(ntPrefix + "/pitch", Units::radToDeg(getPitch()));
+            NetworkTables::updateValue(ntPrefix + "/roll", Units::radToDeg(getRoll()));
+            NetworkTables::updateValue(ntPrefix + "/yaw", Units::radToDeg(getYaw()));
+            NetworkTables::updateValue(ntPrefix + "/accelX", acceleration.x);
+            NetworkTables::updateValue(ntPrefix + "/accelY", acceleration.y);
+            NetworkTables::updateValue(ntPrefix + "/accelZ", acceleration.z);
         }
 
         void checkHealth() override
@@ -194,6 +204,7 @@ namespace devils
         }
 
     private:
+        double headingScale = 1;
         double headingOffset = 0;
         bool isCalibrating = false;
         bool isErrored = false;

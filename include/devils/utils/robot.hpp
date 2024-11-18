@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../nt/objects/ntRobot.hpp"
 #include "../nt/ntService.hpp"
 
 namespace devils
@@ -40,8 +39,5 @@ namespace devils
 
         /// @brief Network Table Service
         NTService &networkService = NTService::getInstance();
-
-        /// @brief The network table object for the base robot
-        NTRobot ntRobot = NTRobot();
     };
 }

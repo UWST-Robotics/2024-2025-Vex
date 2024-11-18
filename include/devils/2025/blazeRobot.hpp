@@ -19,7 +19,7 @@ namespace devils
         BlazeRobot()
         {
             // Reset Network Tables
-            NetworkTables::Reset();
+            NetworkTables::reset();
             networkOdom.setSize(15.0, 15.0);
 
             imu.calibrate();
