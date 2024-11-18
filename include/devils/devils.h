@@ -25,6 +25,7 @@
 #include "odom/complementaryFilterOdom.hpp"
 #include "odom/trackingWheelOdom.hpp"
 #include "odom/differentialWheelOdom.hpp"
+#include "odom/tankChassisOdom.hpp"
 
 // Geometry
 #include "geometry/perspectiveFactory.hpp"

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../nt/objects/ntRobot.hpp"
+#include "../nt/ntService.hpp"
 
 namespace devils
 {
@@ -38,7 +39,7 @@ namespace devils
         pros::Controller partnerController = pros::Controller(pros::E_CONTROLLER_PARTNER);
 
         /// @brief Network Table Service
-        NetworkService &networkService = NetworkService::getInstance();
+        NTService &networkService = NTService::getInstance();
 
         /// @brief The network table object for the base robot
         NTRobot ntRobot = NTRobot();

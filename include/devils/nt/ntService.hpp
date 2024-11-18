@@ -10,16 +10,16 @@ namespace devils
     /**
      * Singleton service for managing network objects.
      */
-    class NetworkService : public AutoRunnable
+    class NTService : public AutoRunnable
     {
     public:
         /**
          * Gets the singleton instance of the network service.
          * @return The singleton instance of the network service.
          */
-        static NetworkService &getInstance()
+        static NTService &getInstance()
         {
-            static NetworkService instance;
+            static NTService instance;
             return instance;
         }
 
@@ -37,11 +37,11 @@ namespace devils
 
     private:
         // Singleton Constructor
-        NetworkService() : AutoRunnable() {}
+        NTService() : AutoRunnable() {}
 
     public:
         // Prevent copying
-        NetworkService(NetworkService const &) = delete;
-        void operator=(NetworkService const &) = delete;
+        NTService(NTService const &) = delete;
+        void operator=(NTService const &) = delete;
     };
 }
