@@ -67,8 +67,6 @@ namespace devils
                                                  new AutoRotateToStep(chassis, chassis, M_PI / 2.0)});
 
         // Additional Network Objects
-        NetworkService &networkService = NetworkService::getInstance();
-        NetworkRobotState networkRobotState = NetworkRobotState();
-        NetworkOdom networkOdom = NetworkOdom("DummyOdom", chassis);
+        NTOdom networkOdom = NTOdom("DummyOdom", chassis);
     };
 }

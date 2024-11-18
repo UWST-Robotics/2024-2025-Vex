@@ -1,15 +1,17 @@
 #pragma once
-#include "networkObject.hpp"
-#include "../odom/odomSource.hpp"
-#include "../network/networkTables.hpp"
-#include "../geometry/units.hpp"
+
+#include "../ntObjectBase.hpp"
+#include "../networkTables.hpp"
+#include "../../odom/odomSource.hpp"
+#include "../../geometry/units.hpp"
+#include "../../geometry/vector3.hpp"
 
 namespace devils
 {
-    class NetworkOdom : private INetworkObject
+    class NTOdom : private NTObjectBase
     {
     public:
-        NetworkOdom(std::string name, OdomSource &odomSource)
+        NTOdom(std::string name, OdomSource &odomSource)
             : name(name),
               odomSource(odomSource)
         {

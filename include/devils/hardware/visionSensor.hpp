@@ -5,7 +5,7 @@
 #include "../utils/logger.hpp"
 #include "../geometry/perspective.hpp"
 #include "structs/visionObject.hpp"
-#include "../network/networkObject.hpp"
+#include "../nt/objects/ntHardware.hpp"
 #include <string>
 
 namespace devils
@@ -13,7 +13,7 @@ namespace devils
     /**
      * Represents a vision sensor object. All events are logged.
      */
-    class VisionSensor : private INetworkObject
+    class VisionSensor : private NTHardware
     {
     public:
         // Thank you James Pearman for these measurements
@@ -29,53 +29,11 @@ namespace devils
          * @param port The port of the motor (from 1 to 21)
          */
         VisionSensor(std::string name, uint8_t port)
-            : name(name),
+            : NTHardware(name, "VisionSensor", port),
               sensor(port, pros::E_VISION_ZERO_CENTER)
         {
-            if (errno != 0 && LOGGING_ENABLED)
-                Logger::error(name + ": port is invalid");
-        }
-
-        /**
-         * Gets any objects detected by the vision sensor.
-         * @return The objects detected by the vision sensor
-         */
-        std::vector<VisionObject> getObjects()
-        {
-            std::vector<VisionObject> objects = {};
-
-            // Get object count
-            int objectCount = sensor.get_object_count();
-            if (objectCount == 0)
-                return objects;
-
-            // Handle Errors
-            if (objectCount == PROS_ERR)
-            {
-                if (LOGGING_ENABLED)
-                    Logger::error(name + ": failed to get object count");
-                return objects;
-            }
-
-            // Get objects
-            for (int i = 0; i < objectCount; i++)
-            {
-                // Get Object
-                pros::vision_object_s_t object = sensor.get_by_size(i);
-                if (object.signature == 0)
-                    continue;
-
-                // Filter out small objects
-                if (object.width * object.height < MIN_OBJECT_AREA)
-                    continue;
-
-                // Create Display Object
-                short x = object.x_middle_coord;
-                short y = object.y_middle_coord;
-                objects.push_back(VisionObject((double)x, (double)y, (double)(object.width * object.height)));
-            }
-
-            return objects;
+            if (errno != 0)
+                reportFault("Invalid port");
         }
 
         /**
@@ -96,8 +54,8 @@ namespace devils
         void setLEDColor(int32_t color)
         {
             auto status = sensor.set_led(color);
-            if (status == PROS_ERR && LOGGING_ENABLED)
-                Logger::error(name + ": failed to set LED color");
+            if (status == PROS_ERR)
+                reportFault("Failed to set LED color");
         }
 
         /**
@@ -106,30 +64,22 @@ namespace devils
         void resetLEDColor()
         {
             auto status = sensor.clear_led();
-            if (status == PROS_ERR && LOGGING_ENABLED)
-                Logger::error(name + ": failed to reset LED color");
+            if (status == PROS_ERR)
+                reportFault("Failed to reset LED color");
         }
 
-        void serialize() override
+    protected:
+        void serializeHardware(std::string &ntPrefix) override
         {
-            // Get Prefix
-            std::string networkTableKey = NetworkTables::GetHardwareKey("vex", sensor.get_port());
+            // TODO: Serialize Hardware
+        }
 
-            // Update Network Table
-            NetworkTables::UpdateValue(networkTableKey + "/name", name);
-            NetworkTables::UpdateValue(networkTableKey + "/type", "VisionSensor");
-
-            if (!sensor.is_installed())
-                NetworkTables::UpdateValue(networkTableKey + "/faults", "Disconnected");
-            else
-                NetworkTables::UpdateValue(networkTableKey + "/faults", "");
+        void checkHealth() override
+        {
+            clearFaults();
         }
 
     private:
-        static constexpr bool LOGGING_ENABLED = false;
-        static constexpr double MIN_OBJECT_AREA = 3 * 3; // px^2
-
-        std::string name;
         pros::Vision sensor;
     };
 }

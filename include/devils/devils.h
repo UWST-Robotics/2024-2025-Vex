@@ -17,8 +17,8 @@
 #include "hardware/imu.hpp"
 #include "hardware/opticalSensor.hpp"
 #include "hardware/visionSensor.hpp"
-#include "hardware/scuffPneumatic.hpp"
-#include "hardware/scuffPneumaticGroup.hpp"
+#include "hardware/adiPneumatic.hpp"
+#include "hardware/adiPneumaticGroup.hpp"
 
 // Odom
 #include "odom/odomSource.hpp"
@@ -40,10 +40,11 @@
 #include "utils/eventTimer.hpp"
 
 // Network
-#include "network/networkTables.hpp"
-#include "network/networkService.hpp"
-#include "network/networkOdom.hpp"
-#include "network/networkRobotState.hpp"
+#include "nt/networkTables.hpp"
+#include "nt/ntService.hpp"
+#include "nt/objects/ntOdom.hpp"
+#include "nt/objects/ntRobot.hpp"
+#include "nt/objects/ntHardware.hpp"
 
 // AutoSteps
 #include "autoSteps/common/autoStep.hpp"

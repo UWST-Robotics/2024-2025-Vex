@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../nt/objects/ntRobot.hpp"
+
 namespace devils
 {
     /**
@@ -34,5 +36,11 @@ namespace devils
 
         /// @brief The partner game controller.
         pros::Controller partnerController = pros::Controller(pros::E_CONTROLLER_PARTNER);
+
+        /// @brief Network Table Service
+        NetworkService &networkService = NetworkService::getInstance();
+
+        /// @brief The network table object for the base robot
+        NTRobot ntRobot = NTRobot();
     };
 }

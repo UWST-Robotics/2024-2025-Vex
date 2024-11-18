@@ -1,31 +1,32 @@
 #pragma once
+
 #include "pros/rtos.hpp"
 
 namespace devils
 {
-    class INetworkObject;
-    typedef std::vector<devils::INetworkObject *> NetworkObjectList;
+    class NTObjectBase;
+    typedef std::vector<devils::NTObjectBase *> NetworkObjectList;
 
     /**
      * Represents a netowrk object that can be serialized and sent over serial.
      */
-    class INetworkObject
+    class NTObjectBase
     {
     public:
         // Disable copy constructor
-        INetworkObject(INetworkObject const &) = delete;
+        NTObjectBase(NTObjectBase const &) = delete;
 
         // Disable assignment operator
-        INetworkObject &operator=(INetworkObject const &) = delete;
+        NTObjectBase &operator=(NTObjectBase const &) = delete;
 
         // Register the network object
-        INetworkObject()
+        NTObjectBase()
         {
             GetAllNetworkObjects().push_back(this);
         }
 
         // Unregister the network object
-        ~INetworkObject()
+        ~NTObjectBase()
         {
             NetworkObjectList &allNetworkObjects = GetAllNetworkObjects();
 

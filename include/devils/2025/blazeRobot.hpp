@@ -112,7 +112,7 @@ namespace devils
         static constexpr double WHEEL_BASE = 12.0;                            // in
 
         // Subsystems
-        ScuffPneumatic intakeLauncher = ScuffPneumatic("IntakeLauncher", INTAKE_LAUNCHER_PORT);
+        ADIPneumatic intakeLauncher = ADIPneumatic("IntakeLauncher", INTAKE_LAUNCHER_PORT);
         IMU imu = IMU("IMU", IMU_PORT);
         TankChassis chassis = TankChassis("Chassis", L_MOTOR_PORTS, R_MOTOR_PORTS);
         IntakeSystem intake = IntakeSystem(INTAKE_PORTS);
@@ -184,8 +184,6 @@ namespace devils
         // });
 
         // Debug
-        NetworkService &networkService = NetworkService::getInstance();
-        NetworkRobotState networkRobotState = NetworkRobotState();
         // NetworkOdom networkOdom = NetworkOdom("WheelOdom", wheelOdom);
     };
 }

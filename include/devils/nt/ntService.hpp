@@ -1,7 +1,8 @@
 #pragma once
+
 #include "../utils/runnable.hpp"
 #include <vector>
-#include "networkObject.hpp"
+#include "ntObjectBase.hpp"
 #include "networkTables.hpp"
 
 namespace devils
@@ -28,7 +29,7 @@ namespace devils
         void update() override
         {
             // Serialize all network objects
-            NetworkObjectList &allNetworkObjects = INetworkObject::GetAllNetworkObjects();
+            NetworkObjectList &allNetworkObjects = NTObjectBase::GetAllNetworkObjects();
             for (int i = 0; i < allNetworkObjects.size(); i++)
                 if (allNetworkObjects[i]->isDirty())
                     allNetworkObjects[i]->runSerialization();

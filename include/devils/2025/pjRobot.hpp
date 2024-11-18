@@ -122,7 +122,7 @@ namespace devils
         ConveyorSystem conveyor = ConveyorSystem(CONVEYOR_PORTS, GRABBER_PORT);
         IMU imu = IMU("IMU", IMU_PORT);
         OpticalSensor opticalSensor = OpticalSensor("OpticalSensor", OPTICAL_SENSOR_PORT);
-        ScuffPneumatic intakeLauncher = ScuffPneumatic("IntakeLauncher", INTAKE_LAUNCHER_PORT);
+        ADIPneumatic intakeLauncher = ADIPneumatic("IntakeLauncher", INTAKE_LAUNCHER_PORT);
 
         // Autonomous
         // DifferentialWheelOdometry wheelOdom = DifferentialWheelOdometry(chassis, WHEEL_RADIUS, WHEEL_BASE);
@@ -187,8 +187,6 @@ namespace devils
         // });
 
         // Debug
-        NetworkService &networkService = NetworkService::getInstance();
-        NetworkRobotState networkRobotState = NetworkRobotState();
         // NetworkOdom networkOdom = NetworkOdom("WheelOdom", wheelOdom);
     };
 }

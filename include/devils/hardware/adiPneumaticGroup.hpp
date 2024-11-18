@@ -1,27 +1,42 @@
 #pragma once
 #include <string>
 #include "motor.hpp"
-#include "scuffPneumatic.hpp"
+#include "adiPneumatic.hpp"
 
 namespace devils
 {
+    typedef std::vector<std::shared_ptr<ADIPneumatic>> ADIPneumaticList;
+
     /**
-     * Represents a set of `ScuffPneumatic`s grouped together.
+     * Represents a set of `ADIPneumatic`s grouped together.
      */
-    class ScuffPneumaticGroup
+    class ADIPneumaticGroup
     {
     public:
         /**
-         * Creates a new scuff pneumatic group.
+         * Creates a new ADI pneumatic group.
          * @param name The name of the pneumatic group (for logging purposes)
          * @param ports The ADI ports of the pneumatics in the group
          */
-        ScuffPneumaticGroup(std::string name, std::initializer_list<uint8_t> ports)
-            : name(name), pneumatics()
+        ADIPneumaticGroup(
+            std::string name,
+            std::initializer_list<uint8_t> ports)
+            : name(name),
+              pneumatics()
         {
             pneumatics.reserve(ports.size());
             for (int8_t port : ports)
-                pneumatics.push_back(std::make_shared<ScuffPneumatic>(_getPneumaticName(port), port));
+                pneumatics.push_back(std::make_shared<ADIPneumatic>(getPneumaticName(port), port));
+        }
+
+        /**
+         * Sets the state of all the pneumatics in the group.
+         * @param isExtended True to extend the pneumatics, false to retract them.
+         */
+        void setExtended(bool isExtended)
+        {
+            for (auto pneumatic : pneumatics)
+                pneumatic->setExtended(isExtended);
         }
 
         /**
@@ -29,8 +44,7 @@ namespace devils
          */
         void extend()
         {
-            for (auto pneumatic : pneumatics)
-                pneumatic->extend();
+            setExtended(true);
         }
 
         /**
@@ -38,8 +52,7 @@ namespace devils
          */
         void retract()
         {
-            for (auto pneumatic : pneumatics)
-                pneumatic->retract();
+            setExtended(false);
         }
 
         /**
@@ -58,21 +71,23 @@ namespace devils
          * Gets the pneumatics in the motor group.
          * @return The pneumatics in the motor group.
          */
-        std::vector<std::shared_ptr<ScuffPneumatic>> &getPneumatics()
+        ADIPneumaticList &getPneumatics()
         {
             return pneumatics;
         }
 
+    private:
         /**
          * Gets the name of each pneumatic in the pneumatic group.
+         * @param port The port of the pneumatic
+         * @return The name of the pneumatic
          */
-        std::string _getPneumaticName(uint32_t port)
+        std::string getPneumaticName(uint32_t port)
         {
             return name + "_" + std::to_string(port);
         }
 
-    private:
         const std::string name;
-        std::vector<std::shared_ptr<ScuffPneumatic>> pneumatics;
+        ADIPneumaticList pneumatics;
     };
 }

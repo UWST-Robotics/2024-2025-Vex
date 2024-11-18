@@ -1,16 +1,16 @@
 #pragma once
-#include "networkObject.hpp"
-#include "../odom/odomSource.hpp"
-#include "../network/networkTables.hpp"
-#include "pros/misc.hpp"
-#include "devils/sdkExtensions.h"
+
+#include "../../sdkExtensions.h"
+#include "../../odom/odomSource.hpp"
+#include "../ntObjectBase.hpp"
+#include "../networkTables.hpp"
 
 namespace devils
 {
-    class NetworkRobotState : private INetworkObject
+    class NTRobot : private NTObjectBase
     {
     public:
-        NetworkRobotState()
+        NTRobot()
         {
             setSerializationRate(500);
             systemVersion = getSystemVersion();
@@ -29,7 +29,6 @@ namespace devils
             NetworkTables::UpdateValue(networkTableKey + "/type", "VEX V5");
 
             // Version
-            NetworkTables::UpdateValue(networkTableKey + "/prosVersion", PROS_VERSION_STRING);
             NetworkTables::UpdateValue(networkTableKey + "/systemVersion", systemVersion);
             NetworkTables::UpdateValue(networkTableKey + "/sdkVersion", sdkVersion);
 

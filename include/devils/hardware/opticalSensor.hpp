@@ -4,8 +4,7 @@
 #include "pros/error.h"
 #include "../utils/logger.hpp"
 #include "../geometry/units.hpp"
-#include "../network/networkObject.hpp"
-#include "../network/networkTables.hpp"
+#include "../nt/objects/ntHardware.hpp"
 #include <string>
 
 namespace devils
@@ -13,7 +12,7 @@ namespace devils
     /**
      * Represents a V5 optical sensor unit.
      */
-    class OpticalSensor : private INetworkObject
+    class OpticalSensor : private NTHardware
     {
     public:
         /**
@@ -21,12 +20,12 @@ namespace devils
          * @param name The name of the Optical Sensor (for logging purposes)
          * @param port The port of the Optical Sensor (from 1 to 21)
          */
-        OpticalSensor(std::string name, uint8_t port)
-            : name(name),
+        OpticalSensor(const std::string name, const uint8_t port)
+            : NTHardware(name, "OpticalSensor", port),
               sensor(port)
         {
-            if (errno != 0 && LOGGING_ENABLED)
-                Logger::error(name + ": optical sensor port is invalid");
+            if (errno != 0)
+                reportFault("Invalid port");
         }
 
         /**
@@ -36,9 +35,12 @@ namespace devils
         double getProximity()
         {
             std::int32_t proximity = sensor.get_proximity();
-            if (proximity == PROS_ERR && LOGGING_ENABLED)
-                Logger::error(name + ": optical sensor get proximity failed");
-            return proximity == PROS_ERR ? PROS_ERR : (proximity / 255.0);
+            if (proximity == PROS_ERR)
+            {
+                reportFault("Failed to retrieve proximity");
+                return 0;
+            }
+            return proximity / 255.0;
         }
 
         /**
@@ -48,9 +50,12 @@ namespace devils
         double getHue()
         {
             std::int32_t hue = sensor.get_hue();
-            if (hue == PROS_ERR && LOGGING_ENABLED)
-                Logger::error(name + ": optical sensor get hue failed");
-            return hue == PROS_ERR ? PROS_ERR : hue;
+            if (hue == PROS_ERR)
+            {
+                reportFault("Failed to retrieve hue");
+                return 0;
+            }
+            return hue;
         }
 
         /**
@@ -60,9 +65,12 @@ namespace devils
         double getSaturation()
         {
             std::int32_t saturation = sensor.get_saturation();
-            if (saturation == PROS_ERR && LOGGING_ENABLED)
-                Logger::error(name + ": optical sensor get saturation failed");
-            return saturation == PROS_ERR ? PROS_ERR : saturation;
+            if (saturation == PROS_ERR)
+            {
+                reportFault("Failed to retrieve saturation");
+                return 0;
+            }
+            return saturation;
         }
 
         /**
@@ -72,34 +80,32 @@ namespace devils
         double getBrightness()
         {
             std::int32_t brightness = sensor.get_brightness();
-            if (brightness == PROS_ERR && LOGGING_ENABLED)
-                Logger::error(name + ": optical sensor get brightness failed");
-            return brightness == PROS_ERR ? PROS_ERR : brightness;
+            if (brightness == PROS_ERR)
+            {
+                reportFault("Failed to retrieve brightness");
+                return 0;
+            }
+            return brightness;
         }
 
-        void serialize() override
+    protected:
+        void serializeHardware(std::string &ntPrefix) override
         {
-            // Get Prefix
-            std::string networkTableKey = NetworkTables::GetHardwareKey("vex", sensor.get_port());
+            NetworkTables::UpdateValue(ntPrefix + "/proximity", getProximity() * 100);
+            NetworkTables::UpdateValue(ntPrefix + "/colorHue", getHue());
+            NetworkTables::UpdateValue(ntPrefix + "/colorSaturation", getSaturation() * 100);
+            NetworkTables::UpdateValue(ntPrefix + "/colorBrightness", getBrightness() * 100);
+        }
 
-            // Update Network Table
-            NetworkTables::UpdateValue(networkTableKey + "/name", name);
-            NetworkTables::UpdateValue(networkTableKey + "/type", "OpticalSensor");
-            NetworkTables::UpdateValue(networkTableKey + "/proximity", std::to_string(getProximity() * 100));
-            NetworkTables::UpdateValue(networkTableKey + "/colorHue", std::to_string(getHue()));
-            NetworkTables::UpdateValue(networkTableKey + "/colorSaturation", std::to_string(getSaturation() * 100));
-            NetworkTables::UpdateValue(networkTableKey + "/colorBrightness", std::to_string(getBrightness() * 100));
-
+        void checkHealth() override
+        {
             if (!sensor.is_installed())
-                NetworkTables::UpdateValue(networkTableKey + "/faults", "Disconnected");
+                reportFault("Disconnected");
             else
-                NetworkTables::UpdateValue(networkTableKey + "/faults", "");
+                clearFaults();
         }
 
     private:
-        static constexpr bool LOGGING_ENABLED = false;
-
-        std::string name;
         pros::Optical sensor;
     };
 }

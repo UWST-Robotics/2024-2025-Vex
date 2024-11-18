@@ -15,7 +15,7 @@ namespace devils
 
         void doStep() override
         {
-            conveyor.tryMove(intakeSpeed);
+            conveyor.runAutomatic();
         }
 
     private:

@@ -93,7 +93,7 @@ namespace devils
         static constexpr double MOGO_CONVEYOR_SPEED = 1.0;
 
         SmartMotorGroup conveyorMotors;
-        ScuffPneumatic grabberPneumatic;
+        ADIPneumatic grabberPneumatic;
         OpticalSensor *sensor = nullptr;
     };
 }

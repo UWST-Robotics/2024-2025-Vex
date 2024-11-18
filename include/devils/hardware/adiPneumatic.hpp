@@ -1,7 +1,7 @@
 #pragma once
 #include "pros/adi.hpp"
 #include "../utils/logger.hpp"
-#include "../network/networkObject.hpp"
+#include "../nt/objects/ntHardware.hpp"
 #include <string>
 
 namespace devils
@@ -10,22 +10,21 @@ namespace devils
      * Represents a non-V5 pneumatic valve controlled by ADI ports.
      * See https://github.com/msoe-vex/pcb-design/tree/main/VEX%20Solenoid%20Driver%20V2%20Complete
      */
-    class ScuffPneumatic : private INetworkObject
+    class ADIPneumatic : private NTHardware
     {
     public:
         /**
-         * Creates a new scuff pneumatic.
+         * Creates a new pneumatic controlled by an ADI port.
          * @param name The name of the pneumatic (for logging purposes)
          * @param port The ADI port of the motor controller (from 1 to 8)
          */
-        ScuffPneumatic(std::string name, int8_t port)
-            : port(port),
-              name(name),
+        ADIPneumatic(std::string name, int8_t port)
+            : NTHardware(name, "ADIPneumatic", port),
               controller(abs(port))
         {
             isInverted = port < 0;
-            if (errno != 0 && LOGGING_ENABLED)
-                Logger::error(name + ": adi port is invalid");
+            if (errno != 0)
+                reportFault("ADI port is invalid");
         }
 
         /**
@@ -43,8 +42,8 @@ namespace devils
             int32_t status = controller.set_value(isExtended);
 
             // Check for errors
-            if (status != 1 && LOGGING_ENABLED)
-                Logger::error(name + ": pneumatic failed");
+            if (status != 1)
+                reportFault("Set ADI value failed");
         }
 
         /**
@@ -72,23 +71,19 @@ namespace devils
             return isExtended;
         }
 
-        void serialize() override
+    protected:
+        void serializeHardware(std::string &ntPrefix) override
         {
-            // Get Prefix
-            std::string networkTableKey = NetworkTables::GetHardwareKey("adi", port);
+            NetworkTables::UpdateValue(ntPrefix + "/isExtended", isExtended);
+        }
 
-            // Update Network Table
-            NetworkTables::UpdateValue(networkTableKey + "/name", name);
-            NetworkTables::UpdateValue(networkTableKey + "/type", "ScuffPneumatic");
-            NetworkTables::UpdateValue(networkTableKey + "/isExtended", std::to_string(isExtended));
+        void checkHealth() override
+        {
+            clearFaults();
         }
 
     private:
-        static constexpr bool LOGGING_ENABLED = false;
-
-        uint8_t port;
-        std::string name;
-        pros::adi::DigitalOut controller;
+        const pros::adi::DigitalOut controller;
         bool isExtended = false;
         bool isInverted = false;
     };

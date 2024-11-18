@@ -1,4 +1,5 @@
 #pragma once
+
 #include <map>
 #include <string>
 
@@ -35,7 +36,7 @@ namespace devils
         }
 
         /**
-         * Sends a message to the to update a value.
+         * Sends a message to the to update a string value.
          * @param key The key to update including the full path. (e.g. "/devils/robot/position/x")
          * @param value The value to update.
          */
@@ -54,7 +55,7 @@ namespace devils
         }
 
         /**
-         * Sends a message to the to update a value.
+         * Sends a message to the to update a numeric value.
          * @param key The key to update including the full path. (e.g. "/devils/robot/position/x")
          * @param value The value to update.
          */
@@ -64,15 +65,25 @@ namespace devils
         }
 
         /**
-         * Gets the network table key of a hardware device.
-         * @param portType The type of the port (e.g. "adi", "vex", etc.)
-         * @param port The port index of the hardware.
-         * @return The network table key for the hardware.
+         * Sends a message to the to update a numeric value.
+         * @param key The key to update including the full path. (e.g. "/devils/robot/position/x")
+         * @param value The value to update.
          */
-        static std::string GetHardwareKey(std::string portType, int8_t port)
+        static void UpdateValue(std::string key, int value)
         {
-            return "_hardware/" + portType + std::to_string(abs(port));
+            UpdateValue(key, std::to_string(value));
         }
+
+        /**
+         * Sends a message to the to update a boolean value.
+         * @param key The key to update including the full path. (e.g. "/devils/robot/position/x")
+         * @param value The value to update.
+         */
+        static void UpdateValue(std::string key, bool value)
+        {
+            UpdateValue(key, value ? "true" : "false");
+        }
+
         /**
          * Gets the network table cache.
          * @return The network table cache.

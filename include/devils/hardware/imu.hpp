@@ -1,8 +1,9 @@
 #pragma once
+
 #include "pros/imu.hpp"
 #include "pros/error.h"
 #include "../utils/logger.hpp"
-#include "../network/networkObject.hpp"
+#include "../nt/objects/ntHardware.hpp"
 #include "../geometry/units.hpp"
 #include "../geometry/vector3.hpp"
 #include "../odom/odomSource.hpp"
@@ -13,22 +14,21 @@ namespace devils
     /**
      * Represents a V5 inertial measurement unit.
      */
-    class IMU : public OdomSource, private INetworkObject
+    class IMU : public OdomSource, private NTHardware
     {
     public:
         /**
          * Creates a new IMU.
+         * Remember to calibrate the IMU before use.
          * @param name The name of the IMU (for logging purposes)
          * @param port The port of the IMU (from 1 to 21)
          */
         IMU(std::string name, uint8_t port)
-            : name(name),
+            : NTHardware(name, "IMU", port),
               imu(port)
         {
-            if (CALIBRATE_ON_START)
-                imu.reset(true);
-            if (errno != 0 && LOGGING_ENABLED)
-                Logger::error(name + ": imu port is invalid");
+            if (errno != 0)
+                reportFault("Invalid port");
         }
 
         /**
@@ -57,9 +57,9 @@ namespace devils
         Vector3 getAccel()
         {
             auto accel = imu.get_accel();
-            if (accel.x == PROS_ERR_F && LOGGING_ENABLED)
+            if (accel.x == PROS_ERR_F)
             {
-                Logger::error(name + ": imu get accel failed");
+                reportFault("Get IMU acceleration failed");
                 return Vector3(0, 0, 0);
             }
             return Vector3(
@@ -70,50 +70,62 @@ namespace devils
 
         /**
          * Gets the current heading of the IMU in radians, unbounded.
-         * @return The current heading of the IMU in radians or `PROS_ERR_F` if the operation failed.
+         * @return The current heading of the IMU in radians or 0 if the operation failed.
          */
         double getHeading()
         {
             double heading = imu.get_rotation();
-            if (heading == PROS_ERR_F && LOGGING_ENABLED)
-                Logger::error(name + ": imu get heading failed");
-            return heading == PROS_ERR_F ? PROS_ERR_F : Units::degToRad(heading);
+            if (heading == PROS_ERR_F)
+            {
+                reportFault("Get IMU heading failed");
+                return 0;
+            }
+            return Units::degToRad(heading);
         }
 
         /**
          * Gets the current pitch of the IMU in radians.
-         * @return The current pitch of the IMU in radians or `PROS_ERR_F` if the operation failed.
+         * @return The current pitch of the IMU in radians or 0 if the operation failed.
          */
         double getPitch()
         {
             double pitch = imu.get_pitch();
-            if (pitch == PROS_ERR_F && LOGGING_ENABLED)
-                Logger::error(name + ": imu get pitch failed");
-            return pitch == PROS_ERR_F ? PROS_ERR_F : Units::degToRad(pitch);
+            if (pitch == PROS_ERR_F)
+            {
+                reportFault("Get IMU pitch failed");
+                return 0;
+            }
+            return Units::degToRad(pitch);
         }
 
         /**
          * Gets the current roll of the IMU in radians.
-         * @return The current roll of the IMU in radians or `PROS_ERR_F` if the operation failed.
+         * @return The current roll of the IMU in radians or 0 if the operation failed.
          */
         double getRoll()
         {
             double roll = imu.get_roll();
-            if (roll == PROS_ERR_F && LOGGING_ENABLED)
-                Logger::error(name + ": imu get roll failed");
-            return roll == PROS_ERR_F ? PROS_ERR_F : Units::degToRad(roll);
+            if (roll == PROS_ERR_F)
+            {
+                reportFault("Get IMU roll failed");
+                return 0;
+            }
+            return Units::degToRad(roll);
         }
 
         /**
          * Gets the current yaw of the IMU in radians.
-         * @return The current yaw of the IMU in radians or `PROS_ERR_F` if the operation failed.
+         * @return The current yaw of the IMU in radians or 0 if the operation failed.
          */
         double getYaw()
         {
             double yaw = imu.get_yaw();
-            if (yaw == PROS_ERR_F && LOGGING_ENABLED)
-                Logger::error(name + ": imu get yaw failed");
-            return yaw == PROS_ERR_F ? PROS_ERR_F : Units::degToRad(yaw);
+            if (yaw == PROS_ERR_F)
+            {
+                reportFault("Get IMU yaw failed");
+                return 0;
+            }
+            return Units::degToRad(yaw);
         }
 
         /**
@@ -123,21 +135,8 @@ namespace devils
         void setHeading(double heading)
         {
             int32_t result = imu.set_rotation(Units::radToDeg(heading + headingOffset));
-            if (result == PROS_ERR && LOGGING_ENABLED)
-                Logger::error(name + ": imu set heading failed");
-        }
-
-        /**
-         * Gets the average acceleration of the IMU in Gs.
-         * @return The average acceleration of the IMU in Gs.
-         */
-        double getAverageAcceleration()
-        {
-            auto accel = imu.get_accel();
-            if (accel.x == PROS_ERR_F && LOGGING_ENABLED)
-                Logger::error(name + ": imu get accel failed");
-            double avgAcceleration = sqrt(pow(accel.x, 2) + pow(accel.y, 2) + pow(accel.z, 2));
-            return accel.x == PROS_ERR_F ? 0 : avgAcceleration;
+            if (result == PROS_ERR)
+                reportFault("Set IMU heading failed");
         }
 
         /**
@@ -159,64 +158,47 @@ namespace devils
                 pros::delay(20);
         }
 
-        void serialize() override
+    protected:
+        void serializeHardware(std::string &ntPrefix) override
         {
-            checkHealth();
+            auto acceleration = getAccel();
 
-            // Get Prefix
-            std::string networkTableKey = NetworkTables::GetHardwareKey("vex", imu.get_port());
-
-            // Update Network Table
-            NetworkTables::UpdateValue(networkTableKey + "/name", name);
-            NetworkTables::UpdateValue(networkTableKey + "/type", "IMU");
-            NetworkTables::UpdateValue(networkTableKey + "/heading", std::to_string(Units::radToDeg(getHeading())));
-            NetworkTables::UpdateValue(networkTableKey + "/pitch", std::to_string(Units::radToDeg(getPitch())));
-            NetworkTables::UpdateValue(networkTableKey + "/roll", std::to_string(Units::radToDeg(getRoll())));
-            NetworkTables::UpdateValue(networkTableKey + "/yaw", std::to_string(Units::radToDeg(getYaw())));
-            NetworkTables::UpdateValue(networkTableKey + "/accel", std::to_string(getAverageAcceleration()));
-
-            if (!isConnected)
-                NetworkTables::UpdateValue(networkTableKey + "/faults", "Disconnected");
-            else if (isCalibrating)
-                NetworkTables::UpdateValue(networkTableKey + "/faults", "Calibrating");
-            else if (isErrored)
-                NetworkTables::UpdateValue(networkTableKey + "/faults", "Unknown Error");
-            else
-                NetworkTables::UpdateValue(networkTableKey + "/faults", "");
+            NetworkTables::UpdateValue(ntPrefix + "/heading", Units::radToDeg(getHeading()));
+            NetworkTables::UpdateValue(ntPrefix + "/pitch", Units::radToDeg(getPitch()));
+            NetworkTables::UpdateValue(ntPrefix + "/roll", Units::radToDeg(getRoll()));
+            NetworkTables::UpdateValue(ntPrefix + "/yaw", Units::radToDeg(getYaw()));
+            NetworkTables::UpdateValue(ntPrefix + "/accelX", acceleration.x);
+            NetworkTables::UpdateValue(ntPrefix + "/accelY", acceleration.y);
+            NetworkTables::UpdateValue(ntPrefix + "/accelZ", acceleration.z);
         }
 
-    private:
-        /**
-         * Checks and logs the current health of the IMU.
-         */
-        void checkHealth()
+        void checkHealth() override
         {
-            // Check if IMU is Connected
-            isConnected = imu.is_installed();
-            if (!isConnected && LOGGING_ENABLED)
-                Logger::error(name + ": imu is not connected");
-
-            if (!isConnected)
-                return;
-
             // Status Check
             pros::ImuStatus imuStatus = imu.get_status();
             isCalibrating = imuStatus == pros::ImuStatus::calibrating;
             isErrored = imuStatus == pros::ImuStatus::error;
 
-            if (isErrored && LOGGING_ENABLED)
-                Logger::error(name + ": imu is in an error state");
+            // Check if IMU is Connected
+            isConnected = imu.is_installed();
+
+            // Report Fault
+            if (!isConnected)
+                reportFault("Disconnected");
+            else if (isCalibrating)
+                reportFault("Calibrating");
+            else if (isErrored)
+                reportFault("Unknown Error");
+            else
+                clearFaults();
         }
 
-        static constexpr bool CALIBRATE_ON_START = false;
-        static constexpr bool LOGGING_ENABLED = false;
-
+    private:
         double headingOffset = 0;
         bool isCalibrating = false;
         bool isErrored = false;
         bool isConnected = false;
 
-        std::string name;
         pros::IMU imu;
         Pose odomPose;
     };
