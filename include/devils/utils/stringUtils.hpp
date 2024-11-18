@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <sstream>
 
 namespace devils
 {
@@ -10,6 +11,9 @@ namespace devils
     class StringUtils
     {
     public:
+        // Private constructor to prevent instantiation
+        StringUtils() = delete;
+
         /**
          * Splits a string by a delimiter.
          * @param str The string to split.
@@ -38,22 +42,5 @@ namespace devils
             result.push_back(buffer);
             return result;
         }
-
-        static std::string replace(std::string inputText, char character, char replacementChar)
-        {
-            std::string result = "";
-            for (int i = 0; i < inputText.length(); i++)
-            {
-                if (inputText[i] == character)
-                    result += replacementChar;
-                else
-                    result += inputText[i];
-            }
-            return result;
-        }
-
-    private:
-        // Private constructor to prevent instantiation
-        StringUtils() = delete;
     };
 }

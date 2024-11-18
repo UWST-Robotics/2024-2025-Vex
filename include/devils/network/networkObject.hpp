@@ -60,6 +60,8 @@ namespace devils
          */
         bool isDirty()
         {
+            if (lastSerializationTime == -1)
+                return true;
             return pros::millis() - lastSerializationTime > maxSerializeTime;
         }
 

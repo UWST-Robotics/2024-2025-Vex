@@ -3,9 +3,8 @@
 #include "pros/vision.hpp"
 #include "motor.hpp"
 #include "../utils/logger.hpp"
-#include "../utils/ramp.hpp"
 #include "../geometry/perspective.hpp"
-#include "../utils/visionObject.hpp"
+#include "structs/visionObject.hpp"
 #include "../network/networkObject.hpp"
 #include <string>
 
