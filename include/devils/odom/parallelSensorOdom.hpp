@@ -1,4 +1,5 @@
 #pragma once
+
 #include "differentialWheelOdom.hpp"
 #include "../utils/runnable.hpp"
 
@@ -7,25 +8,23 @@
 namespace devils
 {
     /**
-     * Represents an odometry system using a tank chassis.
+     * Represents an odometry system using a set of parallel rotation sensors.
+     * If the sensors are perpendicular, use `PerpendicularSensorOdometry` instead.
      */
-    class DifferentialSensorOdometry : public DifferentialWheelOdom, public Runnable
+    class ParallelSensorOdometry : public DifferentialWheelOdom, public Runnable
     {
     public:
         /**
-         * Creates an odometry system using a set of rotation sensors.
-         * Sensors should be placed on the left and right sides of the robot.
-         * If this is not how the sensors are positioned, use `TrackingWheelOdometry` for
-         * horizontal and vertical tracking wheels instead.
+         * Creates an odometry system using a set of parallel rotation sensors.
          * @param leftSensor The left rotation sensor.
          * @param rightSensor The right rotation sensor.
          * @param wheelRadius The radius of the wheels in inches.
          * @param wheelBase The distance between the wheels in inches.
          */
-        DifferentialSensorOdometry(RotationSensor &leftSensor,
-                                   RotationSensor &rightSensor,
-                                   const double wheelRadius,
-                                   const double wheelBase)
+        ParallelSensorOdometry(RotationSensor &leftSensor,
+                               RotationSensor &rightSensor,
+                               const double wheelRadius,
+                               const double wheelBase)
             : leftSensor(leftSensor),
               rightSensor(rightSensor),
               DifferentialWheelOdom(wheelRadius, wheelBase)

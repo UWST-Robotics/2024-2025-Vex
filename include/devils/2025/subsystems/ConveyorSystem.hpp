@@ -10,9 +10,10 @@ namespace devils
     class ConveyorSystem
     {
     public:
-        ConveyorSystem(std::initializer_list<int8_t> conveyorPorts, uint8_t grabberPort)
-            : conveyorMotors("ConveyorMotors", conveyorPorts),
-              grabberPneumatic("GrabberPneumatic", grabberPort)
+        ConveyorSystem(SmartMotorGroup &conveyorMotors,
+                       ADIPneumatic &grabberPneumatic)
+            : conveyorMotors(conveyorMotors),
+              grabberPneumatic(grabberPneumatic)
         {
         }
 
@@ -59,13 +60,6 @@ namespace devils
          */
         void useSensor(OpticalSensor *sensor)
         {
-            // Log Memory Address
-            Logger::info("ConveyorSystem: Sensor Address: " + std::to_string((int)sensor));
-            Logger::info("ConveyorSystem: Sensor Proximity: " + std::to_string(sensor->getProximity()));
-            Logger::info("ConveyorSystem: Sensor Hue: " + std::to_string(sensor->getHue()));
-            Logger::info("ConveyorSystem: Sensor Saturation: " + std::to_string(sensor->getSaturation()));
-
-            // Set Sensor
             this->sensor = sensor;
         }
 
@@ -99,8 +93,8 @@ namespace devils
         static constexpr double NO_MOGO_CONVEYOR_SPEED = 0.5;
         static constexpr double MOGO_CONVEYOR_SPEED = 1.0;
 
-        SmartMotorGroup conveyorMotors;
-        ADIPneumatic grabberPneumatic;
+        SmartMotorGroup &conveyorMotors;
+        ADIPneumatic &grabberPneumatic;
         OpticalSensor *sensor = nullptr;
     };
 }

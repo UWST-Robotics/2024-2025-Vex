@@ -17,20 +17,28 @@ namespace devils
          */
         BlazeRobot()
         {
-            // Reset Network Tables
+            // Initialize NT
             NetworkTables::reset();
-            networkOdom.setSize(15.0, 15.0);
 
-            // Configure Subsystems
-            conveyor.useSensor(&opticalSensor);
-
-            // Calibrate IMU
+            // Initialize Hardware
             imu.calibrate();
 
-            // Setup Odometry
-            odometry.useIMU(&imu);
-            odometry.setTicksPerRevolution(TICKS_PER_REVOLUTION);
-            odometry.runAsync();
+            // Initialize Subsystems
+            conveyor.useSensor(&conveyorSensor);
+
+            deadWheelOdom.useIMU(&imu);
+            deadWheelOdom.runAsync();
+
+            chassisOdom.useIMU(&imu);
+            chassisOdom.setTicksPerRevolution(TICKS_PER_REVOLUTION);
+            chassisOdom.runAsync();
+
+            chassisOdomNoIMU.setTicksPerRevolution(TICKS_PER_REVOLUTION);
+            chassisOdomNoIMU.runAsync();
+
+            chassisOdomNT.setSize(15.0, 15.0);
+            chassisOdomNoIMUNT.setSize(15.0, 15.0);
+            deadWheelOdomNT.setSize(15.0, 15.0);
         }
 
         void autonomous() override
@@ -61,9 +69,8 @@ namespace devils
                 leftX = JoystickCurve::curve(leftX, 3.0, 0.05);
                 intakeInput = JoystickCurve::curve(intakeInput, 3.0, 0.1);
 
-                // Move Conveyor/Intkae
+                // Move Conveyor/Intake
                 conveyor.moveAutomatic();
-                // conveyor.forceMove(intakeInput);
                 intake.move(intakeInput);
 
                 // Grab Mogo
@@ -97,32 +104,40 @@ namespace devils
             intakeLauncher.retract();
         }
 
-        // V5 Ports
-        static constexpr std::initializer_list<int8_t> L_MOTOR_PORTS = {20, -11, 5, -6};
-        static constexpr std::initializer_list<int8_t> R_MOTOR_PORTS = {-1, 2, 3, -4};
-        static constexpr std::initializer_list<int8_t> INTAKE_PORTS = {18};
-        static constexpr std::initializer_list<int8_t> CONVEYOR_PORTS = {-9, 10};
-        static constexpr uint8_t IMU_PORT = 15;
-        static constexpr uint8_t OPTICAL_SENSOR_PORT = 8;
-
-        static constexpr int8_t GRABBER_PORT = 1;
-        static constexpr int8_t INTAKE_LAUNCHER_PORT = 2;
-
+        // Constants
         static constexpr double TICKS_PER_REVOLUTION = 300.0 * (48.0 / 36.0); // ticks
         static constexpr double WHEEL_RADIUS = 1.625;                         // in
         static constexpr double WHEEL_BASE = 12.0;                            // in
+        static constexpr double DEAD_WHEEL_RADIUS = 1.0;                      // in
+
+        // Hardware
+        ADIPneumatic grabberPneumatic = ADIPneumatic("GrabberPneumatic", 1);
+        ADIPneumatic intakeLauncher = ADIPneumatic("IntakeLauncher", 2);
+
+        SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {20, -11, 5, -6});
+        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {-1, 2, 3, -4});
+        SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {-9, 10});
+        SmartMotorGroup intakeMotors = SmartMotorGroup("IntakeMotors", {18});
+
+        RotationSensor verticalSensor = RotationSensor("VerticalOdom", 13);     // TODO: Fix this ID
+        RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 14); // TODO: Fix this ID
+        OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 8);
+        IMU imu = IMU("IMU", 15);
 
         // Subsystems
-        ADIPneumatic intakeLauncher = ADIPneumatic("IntakeLauncher", INTAKE_LAUNCHER_PORT);
-        IMU imu = IMU("IMU", IMU_PORT);
-        TankChassis chassis = TankChassis("Chassis", L_MOTOR_PORTS, R_MOTOR_PORTS);
-        IntakeSystem intake = IntakeSystem(INTAKE_PORTS);
-        ConveyorSystem conveyor = ConveyorSystem(CONVEYOR_PORTS, GRABBER_PORT);
-        OpticalSensor opticalSensor = OpticalSensor("OpticalSensor", OPTICAL_SENSOR_PORT);
+        TankChassis chassis = TankChassis(leftMotors, rightMotors);
+        IntakeSystem intake = IntakeSystem(intakeMotors);
+        ConveyorSystem conveyor = ConveyorSystem(conveyorMotors, grabberPneumatic);
+        TankChassisOdom chassisOdom = TankChassisOdom(chassis, WHEEL_RADIUS, WHEEL_BASE);
+        TankChassisOdom chassisOdomNoIMU = TankChassisOdom(chassis, WHEEL_RADIUS, WHEEL_BASE);
+        PerpendicularSensorOdometry deadWheelOdom = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, WHEEL_RADIUS);
+
+        NTOdom chassisOdomNT = NTOdom("ChassisOdom", chassisOdom);
+        NTOdom chassisOdomNoIMUNT = NTOdom("ChassisOdom_NoIMU", chassisOdomNoIMU);
+        NTOdom deadWheelOdomNT = NTOdom("DeadWheelOdom", deadWheelOdom);
 
         // Autonomous
-        TankChassisOdom odometry = TankChassisOdom(chassis, WHEEL_RADIUS, WHEEL_BASE);
-
+        OdomSource &odometry = deadWheelOdom; // <-- Primary Odometry Source
         AutoStepList autoRoutine = AutoStepList({
 
             // Section 1
@@ -178,8 +193,5 @@ namespace devils
             new AutoPauseStep(chassis, 2000),
             new AutoDriveStep(chassis, odometry, 10.0),
         });
-
-        // Debug
-        NTOdom networkOdom = NTOdom("Odometry", odometry);
     };
 }

@@ -23,9 +23,10 @@
 // Odom
 #include "odom/odomSource.hpp"
 #include "odom/complementaryFilterOdom.hpp"
-#include "odom/trackingWheelOdom.hpp"
 #include "odom/differentialWheelOdom.hpp"
 #include "odom/tankChassisOdom.hpp"
+#include "odom/perpendicularSensorOdom.hpp"
+#include "odom/parallelSensorOdom.hpp"
 
 // Geometry
 #include "geometry/perspectiveFactory.hpp"
@@ -38,7 +39,6 @@
 
 // Utils
 #include "utils/joystickCurve.hpp"
-#include "utils/eventTimer.hpp"
 
 // Path
 #include "path/path.hpp"

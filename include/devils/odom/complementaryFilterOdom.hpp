@@ -50,6 +50,7 @@ namespace devils
 
                 // Weight the absolute and relative rotations.
                 // Accounts for normalization in the rotation.
+                // TODO: Fix this
                 // double diffRad = Units::diffRad(absolutePose.rotation, relativePose.rotation);
                 // currentPose.rotation = Units::normalizeRadians(relativePose.rotation + diffRad * absoluteWeight);
 

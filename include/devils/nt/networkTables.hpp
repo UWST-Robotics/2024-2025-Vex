@@ -1,9 +1,9 @@
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include <string>
 
-typedef std::map<std::string, std::string> NetworkTableCache;
+typedef std::unordered_map<std::string, std::string> NetworkTableCache;
 
 namespace devils
 {
@@ -43,7 +43,6 @@ namespace devils
         static void updateValue(std::string key, std::string value)
         {
             // Check if the value has changed
-
             for (auto &pair : cache)
                 if (pair.first == key && pair.second == value)
                     return;

@@ -20,10 +20,10 @@ namespace devils
          * @param rightMotorPorts The ports of the right motors. Negative ports are reversed.
          */
         TankChassis(
-            std::string name,
-            const std::initializer_list<int8_t> leftMotorPorts,
-            const std::initializer_list<int8_t> rightMotorPorts) : leftMotors(name + ".LeftMotors", leftMotorPorts),
-                                                                   rightMotors(name + ".RightMotors", rightMotorPorts)
+            SmartMotorGroup leftMotors,
+            SmartMotorGroup rightMotors)
+            : leftMotors(leftMotors),
+              rightMotors(rightMotors)
         {
             // Disable brake mode by default to prevent overheating
             leftMotors.setBrakeMode(false);
@@ -90,7 +90,7 @@ namespace devils
         }
 
     private:
-        SmartMotorGroup leftMotors;
-        SmartMotorGroup rightMotors;
+        SmartMotorGroup &leftMotors;
+        SmartMotorGroup &rightMotors;
     };
 }

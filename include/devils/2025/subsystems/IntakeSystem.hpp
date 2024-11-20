@@ -10,8 +10,8 @@ namespace devils
     class IntakeSystem
     {
     public:
-        IntakeSystem(std::initializer_list<int8_t> intakePorts)
-            : intakeMotors("IntakeMotors", intakePorts)
+        IntakeSystem(SmartMotorGroup &intakeMotors)
+            : intakeMotors(intakeMotors)
         {
         }
 
@@ -26,6 +26,6 @@ namespace devils
 
     private:
         // TODO: Move pneumatic launcher to here
-        SmartMotorGroup intakeMotors;
+        SmartMotorGroup &intakeMotors;
     };
 }

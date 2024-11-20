@@ -17,34 +17,30 @@ namespace devils
          */
         PJRobot()
         {
+            // Initialize NT
             NetworkTables::reset();
             networkOdom.setSize(15.0, 15.0);
+
+            // Initialize Hardware
+            imu.calibrate();
 
             // Initialize Subsystems
             conveyor.useSensor(&opticalSensor);
 
-            imu.calibrate();
-
-            // odometry.useIMU(imu);
-            odometry.setTicksPerRevolution(TICKS_PER_REVOLUTION);
-            odometry.runAsync();
+            chassisOdom.useIMU(&imu);
+            chassisOdom.setTicksPerRevolution(TICKS_PER_REVOLUTION);
+            chassisOdom.runAsync();
         }
 
         void autonomous() override
         {
             imu.waitUntilCalibrated();
-            // autoRoutine.doStep();
+            autoRoutine.doStep();
         }
 
         void opcontrol() override
         {
             double intakeSpeed = 0.5;
-            // pros::Task autoTask = pros::Task(
-            //     [](void *param)
-            //     {
-            //         BlazeRobot *robot = (BlazeRobot *)param;
-            //         robot->autoRoutine.doStep();
-            //     });
             intakeLauncher.extend();
 
             // Loop
@@ -98,33 +94,32 @@ namespace devils
             intakeLauncher.retract();
         }
 
-        // V5 Ports
-        static constexpr std::initializer_list<int8_t> L_MOTOR_PORTS = {11, -12, 18, -20};
-        static constexpr std::initializer_list<int8_t> R_MOTOR_PORTS = {-19, 17, 15, -16};
-        static constexpr std::initializer_list<int8_t> CONVEYOR_PORTS = {3, -4};
-        static constexpr std::initializer_list<int8_t> INTAKE_PORTS = {10};
-        static constexpr int8_t IMU_PORT = 13;
-        static constexpr int8_t OPTICAL_SENSOR_PORT = 6;
-
-        // ADI Port
-        static constexpr int8_t GRABBER_PORT = 1;
-        static constexpr int8_t INTAKE_LAUNCHER_PORT = 3;
-
         // Constants
         static constexpr double TICKS_PER_REVOLUTION = 300.0 * (48.0 / 36.0); // ticks
         static constexpr double WHEEL_RADIUS = 1.625;                         // in
         static constexpr double WHEEL_BASE = 12.0;                            // in
 
+        // Hardware
+        ADIPneumatic grabberPneumatic = ADIPneumatic("GrabberPneumatic", 1);
+        ADIPneumatic intakeLauncher = ADIPneumatic("IntakeLauncher", 3);
+
+        SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {11, -12, 18, -20});
+        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {-19, 17, 15, -16});
+        SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {3, -4});
+        SmartMotorGroup intakeMotors = SmartMotorGroup("IntakeMotors", {10});
+
+        OpticalSensor opticalSensor = OpticalSensor("OpticalSensor", 6);
+        IMU imu = IMU("IMU", 13);
+
         // Subsystems
-        TankChassis chassis = TankChassis("Chassis", L_MOTOR_PORTS, R_MOTOR_PORTS);
-        IntakeSystem intake = IntakeSystem(INTAKE_PORTS);
-        ConveyorSystem conveyor = ConveyorSystem(CONVEYOR_PORTS, GRABBER_PORT);
-        IMU imu = IMU("IMU", IMU_PORT);
-        OpticalSensor opticalSensor = OpticalSensor("OpticalSensor", OPTICAL_SENSOR_PORT);
-        ADIPneumatic intakeLauncher = ADIPneumatic("IntakeLauncher", INTAKE_LAUNCHER_PORT);
+        TankChassis chassis = TankChassis(leftMotors, rightMotors);
+        IntakeSystem intake = IntakeSystem(intakeMotors);
+        ConveyorSystem conveyor = ConveyorSystem(conveyorMotors, grabberPneumatic);
+        TankChassisOdom chassisOdom = TankChassisOdom(chassis, WHEEL_RADIUS, WHEEL_BASE);
+        NTOdom networkOdom = NTOdom("ChassisOdom", chassisOdom);
 
         // Autonomous
-        TankChassisOdom odometry = TankChassisOdom(chassis, WHEEL_RADIUS, WHEEL_BASE);
+        OdomSource &odometry = chassisOdom;
         AutoStepList autoRoutine = AutoStepList({
             // Start
             new AutoJumpToStep(odometry, -64, -48, 0),
@@ -187,8 +182,5 @@ namespace devils
             // Drop Mogo
             new AutoDriveStep(chassis, odometry, 16.0),
         });
-
-        // Debug
-        NTOdom networkOdom = NTOdom("odometry", odometry);
     };
 }
