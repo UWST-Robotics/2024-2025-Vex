@@ -3,7 +3,6 @@
 #include "../devils.h"
 #include "subsystems/ConveyorSystem.hpp"
 #include "subsystems/IntakeSystem.hpp"
-#include "autoSteps/AutoConveyorStep.hpp"
 #include "autoSteps/AutoIntakeStep.hpp"
 
 namespace devils
@@ -65,7 +64,7 @@ namespace devils
                 intakeInput = JoystickCurve::curve(intakeInput, 3.0, 0.1);
 
                 // Move Conveyor/Intake
-                conveyor.runAutomatic();
+                conveyor.moveAutomatic();
                 intake.move(intakeInput);
 
                 // Grab Mogo

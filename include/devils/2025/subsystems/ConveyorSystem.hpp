@@ -20,7 +20,7 @@ namespace devils
          * Runs the conveyor system at a given voltage. Automatically stops the conveyor system if a ring is detected.
          * @param voltage The voltage to run the conveyor system at, from -1 to 1.
          */
-        void runAutomatic()
+        void moveAutomatic()
         {
             // Check if a ring is detected and if the grabber is extended
             bool isRingDetected = true;

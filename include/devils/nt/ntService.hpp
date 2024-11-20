@@ -10,7 +10,7 @@ namespace devils
     /**
      * Singleton service for managing network objects.
      */
-    class NTService : public AutoRunnable
+    class NTService : public Runnable
     {
     public:
         /**
@@ -26,7 +26,7 @@ namespace devils
         /**
          * Updates all network objects.
          */
-        void update() override
+        void onUpdate() override
         {
             // Heartbeat
             NetworkTables::sendHeartbeat();
@@ -40,7 +40,11 @@ namespace devils
 
     private:
         // Singleton Constructor
-        NTService() : AutoRunnable() {}
+        NTService()
+        {
+            // Run on startup
+            runAsync();
+        }
 
     public:
         // Prevent copying

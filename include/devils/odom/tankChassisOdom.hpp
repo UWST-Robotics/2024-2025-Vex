@@ -27,11 +27,20 @@ namespace devils
         {
         }
 
-        void update() override
+        void onUpdate() override
         {
+            // Process differential odometry
             double leftPosition = chassis.getLeftMotors().getPosition() / ticksPerRevolution;
             double rightPosition = chassis.getRightMotors().getPosition() / ticksPerRevolution;
             DifferentialWheelOdom::update(leftPosition, rightPosition);
+
+            // Apply IMU
+            if (imu != nullptr)
+            {
+                Pose currentPose = getPose();
+                currentPose.rotation = imu->getHeading();
+                setPose(currentPose);
+            }
         }
 
         /**
@@ -42,8 +51,18 @@ namespace devils
             this->ticksPerRevolution = ticksPerRevolution;
         }
 
+        /**
+         * Sets the IMU to use for odometry.
+         * @param imu The IMU to use.
+         */
+        void useIMU(IMU *imu)
+        {
+            this->imu = imu;
+        }
+
     private:
         double ticksPerRevolution = 300.0 * (48.0 / 36.0); // ticks
         TankChassis &chassis;
+        IMU *imu;
     };
 }

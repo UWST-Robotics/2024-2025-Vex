@@ -14,9 +14,15 @@ namespace devils
      * This is useful for testing autonomous routines without a physical robot.
      * Can be used as an OdomSource.
      */
-    class DummyChassis : public ChassisBase, public OdomSource, public AutoRunnable
+    class DummyChassis : public ChassisBase, public OdomSource, public Runnable
     {
     public:
+        DummyChassis()
+        {
+            // Run on startup
+            runAsync();
+        }
+
         void move(double forward, double turn, double strafe = 0) override
         {
             forward = std::clamp(forward, -1.0, 1.0) * forwardSpeed;
@@ -28,7 +34,7 @@ namespace devils
             lastStrafe = strafe;
         }
 
-        void update() override
+        void onUpdate() override
         {
             // TODO: Multiply acceleration by delta time
 

@@ -33,7 +33,7 @@ namespace devils
         /**
          * Updates the odometry with the latest GPS data
          */
-        void update() override
+        void onUpdate() override
         {
             double gpsX = gps.get_position_x();
             double gpsY = gps.get_position_y();

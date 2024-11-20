@@ -9,7 +9,7 @@ namespace devils
     /**
      * Represents an odometry system using a tank chassis.
      */
-    class DifferentialSensorOdometry : public DifferentialWheelOdom, public AutoRunnable
+    class DifferentialSensorOdometry : public DifferentialWheelOdom, public Runnable
     {
     public:
         /**
@@ -32,7 +32,7 @@ namespace devils
         {
         }
 
-        void update() override
+        void onUpdate() override
         {
             double leftPosition = (leftSensor.getAngle() / (2 * M_PI)) / ticksPerRevolution;
             double rightPosition = (rightSensor.getAngle() / (2 * M_PI)) / ticksPerRevolution;

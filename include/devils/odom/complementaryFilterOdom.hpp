@@ -33,7 +33,7 @@ namespace devils
         /**
          * Updates the odometry with the latest data from the sources
          */
-        void update() override
+        void onUpdate() override
         {
             // Get the current pose from each source
             Pose absolutePose = absoluteOdom->getPose();

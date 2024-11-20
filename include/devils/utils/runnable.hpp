@@ -4,57 +4,68 @@
 namespace devils
 {
     /**
-     * Represents a runnable object w/ an update loop.
+     * Represents an asynchronous object that can be run on a separate task.
+     * Tasks are updated periodically at a given interval.
      */
     class Runnable
     {
     public:
         Runnable() = default;
         Runnable(int updateInterval) : updateInterval(updateInterval) {}
+        ~Runnable() { stopAsync(); }
 
         /**
-         * Update function that is called periodically.
+         * Function that is called when the object starts running.
          */
-        virtual void update() = 0;
+        virtual void onStart() {}
 
         /**
-         * Runs the object synchronously.
+         * Function that is called when the object updates periodically.
          */
-        virtual void runSync()
-        {
-            while (true)
-            {
-                update();
-                pros::delay(updateInterval);
-            }
-        }
+        virtual void onUpdate() {};
+
+        /**
+         * Function that is called when the object stops running.
+         */
+        virtual void onStop() {};
 
         /**
          * Runs the object asynchronously.
          * @return The PROS task that runs the object.
          */
-        virtual pros::Task runAsync()
+        pros::Task *runAsync()
         {
-            return pros::Task([=, this]
-                              { runSync(); });
+            stopAsync();
+            currentTask = new pros::Task(
+                [=, this]
+                {
+                    onStart();
+                    while (true)
+                    {
+                        onUpdate();
+                        pros::delay(updateInterval);
+                    }
+                });
+            return currentTask;
+        }
+
+        /**
+         * Stops the object from running.
+         * Deletes the task and calls onStop.
+         */
+        void stopAsync()
+        {
+            if (currentTask != nullptr)
+            {
+                onStop();
+                currentTask->remove();
+                delete currentTask;
+                currentTask = nullptr;
+            }
         }
 
     private:
+        pros::Task *currentTask = nullptr;
         int updateInterval = 20;
-    };
-
-    /**
-     * Represents a runnable object that runs automatically when created.
-     */
-    struct AutoRunnable : public Runnable
-    {
-        pros::Task runTask;
-
-        /**
-         * Automatically runs the object asynchronously.
-         */
-        AutoRunnable() : runTask(runAsync())
-        {
-        }
     };
 }
