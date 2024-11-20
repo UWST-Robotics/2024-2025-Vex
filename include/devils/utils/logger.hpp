@@ -151,7 +151,8 @@ namespace devils
          */
         static void logToSerial(std::string message)
         {
-            printf("%s\n", message.c_str());
+            std::cout << message << std::endl;
+            // printf("%s\n", message.c_str());
         }
 
     private:

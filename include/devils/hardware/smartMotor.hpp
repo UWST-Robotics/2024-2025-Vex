@@ -13,7 +13,7 @@ namespace devils
     /**
      * Represents a motor object. All events are logged.
      */
-    class SmartMotor : public IMotor, private NTHardware
+    class SmartMotor : public IMotor, protected NTHardware
     {
     public:
         /**
@@ -41,7 +41,6 @@ namespace devils
             int32_t status = motor.move(voltage * 127);
             if (status != 1)
                 reportFault("Move Voltage Failed");
-            checkHealth();
         }
 
         /**
@@ -53,7 +52,6 @@ namespace devils
             int32_t status = motor.brake();
             if (status != 1)
                 reportFault("Stop Failed");
-            checkHealth();
         }
 
         /**

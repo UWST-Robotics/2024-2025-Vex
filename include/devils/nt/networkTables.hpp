@@ -20,7 +20,7 @@ namespace devils
         static void reset()
         {
             // Clear the cache
-            getCache().clear();
+            cache.clear();
 
             // Send the reset message over serial
             printf("__NTRESET__\n");
@@ -43,15 +43,17 @@ namespace devils
         static void updateValue(std::string key, std::string value)
         {
             // Check if the value has changed
-            NetworkTableCache &networkTableCache = getCache();
-            if (networkTableCache[key] == value)
-                return;
+
+            for (auto &pair : cache)
+                if (pair.first == key && pair.second == value)
+                    return;
 
             // Update the cache
-            networkTableCache[key] = value;
+            cache[key] = value;
 
             // Send the update over serial
-            printf("__NTUPDATE__ %s %s\n", key.c_str(), value.c_str());
+            std::cout << "__NTUPDATE__ " << key << " " << value << std::endl;
+            // printf("__NTUPDATE__ %s %s\n", key.c_str(), value.c_str());
         }
 
         /**
@@ -84,14 +86,10 @@ namespace devils
             updateValue(key, value ? "true" : "false");
         }
 
-        /**
-         * Gets the network table cache.
-         * @return The network table cache.
-         */
-        static NetworkTableCache &getCache()
-        {
-            static NetworkTableCache networkTableCache;
-            return networkTableCache;
-        }
+    private:
+        static NetworkTableCache cache;
     };
 }
+
+// Initialize the cache
+NetworkTableCache devils::NetworkTables::cache;

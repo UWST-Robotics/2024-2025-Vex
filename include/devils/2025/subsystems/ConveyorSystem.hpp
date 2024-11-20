@@ -59,6 +59,13 @@ namespace devils
          */
         void useSensor(OpticalSensor *sensor)
         {
+            // Log Memory Address
+            Logger::info("ConveyorSystem: Sensor Address: " + std::to_string((int)sensor));
+            Logger::info("ConveyorSystem: Sensor Proximity: " + std::to_string(sensor->getProximity()));
+            Logger::info("ConveyorSystem: Sensor Hue: " + std::to_string(sensor->getHue()));
+            Logger::info("ConveyorSystem: Sensor Saturation: " + std::to_string(sensor->getSaturation()));
+
+            // Set Sensor
             this->sensor = sensor;
         }
 

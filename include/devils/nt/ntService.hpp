@@ -32,10 +32,10 @@ namespace devils
             NetworkTables::sendHeartbeat();
 
             // Serialize all network objects
-            NetworkObjectList &allNetworkObjects = NTObjectBase::GetAllNetworkObjects();
-            for (int i = 0; i < allNetworkObjects.size(); i++)
-                if (allNetworkObjects[i]->isDirty())
-                    allNetworkObjects[i]->runSerialization();
+            auto allNetworkObjects = NTObjectBase::getAllNetworkObjects();
+            for (auto obj : *allNetworkObjects)
+                if (obj->isDirty())
+                    obj->runSerialization();
         }
 
     private:

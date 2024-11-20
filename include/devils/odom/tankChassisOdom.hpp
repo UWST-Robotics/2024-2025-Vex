@@ -9,7 +9,7 @@ namespace devils
     /**
      * Represents an odometry system using a tank chassis.
      */
-    class TankChassisOdom : public DifferentialWheelOdom, public AutoRunnable
+    class TankChassisOdom : public DifferentialWheelOdom, public Runnable
     {
     public:
         /**

@@ -41,11 +41,17 @@ namespace devils
          * @param chassis The chassis to control.
          * @param odomSource The odometry source to use.
          * @param targetPose The target pose to drive to.
+         * @param options The options for the drive step.
          */
-        AutoDriveToStep(ChassisBase &chassis, OdomSource &odomSource, Pose targetPose)
+        AutoDriveToStep(
+            ChassisBase &chassis,
+            OdomSource &odomSource,
+            Pose targetPose,
+            Options *options = nullptr)
             : chassis(chassis),
               odomSource(odomSource),
-              targetPose(targetPose)
+              targetPose(targetPose),
+              options(options == nullptr ? Options() : *options)
         {
         }
 

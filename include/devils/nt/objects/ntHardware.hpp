@@ -36,8 +36,6 @@ namespace devils
         }
 
     protected:
-        static constexpr bool LOGGING_ENABLED = true;
-
         /**
          * Reports a hardware fault.
          * Value is sent to the network table and logged.
@@ -73,11 +71,13 @@ namespace devils
         virtual void checkHealth() = 0;
 
     private:
-        const std::string name;
-        const std::string type;
-        const int8_t port;
+        static constexpr bool LOGGING_ENABLED = true;
 
-        std::string ntPrefix;
+        const std::string name = "";
+        const std::string type = "";
+        const int8_t port = 0;
+
+        std::string ntPrefix = "";
         bool isFaulted = false;
     };
 }

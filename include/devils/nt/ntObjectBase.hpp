@@ -1,11 +1,12 @@
 #pragma once
 
+#include <unordered_set>
 #include "pros/rtos.hpp"
 
 namespace devils
 {
     class NTObjectBase;
-    typedef std::vector<devils::NTObjectBase *> NetworkObjectList;
+    typedef std::unordered_set<devils::NTObjectBase *> NetworkObjectList;
 
     /**
      * Represents a netowrk object that can be serialized and sent over serial.
@@ -13,36 +14,28 @@ namespace devils
     class NTObjectBase
     {
     public:
-        // Disable copy constructor
-        NTObjectBase(NTObjectBase const &) = delete;
-
-        // Disable assignment operator
-        NTObjectBase &operator=(NTObjectBase const &) = delete;
-
         // Register the network object
         NTObjectBase()
         {
-            GetAllNetworkObjects().push_back(this);
+            mutex.take(0);
+            // allNetworkObjects.insert(this);
+            mutex.give();
+        }
+
+        // Copy constructor
+        NTObjectBase(NTObjectBase const &)
+        {
+            mutex.take(0);
+            // allNetworkObjects.insert(this);
+            mutex.give();
         }
 
         // Unregister the network object
         ~NTObjectBase()
         {
-            NetworkObjectList &allNetworkObjects = GetAllNetworkObjects();
-
-            allNetworkObjects.erase(
-                std::remove(allNetworkObjects.begin(), allNetworkObjects.end(), this),
-                allNetworkObjects.end());
-        }
-
-        /**
-         * Gets a list of all alive network objects.
-         * @return A list of all alive network objects.
-         */
-        static NetworkObjectList &GetAllNetworkObjects()
-        {
-            static NetworkObjectList allNetworkObjects;
-            return allNetworkObjects;
+            mutex.take(0);
+            allNetworkObjects.erase(this);
+            mutex.give();
         }
 
         /**
@@ -77,6 +70,11 @@ namespace devils
             lastSerializationTime = pros::millis();
         }
 
+        static NetworkObjectList *getAllNetworkObjects()
+        {
+            return &allNetworkObjects;
+        }
+
     protected:
         /**
          * Should be implemented by child classes to serialize the object.
@@ -85,7 +83,14 @@ namespace devils
         virtual void serialize() = 0;
 
     private:
+        static NetworkObjectList allNetworkObjects;
+        static pros::Mutex mutex;
+
         int maxSerializeTime = 50; // ms
-        int lastSerializationTime = -1;
+        uint32_t lastSerializationTime = -1;
     };
 }
+
+// Initialize static variables
+devils::NetworkObjectList devils::NTObjectBase::allNetworkObjects;
+pros::Mutex devils::NTObjectBase::mutex;

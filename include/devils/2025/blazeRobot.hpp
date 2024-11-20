@@ -22,29 +22,31 @@ namespace devils
             NetworkTables::reset();
             networkOdom.setSize(15.0, 15.0);
 
-            imu.calibrate();
+            // Configure Subsystems
+            conveyor.useSensor(&opticalSensor);
+
+            // imu.calibrate();
 
             // Setup Odometry
             // odometry.useIMU(imu);
             odometry.setTicksPerRevolution(TICKS_PER_REVOLUTION);
             odometry.runAsync();
+
+            // AutoSteps
+            slowReverse.getOptions().maxSpeed = 0.2;
         }
 
         void autonomous() override
         {
-            imu.waitUntilCalibrated();
+            intakeLauncher.extend();
+            conveyor.forceMove(0.5);
+            // imu.waitUntilCalibrated();
             // autoRoutine.doStep();
         }
 
         void opcontrol() override
         {
             double intakeSpeed = 0.5;
-            // pros::Task autoTask = pros::Task(
-            //     [](void *param)
-            //     {
-            //         BlazeRobot *robot = (BlazeRobot *)param;
-            //         robot->autoRoutine.doStep();
-            //     });
             intakeLauncher.extend();
 
             // Loop
@@ -65,6 +67,7 @@ namespace devils
 
                 // Move Conveyor/Intkae
                 conveyor.runAutomatic();
+                // conveyor.forceMove(intakeInput);
                 intake.move(intakeInput);
 
                 // Grab Mogo
@@ -95,7 +98,7 @@ namespace devils
         {
             // Stop the robot
             chassis.stop();
-            intakeLauncher.retract();
+            // intakeLauncher.retract();
         }
 
         // V5 Ports
@@ -119,70 +122,73 @@ namespace devils
         TankChassis chassis = TankChassis("Chassis", L_MOTOR_PORTS, R_MOTOR_PORTS);
         IntakeSystem intake = IntakeSystem(INTAKE_PORTS);
         ConveyorSystem conveyor = ConveyorSystem(CONVEYOR_PORTS, GRABBER_PORT);
+        OpticalSensor opticalSensor = OpticalSensor("OpticalSensor", OPTICAL_SENSOR_PORT);
 
         // Autonomous
         TankChassisOdom odometry = TankChassisOdom(chassis, WHEEL_RADIUS, WHEEL_BASE);
+
+        AutoDriveStep slowReverse = AutoDriveStep(chassis, odometry, -12.0);
+
         AutoStepList autoRoutine = AutoStepList({
-            // Start
-            new AutoJumpToStep(odometry, -64, -48, 0),
 
             // Section 1
-            new AutoDriveStep(chassis, odometry, 16.0),
-            new AutoRotateToStep(chassis, odometry, M_PI),
-            new AutoDriveStep(chassis, odometry, -24.0),
-            // Pickup Mogo
-            // Score Ring
-            new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
-            new AutoDriveStep(chassis, odometry, 24.0),
-            // Score Ring
-            new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
-            new AutoDriveStep(chassis, odometry, 44.0),
-            // Score Ring
-            new AutoDriveStep(chassis, odometry, -12.0),
-            new AutoRotateToStep(chassis, odometry, M_PI * 0.25),
-            new AutoDriveStep(chassis, odometry, -14.0),
-            // Drop Mogo
-            new AutoDriveStep(chassis, odometry, 11.0),
-
-            // Section 2
-            new AutoRotateToStep(chassis, odometry, 0),
-            new AutoDriveStep(chassis, odometry, 48.0),
-            new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
-            new AutoDriveStep(chassis, odometry, -12.0),
+            new AutoIntakeStep(intake, 0.5),
+            new AutoPauseStep(chassis, 500),
+            new AutoDriveStep(chassis, odometry, 12.0),
+            //&slowReverse,
             // Score Ring
             new AutoPauseStep(chassis, 2000),
 
-            // Section 3
-            new AutoDriveStep(chassis, odometry, 14.0),
-            new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
-            new AutoDriveStep(chassis, odometry, -34.0),
-            // Pickup Mogo
-            // Score Ring
-            new AutoRotateToStep(chassis, odometry, M_PI * 0.75),
-            new AutoDriveStep(chassis, odometry, 34.0),
-            // Score Rings
-            new AutoRotateToStep(chassis, odometry, M_PI * -0.25),
-            // Score Rings
-            // Drop Mogo
+            // // Section 2
+            // new AutoDriveStep(chassis, odometry, 14.0),
+            // new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
+            // new AutoDriveStep(chassis, odometry, 48.0),
+            // new AutoRotateToStep(chassis, odometry, M_PI),
+            // new AutoDriveStep(chassis, odometry, -24.0),
+            // // Pickup Mogo
+            // // Score Ring
+            // new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
+            // new AutoDriveStep(chassis, odometry, 24.0),
+            // // Score Ring
+            // new AutoRotateToStep(chassis, odometry, M_PI * 0.25),
+            // new AutoDriveStep(chassis, odometry, 34.0),
+            // // Score Ring
+            // new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
+            // new AutoDriveStep(chassis, odometry, 6.0),
+            // // Score Ring
+            // new AutoRotateToStep(chassis, odometry, M_PI),
+            // new AutoDriveStep(chassis, odometry, 50.0),
+            // // Score Ring
+            // new AutoDriveStep(chassis, odometry, -10.0),
+            // new AutoRotateToStep(chassis, odometry, M_PI * 0.1),
+            // new AutoDriveStep(chassis, odometry, -10.0),
+            // // Drop Mogo
 
-            // Section 4
-            new AutoDriveStep(chassis, odometry, 34.0),
-            new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
-            new AutoDriveStep(chassis, odometry, -33.0),
-            // Pickup Mogo
-            new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
-            new AutoDriveStep(chassis, odometry, 24.0),
-            // Score Rings
-            new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
-            new AutoDriveStep(chassis, odometry, 32.0),
-            // Score Rings
-            new AutoRotateToStep(chassis, odometry, 0),
-            new AutoDriveStep(chassis, odometry, 23.0),
-            // Score Rings
-            new AutoRotateToStep(chassis, odometry, M_PI * 0.75),
-            new AutoDriveStep(chassis, odometry, -16.0),
-            // Drop Mogo
-            new AutoDriveStep(chassis, odometry, 16.0),
+            // // Section 3
+            // new AutoDriveStep(chassis, odometry, 84.0),
+            // new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
+            // new AutoDriveStep(chassis, odometry, -25.0),
+            // // Pickup Mogo
+            // // Score Ring
+            // new AutoRotateToStep(chassis, odometry, 0),
+            // new AutoDriveStep(chassis, odometry, 24.0),
+            // // Score Ring
+            // new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
+            // new AutoDriveStep(chassis, odometry, 24.0),
+            // // Score Ring
+            // new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
+            // new AutoDriveStep(chassis, odometry, -12.0),
+            // // Drop Mogo
+
+            // // Section 4
+            // new AutoDriveStep(chassis, odometry, 40.0),
+            // new AutoRotateToStep(chassis, odometry, M_PI * 0.25),
+            // new AutoDriveStep(chassis, odometry, 34.0),
+            // new AutoRotateToStep(chassis, odometry, M_PI),
+            // new AutoDriveStep(chassis, odometry, -5.0),
+            // // Score Rings
+            // new AutoPauseStep(chassis, 2000),
+            // new AutoDriveStep(chassis, odometry, 10.0),
         });
 
         // Debug

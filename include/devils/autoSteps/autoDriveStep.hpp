@@ -20,9 +20,14 @@ namespace devils
          * @param chassis The chassis to control.
          * @param odomSource The odometry source to use.
          * @param distance The distance to drive in inches.
+         * @param options The options for the drive step.
          */
-        AutoDriveStep(ChassisBase &chassis, OdomSource &odomSource, double distance)
-            : AutoDriveToStep(chassis, odomSource, Pose(0, 0, 0)),
+        AutoDriveStep(
+            ChassisBase &chassis,
+            OdomSource &odomSource,
+            double distance,
+            AutoDriveToStep::Options *options = nullptr)
+            : AutoDriveToStep(chassis, odomSource, Pose(0, 0, 0), options),
               distance(distance)
         {
         }
