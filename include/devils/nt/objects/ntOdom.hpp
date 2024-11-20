@@ -27,12 +27,12 @@ namespace devils
             std::string networkTableKey = "_poses/" + name;
 
             NetworkTables::updateValue(networkTableKey + "/name", name);
-            NetworkTables::updateValue(networkTableKey + "/x", std::to_string(pose.x));
-            NetworkTables::updateValue(networkTableKey + "/y", std::to_string(pose.y));
-            NetworkTables::updateValue(networkTableKey + "/rotation", std::to_string(Units::radToDeg(pose.rotation)));
-            NetworkTables::updateValue(networkTableKey + "/velocityX", std::to_string(velocity.x));
-            NetworkTables::updateValue(networkTableKey + "/velocityY", std::to_string(velocity.y));
-            NetworkTables::updateValue(networkTableKey + "/velocityRotation", std::to_string(velocity.z));
+            NetworkTables::updateDoubleValue(networkTableKey + "/x", pose.x);
+            NetworkTables::updateDoubleValue(networkTableKey + "/y", pose.y);
+            NetworkTables::updateDoubleValue(networkTableKey + "/rotation", Units::radToDeg(pose.rotation));
+            NetworkTables::updateDoubleValue(networkTableKey + "/velocityX", velocity.x);
+            NetworkTables::updateDoubleValue(networkTableKey + "/velocityY", velocity.y);
+            NetworkTables::updateDoubleValue(networkTableKey + "/velocityRotation", velocity.z);
         }
 
         /**
@@ -42,8 +42,8 @@ namespace devils
          */
         void setSize(double width, double length)
         {
-            NetworkTables::updateValue("_poses/" + name + "/width", std::to_string(width));
-            NetworkTables::updateValue("_poses/" + name + "/length", std::to_string(length));
+            NetworkTables::updateDoubleValue("_poses/" + name + "/width", width);
+            NetworkTables::updateDoubleValue("_poses/" + name + "/length", length);
         }
 
     private:

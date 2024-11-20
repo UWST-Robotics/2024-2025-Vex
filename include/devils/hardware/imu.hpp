@@ -173,13 +173,13 @@ namespace devils
         {
             auto acceleration = getAccel();
 
-            NetworkTables::updateValue(ntPrefix + "/heading", Units::radToDeg(getHeading()));
-            NetworkTables::updateValue(ntPrefix + "/pitch", Units::radToDeg(getPitch()));
-            NetworkTables::updateValue(ntPrefix + "/roll", Units::radToDeg(getRoll()));
-            NetworkTables::updateValue(ntPrefix + "/yaw", Units::radToDeg(getYaw()));
-            NetworkTables::updateValue(ntPrefix + "/accelX", acceleration.x);
-            NetworkTables::updateValue(ntPrefix + "/accelY", acceleration.y);
-            NetworkTables::updateValue(ntPrefix + "/accelZ", acceleration.z);
+            NetworkTables::updateDoubleValue(ntPrefix + "/heading", Units::radToDeg(getHeading()));
+            NetworkTables::updateDoubleValue(ntPrefix + "/pitch", Units::radToDeg(getPitch()));
+            NetworkTables::updateDoubleValue(ntPrefix + "/roll", Units::radToDeg(getRoll()));
+            NetworkTables::updateDoubleValue(ntPrefix + "/yaw", Units::radToDeg(getYaw()));
+            NetworkTables::updateDoubleValue(ntPrefix + "/accelX", acceleration.x);
+            NetworkTables::updateDoubleValue(ntPrefix + "/accelY", acceleration.y);
+            NetworkTables::updateDoubleValue(ntPrefix + "/accelZ", acceleration.z);
         }
 
         void checkHealth() override

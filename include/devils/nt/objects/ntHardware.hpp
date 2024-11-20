@@ -29,7 +29,7 @@ namespace devils
             // Update network table
             NetworkTables::updateValue(ntPrefix + "/name", name);
             NetworkTables::updateValue(ntPrefix + "/type", type);
-            NetworkTables::updateValue(ntPrefix + "/port", std::to_string(port));
+            NetworkTables::updateIntValue(ntPrefix + "/port", port);
 
             // Serialize hardware
             serializeHardware(ntPrefix);

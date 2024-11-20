@@ -29,8 +29,8 @@ namespace devils
                 int index = i / DELTA_T;
 
                 // Update Network Table
-                NetworkTables::updateValue(networkTableKey + std::to_string(index) + "/x", pose.x);
-                NetworkTables::updateValue(networkTableKey + std::to_string(index) + "/y", pose.y);
+                NetworkTables::updateDoubleValue(networkTableKey + std::to_string(index) + "/x", pose.x);
+                NetworkTables::updateDoubleValue(networkTableKey + std::to_string(index) + "/y", pose.y);
             }
         }
 

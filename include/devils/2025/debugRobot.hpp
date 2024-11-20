@@ -43,8 +43,8 @@ namespace devils
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1);
                 leftX = JoystickCurve::curve(leftX, 3.0, 0.05);
 
-                NetworkTables::updateValue("Controls/LeftY", leftY);
-                NetworkTables::updateValue("Controls/LeftX", leftX);
+                NetworkTables::updateDoubleValue("Controls/LeftY", leftY);
+                NetworkTables::updateDoubleValue("Controls/LeftX", leftX);
 
                 // Move Chassis
                 chassis.move(leftY, leftX);

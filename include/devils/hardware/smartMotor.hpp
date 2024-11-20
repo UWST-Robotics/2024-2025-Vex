@@ -119,9 +119,9 @@ namespace devils
     protected:
         void serializeHardware(std::string &ntPrefix) override
         {
-            NetworkTables::updateValue(ntPrefix + "/temperature", getTemperature());
-            NetworkTables::updateValue(ntPrefix + "/position", getPosition());
-            NetworkTables::updateValue(ntPrefix + "/velocity", getVelocity());
+            NetworkTables::updateDoubleValue(ntPrefix + "/temperature", getTemperature());
+            NetworkTables::updateDoubleValue(ntPrefix + "/position", getPosition());
+            NetworkTables::updateDoubleValue(ntPrefix + "/velocity", getVelocity());
         }
 
         void checkHealth() override

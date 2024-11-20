@@ -28,8 +28,8 @@ namespace devils
             {
                 double proximity = sensor->getProximity();
                 isRingDetected = proximity > PROXIMITY_THRESHOLD;
-                NetworkTables::updateValue("RingDetected", isRingDetected);
-                NetworkTables::updateValue("Proximity", proximity);
+                NetworkTables::updateBoolValue("RingDetected", isRingDetected);
+                NetworkTables::updateDoubleValue("Proximity", proximity);
             }
             bool isGrabbed = isGoalGrabbed();
 

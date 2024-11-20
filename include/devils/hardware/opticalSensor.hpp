@@ -91,10 +91,10 @@ namespace devils
     protected:
         void serializeHardware(std::string &ntPrefix) override
         {
-            NetworkTables::updateValue(ntPrefix + "/proximity", getProximity() * 100);
-            NetworkTables::updateValue(ntPrefix + "/colorHue", getHue());
-            NetworkTables::updateValue(ntPrefix + "/colorSaturation", getSaturation() * 100);
-            NetworkTables::updateValue(ntPrefix + "/colorBrightness", getBrightness() * 100);
+            NetworkTables::updateDoubleValue(ntPrefix + "/proximity", getProximity() * 100);
+            NetworkTables::updateDoubleValue(ntPrefix + "/colorHue", getHue());
+            NetworkTables::updateDoubleValue(ntPrefix + "/colorSaturation", getSaturation() * 100);
+            NetworkTables::updateDoubleValue(ntPrefix + "/colorBrightness", getBrightness() * 100);
         }
 
         void checkHealth() override
