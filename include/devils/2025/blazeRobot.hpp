@@ -140,9 +140,29 @@ namespace devils
 
         NTOdom deadWheelOdomNT = NTOdom("DeadWheelOdom", deadWheelOdom);
 
+        // Autonomous Constants
+        AutoDriveToStep::Options highSpeed = {
+            1.0,  // accelDist
+            1.0,  // decelDist
+            0.8,  // maxSpeed
+            0.15, // minSpeed
+            2.0,  // rotationGain
+            1.0   // goalDist
+        };
+
+        AutoDriveToStep::Options slowSpeed = {
+            3.0,  // accelDist
+            16.0, // decelDist
+            0.3,  // maxSpeed
+            0.18, // minSpeed
+            2.0,  // rotationGain
+            0.3   // goalDist
+        };
+
         // Autonomous
         OdomSource &odometry = deadWheelOdom; // <-- Primary Odometry Source
         AutoStepList autoRoutine = AutoStepList({
+            new AutoJumpToStep(odometry, -64, 0, 0),
 
             // Section 1
             new AutoIntakeStep(intake, 0.5),
@@ -156,22 +176,29 @@ namespace devils
             new AutoRotateToStep(chassis, odometry, 0),
             new AutoDriveStep(chassis, odometry, 24.0), // 3
             new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
-            new AutoDriveStep(chassis, odometry, 12.0), // 4
-            new AutoDriveStep(chassis, odometry, -12.0),
+            new AutoDriveStep(chassis, odometry, 6.0), // 4
+            new AutoPauseStep(chassis, 1000),
+            new AutoDriveStep(chassis, odometry, -6.0),
             new AutoRotateToStep(chassis, odometry, M_PI),
             new AutoDriveStep(chassis, odometry, 48.0), // 5
             new AutoRotateToStep(chassis, odometry, M_PI * 0.75),
-            new AutoDriveStep(chassis, odometry, 34.0), // 6
+            new AutoDriveStep(chassis, odometry, 12.0), // 6
+
+            new AutoPauseStep(chassis, 1500),
+            new AutoDriveStep(chassis, odometry, 3.0),
+            new AutoDriveStep(chassis, odometry, -3.0),
+            new AutoPauseStep(chassis, 1500),
+
             new AutoDriveStep(chassis, odometry, -10.0),
             new AutoRotateToStep(chassis, odometry, M_PI * -0.25),
             new AutoDriveStep(chassis, odometry, -10.0),
             new AutoGrabMogoStep(conveyor, false),
 
-            new AutoDriveStep(chassis, odometry, 10.0),
+            new AutoDriveStep(chassis, odometry, 12.0),
             new AutoRotateToStep(chassis, odometry, 0),
             new AutoDriveStep(chassis, odometry, 48.0),
             new AutoRotateToStep(chassis, odometry, M_PI * 0.75),
-            new AutoDriveStep(chassis, odometry, -34.0),
+            new AutoDriveStep(chassis, odometry, -33.0),
             new AutoGrabMogoStep(conveyor, true),
             new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
             new AutoDriveStep(chassis, odometry, 24.0), // 1
@@ -179,15 +206,18 @@ namespace devils
             new AutoDriveStep(chassis, odometry, 24.0), // 2
             new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
             new AutoDriveStep(chassis, odometry, 24.0), // 3
-            new AutoRotateToStep(chassis, odometry, M_PI * -0.4),
+            new AutoRotateToStep(chassis, odometry, M_PI * -0.35),
             new AutoDriveStep(chassis, odometry, 24.0), // 4
             new AutoDriveStep(chassis, odometry, -24.0),
             new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
-            new AutoDriveStep(chassis, odometry, -48.0),
+            new AutoDriveStep(chassis, odometry, -24.0),
             new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
-            new AutoDriveStep(chassis, odometry, -34.0),
+            new AutoDriveStep(chassis, odometry, -10.0, highSpeed),
+            new AutoPauseStep(chassis, 1000),
+            new AutoDriveStep(chassis, odometry, 8.0, slowSpeed),
+            new AutoDriveStep(chassis, odometry, -8.0, highSpeed),
             new AutoGrabMogoStep(conveyor, false),
-
+            new AutoPauseStep(chassis, 1500),
             new AutoDriveStep(chassis, odometry, 24.0),
         });
     };
