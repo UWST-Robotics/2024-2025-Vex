@@ -32,6 +32,12 @@ namespace devils
 
             /// @brief Whether to use the minimum distance between the start and target
             bool useMinimumDistance = true;
+
+            /// @brief The default options for the rotational step.
+            static Options getDefault()
+            {
+                return Options();
+            }
         };
 
         /**
@@ -39,11 +45,17 @@ namespace devils
          * @param chassis The chassis to control.
          * @param odomSource The odometry source to use.
          * @param targetAngle The angle to rotate to in radians.
+         * @param options The options for the rotational step.
          */
-        AutoRotateToStep(ChassisBase &chassis, OdomSource &odomSource, double targetAngle)
+        AutoRotateToStep(
+            ChassisBase &chassis,
+            OdomSource &odomSource,
+            double targetAngle,
+            Options options = Options::getDefault())
             : chassis(chassis),
               odomSource(odomSource),
-              targetAngle(targetAngle)
+              targetAngle(targetAngle),
+              options(options)
         {
         }
 
@@ -93,7 +105,7 @@ namespace devils
 
     protected:
         // Options
-        Options options = Options();
+        Options options;
 
         // Robot Base
         ChassisBase &chassis;

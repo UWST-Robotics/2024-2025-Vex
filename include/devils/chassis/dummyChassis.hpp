@@ -60,9 +60,9 @@ namespace devils
         }
 
     private:
-        static constexpr double TRANSLATION_ACCEL = 0.5; // in/s^2
-        static constexpr double ROTATION_ACCEL = 0.05;   // rad/s^2
-        static constexpr double DRAG = 0.2;              // %
+        static constexpr double TRANSLATION_ACCEL = 0.4; // in/s^2
+        static constexpr double ROTATION_ACCEL = 0.04;   // rad/s^2
+        static constexpr double DRAG = 0.25;             // %
 
         double lastForward = 0;
         double lastTurn = 0;

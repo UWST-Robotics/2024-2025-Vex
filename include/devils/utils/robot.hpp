@@ -39,6 +39,6 @@ namespace devils
         pros::Controller partnerController = pros::Controller(pros::E_CONTROLLER_PARTNER);
 
         /// @brief Network Table Service
-        // NTService &networkService = NTService::getInstance();
+        NTService networkService = NTService();
     };
 }

@@ -20,8 +20,8 @@ namespace devils
          * @param rightMotorPorts The ports of the right motors. Negative ports are reversed.
          */
         TankChassis(
-            SmartMotorGroup leftMotors,
-            SmartMotorGroup rightMotors)
+            SmartMotorGroup &leftMotors,
+            SmartMotorGroup &rightMotors)
             : leftMotors(leftMotors),
               rightMotors(rightMotors)
         {

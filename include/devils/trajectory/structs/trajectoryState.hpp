@@ -25,13 +25,13 @@ namespace devils
         Pose currentPose = Pose(0, 0, 0);
 
         /**
-         * Interpolates between two trajectory states.
+         * Linearly interpolates between two trajectory states.
          * Starts with the current state and interpolates to the end state.
          * @param endState The end state
          * @param t The time to interpolate to. 0 is the current state, 1 is the end state.
          * @return The interpolated state
          */
-        TrajectoryState interpolate(TrajectoryState *endState, double t)
+        TrajectoryState lerp(TrajectoryState *endState, double t)
         {
             TrajectoryState interpolatedState;
 
@@ -40,7 +40,7 @@ namespace devils
             interpolatedState.velocity = std::lerp(velocity, endState->velocity, t);
             interpolatedState.acceleration = std::lerp(acceleration, endState->acceleration, t);
             interpolatedState.jerk = std::lerp(jerk, endState->jerk, t);
-            interpolatedState.currentPose = currentPose.interpolate(endState->currentPose, t);
+            interpolatedState.currentPose = currentPose.lerp(endState->currentPose, t);
 
             return interpolatedState;
         }

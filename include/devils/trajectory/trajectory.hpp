@@ -51,7 +51,7 @@ namespace devils
             double dt = (t - prevState->time) / (nextState->time - prevState->time);
 
             // Interpolate between the two states
-            return prevState->interpolate(nextState, dt);
+            return prevState->lerp(nextState, dt);
         }
 
         /**

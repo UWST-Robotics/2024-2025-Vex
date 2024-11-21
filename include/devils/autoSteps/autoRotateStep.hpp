@@ -19,9 +19,14 @@ namespace devils
          * @param chassis The chassis to control.
          * @param odomSource The odometry source to use.
          * @param distance The distance to rotate in radians.
+         * @param options The options for the rotational step.
          */
-        AutoRotateStep(ChassisBase &chassis, OdomSource &odomSource, double distance)
-            : AutoRotateToStep(chassis, odomSource, distance),
+        AutoRotateStep(
+            ChassisBase &chassis,
+            OdomSource &odomSource,
+            double distance,
+            Options options = Options::getDefault())
+            : AutoRotateToStep(chassis, odomSource, distance, options),
               distance(distance)
         {
         }

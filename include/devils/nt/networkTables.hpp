@@ -13,6 +13,9 @@ namespace devils
     class NetworkTables
     {
     public:
+        // Delete Constructor
+        NetworkTables() = delete;
+
         /**
          * Resets all values in the network table.
          * Should be called at the start of runtime.

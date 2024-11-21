@@ -13,14 +13,14 @@ namespace devils
     class NTService : public Runnable
     {
     public:
-        /**
-         * Gets the singleton instance of the network service.
-         * @return The singleton instance of the network service.
-         */
-        static NTService &getInstance()
+        // Constructor
+        NTService()
         {
-            static NTService instance;
-            return instance;
+            // Call Reset
+            NetworkTables::reset();
+
+            // Run on startup
+            runAsync();
         }
 
         /**
@@ -37,18 +37,5 @@ namespace devils
                 if (obj->isDirty())
                     obj->runSerialization();
         }
-
-    private:
-        // Singleton Constructor
-        NTService()
-        {
-            // Run on startup
-            runAsync();
-        }
-
-    public:
-        // Prevent copying
-        NTService(NTService const &) = delete;
-        void operator=(NTService const &) = delete;
     };
 }

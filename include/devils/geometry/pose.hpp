@@ -124,13 +124,13 @@ namespace devils
         }
 
         /**
-         * Interpolates between two poses
+         * Linearly interpolates between two poses
          * Starts with the current pose and interpolates to the end pose
          * @param endPose The end pose
          * @param t The time to interpolate to. 0 is the current pose, 1 is the end pose.
          * @return The interpolated pose
          */
-        Pose interpolate(Pose endPose, double t)
+        Pose lerp(Pose endPose, double t)
         {
             // Calculate the interpolated pose
             Pose interpolatedPose;

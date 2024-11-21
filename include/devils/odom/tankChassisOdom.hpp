@@ -63,6 +63,6 @@ namespace devils
     private:
         double ticksPerRevolution = 300.0 * (48.0 / 36.0); // ticks
         TankChassis &chassis;
-        IMU *imu;
+        IMU *imu = nullptr;
     };
 }

@@ -27,13 +27,19 @@ namespace devils
             double maxSpeed = 0.5;
 
             /// @brief The minimum speed in %
-            double minSpeed = 0.15;
+            double minSpeed = 0.18;
 
             /// @brief The gain for rotation in %/rad
             double rotationGain = 2.0;
 
             /// @brief The distance to the goal in inches
             double goalDist = 0.5;
+
+            /// @brief The default options for the drive step.
+            static Options getDefault()
+            {
+                return Options();
+            }
         };
 
         /**
@@ -47,11 +53,11 @@ namespace devils
             ChassisBase &chassis,
             OdomSource &odomSource,
             Pose targetPose,
-            Options *options = nullptr)
+            Options options = Options::getDefault())
             : chassis(chassis),
               odomSource(odomSource),
               targetPose(targetPose),
-              options(options == nullptr ? Options() : *options)
+              options(options)
         {
         }
 
@@ -116,14 +122,9 @@ namespace devils
             chassis.stop();
         }
 
-        Options &getOptions()
-        {
-            return options;
-        }
-
     protected:
         // Options
-        Options options = Options();
+        Options options;
 
         // Robot Base
         ChassisBase &chassis;

@@ -105,5 +105,35 @@ namespace devils
             dist = signedMod(dist + M_PI, 2 * M_PI) - M_PI;
             return dist;
         }
+
+        /**
+         * Calculates the end velocity over a specified distance given initial velocity and acceleration.
+         * @param initialVelocity The initial velocity in units per second.
+         * @param acceleration Constant acceleration in units per second squared.
+         * @param distance The distance in units.
+         */
+        static double velocityOverDist(
+            double initialVelocity,
+            double acceleration,
+            double distance)
+        {
+            return std::sqrt(
+                initialVelocity * initialVelocity +
+                2 * acceleration * distance);
+        }
+
+        /**
+         * Calculates the acceleration over a specified distance given initial and final velocities.
+         * @param initialVelocity The initial velocity in units per second.
+         * @param finalVelocity The final velocity in units per second.
+         * @param distance The distance in units.
+         */
+        static double accelOverDist(
+            double initialVelocity,
+            double finalVelocity,
+            double distance)
+        {
+            return (finalVelocity * finalVelocity - initialVelocity * initialVelocity) / (2 * distance);
+        }
     };
 }

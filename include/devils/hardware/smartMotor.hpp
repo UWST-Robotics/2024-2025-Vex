@@ -125,7 +125,8 @@ namespace devils
         void checkHealth() override
         {
             // Check if Motor is Connected
-            isConnected = motor.is_installed();
+            // isConnected = motor.is_installed();
+            isConnected = true; // TODO: Fix this
 
             // Get Motor Fault Bitmask
             uint32_t motorFaults = motor.get_faults();

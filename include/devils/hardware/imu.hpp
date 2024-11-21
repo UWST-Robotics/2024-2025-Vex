@@ -31,6 +31,9 @@ namespace devils
                 reportFault("Invalid port");
         }
 
+        IMU(const IMU &) = delete;
+        IMU &operator=(const IMU &) = delete;
+
         /**
          * Converts heading to an `OdomSource` at (0, 0).
          * @param heading The heading to convert to an `OdomSource`.
@@ -74,6 +77,7 @@ namespace devils
          */
         double getHeading()
         {
+            errno = 0;
             double heading = imu.get_rotation();
             if (heading == PROS_ERR_F)
             {
@@ -164,7 +168,7 @@ namespace devils
          */
         void waitUntilCalibrated()
         {
-            while (imu.is_calibrating() && imu.is_installed())
+            while (imu.is_calibrating())
                 pros::delay(20);
         }
 

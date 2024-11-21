@@ -35,6 +35,7 @@ namespace devils
          */
         double getAngle()
         {
+            errno = 0;
             double angle = rotationSensor.get_position();
             if (angle == PROS_ERR)
             {

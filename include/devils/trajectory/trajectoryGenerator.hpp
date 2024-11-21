@@ -20,7 +20,6 @@ namespace devils
         Trajectory generateTrajectory(Path *path)
         {
             // Initialize the trajectory
-            double t = 0;
             std::vector<TrajectoryState *> trajectoryStates;
             trajectoryStates.reserve(path->getLength() / DELTA_T);
 
@@ -28,7 +27,7 @@ namespace devils
             TrajectoryState *prevState = new TrajectoryState();
             prevState->currentPose = path->getPoseAt(0);
             prevState->acceleration = constraints.maxAcceleration;
-            prevState->velocity = 0; // TODO: Set initial velocity
+            prevState->velocity = constraints.initialVelocity;
             trajectoryStates.push_back(prevState);
 
             // Run Forward Pass
@@ -37,6 +36,7 @@ namespace devils
                 // Create new state
                 TrajectoryState *state = new TrajectoryState();
                 state->currentPose = path->getPoseAt(i);
+                state->time = i;
                 trajectoryStates.push_back(state);
 
                 // Forward pass
@@ -51,12 +51,10 @@ namespace devils
             {
                 // Create new state
                 TrajectoryState *state = trajectoryStates[i];
+                TrajectoryState *nextState = trajectoryStates[i + 1];
 
                 // Backward pass
-                backwardPass(prevState, state);
-
-                // Update previous state
-                prevState = state;
+                backwardPass(state, nextState);
             }
 
             return Trajectory(trajectoryStates);
@@ -77,75 +75,32 @@ namespace devils
          * Runs a forward pass given a previous and current state.
          * States are modified in place to meet constraints.
          * @param prevState The previous state
-         * @param state The current state
+         * @param nextState The next state
          */
         void forwardPass(
             TrajectoryState *prevState,
-            TrajectoryState *state)
+            TrajectoryState *nextState)
         {
             // Calculate distance between states
-            double distance = state->currentPose.distanceTo(prevState->currentPose);
+            double distance = nextState->currentPose.distanceTo(prevState->currentPose);
 
-            // Contunuously iterate until we reach desired constraints
-            while (true)
-            {
-                // Calculate current velocity from previous acceleration
-                // v_f = sqrt(v_i^2 + 2 * a * d)
-                state->velocity = sqrt(
-                    prevState->velocity * prevState->velocity +
-                    2 * prevState->acceleration * distance);
-
-                // Constrain velocity
-                state->velocity = std::min(state->velocity, constraints.maxVelocity);
-
-                // Default to max acceleration
-                // This will be modified in subsequent iterations
-                state->acceleration = constraints.maxAcceleration;
-
-                // TODO: Constain velocity here to other models
-                // TODO: Constain acceleration here to other models
-
-                // If we are within epsilon, assume we are done
-                // This is to prevent division by zero or
-                // errors caused by decimal precision
-                if (distance < constraints.epsilon)
-                    break;
-
-                // Calculate actual acceleration between previous and current velocity
-                // a = (v_f^2 - v_i^2) / (2 * d)
-                double actualAcceleration = (state->velocity * state->velocity -
-                                             prevState->velocity * prevState->velocity) /
-                                            (2 * distance);
-
-                // If the actual acceleration is within accel constraints, we're good
-                bool isWithinConstaints = actualAcceleration - constraints.epsilon <= constraints.maxAcceleration;
-                if (isWithinConstaints)
-                    break;
-
-                // Otherwise, reduce previous acceleration and try again
-                prevState->acceleration = actualAcceleration;
-            }
+            // TODO: Implement forward pass
         }
 
         /**
          * Runs a backward pass given a previous and current state.
          * States are modified in place to meet constraints.
          * @param prevState The previous state
-         * @param state The current state
+         * @param nextState The next state
          */
         void backwardPass(
             TrajectoryState *prevState,
-            TrajectoryState *state)
+            TrajectoryState *nextState)
         {
-            // Calculate distance
-            double distance = state->currentPose.distanceTo(prevState->currentPose);
+            // Calculate distance between states
+            double distance = nextState->currentPose.distanceTo(prevState->currentPose);
 
-            // Iterate until we reach desired constraints
-            while (true)
-            {
-                // TODO: Implement backward pass
-                break;
-            }
+            // TODO: Implement backward pass
         }
 
         constexpr static double DELTA_T = 0.01;

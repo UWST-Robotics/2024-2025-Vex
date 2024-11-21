@@ -41,12 +41,11 @@ namespace devils
          * Value is sent to the network table and logged.
          * @param fault The fault to set
          */
-        void reportFault(std::string fault)
+        void reportFault(std::string fault, int code = 0)
         {
-            isFaulted = true;
             NetworkTables::updateValue(ntPrefix + "/faults", fault);
             if (LOGGING_ENABLED)
-                Logger::error(name + ": " + fault);
+                Logger::error(name + ": " + fault + " (" + std::to_string(code) + ")");
         }
 
         /**
@@ -54,30 +53,28 @@ namespace devils
          */
         void clearFaults()
         {
-            isFaulted = false;
-            NetworkTables::updateValue(ntPrefix + "/faults", "");
+            NetworkTables::updateBoolValue(ntPrefix + "/faults", false);
         }
 
         /**
          * Called every interval to serialize the hardware to the network table.
          * @param ntPrefix The network table prefix
          */
-        virtual void serializeHardware(std::string &ntPrefix) = 0;
+        virtual void serializeHardware(std::string &ntPrefix) {};
 
         /**
          * Called every interval to check the health of the hardware.
          * This should call `reportFault` if any fault is detected.
          */
-        virtual void checkHealth() = 0;
+        virtual void checkHealth() {};
 
     private:
-        static constexpr bool LOGGING_ENABLED = true;
+        static constexpr bool LOGGING_ENABLED = false;
 
         const std::string name = "";
         const std::string type = "";
         const int8_t port = 0;
 
         std::string ntPrefix = "";
-        bool isFaulted = false;
     };
 }

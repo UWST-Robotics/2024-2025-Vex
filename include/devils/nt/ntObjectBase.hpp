@@ -18,7 +18,7 @@ namespace devils
         NTObjectBase()
         {
             mutex.take(0);
-            // allNetworkObjects.insert(this);
+            allNetworkObjects.insert(this);
             mutex.give();
         }
 
@@ -26,7 +26,7 @@ namespace devils
         NTObjectBase(NTObjectBase const &)
         {
             mutex.take(0);
-            // allNetworkObjects.insert(this);
+            allNetworkObjects.insert(this);
             mutex.give();
         }
 
@@ -80,7 +80,7 @@ namespace devils
          * Should be implemented by child classes to serialize the object.
          * Child classes can call the `NetworkTable::UpdateValue` method to update the data.
          */
-        virtual void serialize() = 0;
+        virtual void serialize() {};
 
     private:
         static NetworkObjectList allNetworkObjects;

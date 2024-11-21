@@ -42,7 +42,14 @@ namespace devils
                     onStart();
                     while (true)
                     {
-                        onUpdate();
+                        try
+                        {
+                            onUpdate();
+                        }
+                        catch (const std::exception &e)
+                        {
+                            Logger::error("An error occurred in a Runnable task: " + std::string(e.what()));
+                        }
                         pros::delay(updateInterval);
                     }
                 });

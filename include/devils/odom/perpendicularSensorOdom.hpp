@@ -36,17 +36,23 @@ namespace devils
          */
         void onUpdate()
         {
-            // Get Sensor Angles in Radians
-            double verticalRads = verticalSensor.getAngle();
-            double horizontalRads = horizontalSensor.getAngle();
+
+            // Get Sensor Angles in Degrees
+            double verticalRotations = verticalSensor.getAngle() / (2 * M_PI);
+            if (errno != 0)
+                return;
+
+            double horizontalRotations = horizontalSensor.getAngle() / (2 * M_PI);
+            if (errno != 0)
+                return;
 
             // Get Delta Time
             uint32_t deltaT = lastUpdateTimestamp - pros::millis();
             lastUpdateTimestamp = pros::millis();
 
-            // Get Circumference Distance
-            double vertical = verticalRads * wheelRadius;
-            double horizontal = verticalRads * wheelRadius;
+            // Get Distance traveled over circumference
+            double vertical = verticalRotations * wheelRadius * 2 * M_PI;
+            double horizontal = horizontalRotations * wheelRadius * 2 * M_PI;
 
             // Get Delta Distance
             double deltaVertical = vertical - lastVertical;
@@ -54,9 +60,25 @@ namespace devils
             lastVertical = vertical;
             lastHorizontal = horizontal;
 
-            // Append to Pose
-            currentPose.x += deltaVertical;
-            currentPose.y += deltaHorizontal;
+            // Update IMU
+            if (imu != nullptr)
+            {
+                double heading = imu->getHeading();
+                if (errno == 0)
+                    currentPose.rotation = heading;
+            }
+
+            // Calculate trigonometric values
+            double rotation = currentPose.rotation;
+            double sin = std::sin(rotation);
+            double cos = std::cos(rotation);
+
+            double deltaX = deltaVertical * cos + deltaHorizontal * sin;
+            double deltaY = deltaVertical * sin - deltaHorizontal * cos;
+
+            // Update Pose
+            currentPose.x += deltaX;
+            currentPose.y += deltaY;
         }
 
         /**
@@ -87,9 +109,9 @@ namespace devils
 
     private:
         const double wheelRadius;
-
         RotationSensor &verticalSensor;
         RotationSensor &horizontalSensor;
+
         IMU *imu = nullptr;
 
         Pose currentPose = Pose();
