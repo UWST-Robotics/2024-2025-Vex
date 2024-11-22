@@ -34,6 +34,7 @@ namespace devils
         void autonomous() override
         {
             conveyor.runAsync();
+
             intakeLauncher.extend();
             imu.calibrate();
             imu.waitUntilCalibrated();

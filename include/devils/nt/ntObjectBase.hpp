@@ -70,6 +70,10 @@ namespace devils
             lastSerializationTime = pros::millis();
         }
 
+        /**
+         * Gets a list of all network objects.
+         * @return A list of all network objects.
+         */
         static NetworkObjectList *getAllNetworkObjects()
         {
             return &allNetworkObjects;

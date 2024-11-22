@@ -9,11 +9,17 @@
 
 namespace devils
 {
+    // Forward Declaration
+    class AbsoluteStepConverter;
+
     /**
      * Represents a drive step in an autonomous routine.
      */
     class AutoDriveStep : public AutoDriveToStep
     {
+        // Allow the absolute step converter to access private members
+        friend class AbsoluteStepConverter;
+
     public:
         /**
          * Creates a new drive step.

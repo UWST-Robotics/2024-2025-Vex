@@ -8,11 +8,17 @@
 
 namespace devils
 {
+    // Forward Declaration
+    class AbsoluteStepConverter;
+
     /**
      * Represents a rotational step in an autonomous routine.
      */
     class AutoRotateStep : public AutoRotateToStep
     {
+        // Allow the absolute step converter to access private members
+        friend class AbsoluteStepConverter;
+
     public:
         /**
          * Creates a new rotational step.
@@ -39,6 +45,15 @@ namespace devils
 
             // Do base step
             AutoRotateToStep::doStep();
+        }
+
+        /**
+         * Gets the distance of the step in radians.
+         * @return The distance of the step in radians.
+         */
+        double getDistance()
+        {
+            return distance;
         }
 
     protected:

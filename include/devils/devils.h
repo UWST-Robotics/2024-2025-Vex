@@ -70,3 +70,4 @@
 #include "autoSteps/autoRotateToStep.hpp"
 #include "autoSteps/autoPauseStep.hpp"
 #include "autoSteps/autoJumpToStep.hpp"
+#include "autoSteps/absoluteStepConverter.hpp"

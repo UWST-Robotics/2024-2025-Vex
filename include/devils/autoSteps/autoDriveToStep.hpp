@@ -9,11 +9,17 @@
 
 namespace devils
 {
+    // Forward Declaration
+    class AbsoluteStepConverter;
+
     /**
      * Represents a drive step in an autonomous routine.
      */
     class AutoDriveToStep : public IAutoStep
     {
+        // Allow the absolute step converter to access private members
+        friend class AbsoluteStepConverter;
+
     public:
         struct Options
         {
@@ -30,7 +36,7 @@ namespace devils
             double minSpeed = 0.18;
 
             /// @brief The gain for rotation in %/rad
-            double rotationGain = 0.01;
+            double rotationGain = 0.2;
 
             /// @brief The distance to the goal in inches
             double goalDist = 1.0;
@@ -65,6 +71,7 @@ namespace devils
         {
             // Calculate Target Pose
             Pose startPose = odomSource.getPose();
+            double totalDistance = startPose.distanceTo(targetPose);
 
             // Control Loop
             while (true)
@@ -72,7 +79,10 @@ namespace devils
                 // Calculate distance to start and target
                 Pose currentPose = odomSource.getPose();
                 double distanceToStart = currentPose.distanceTo(startPose);
-                double distanceToTarget = currentPose.distanceTo(targetPose);
+                double distanceToTarget = Math::distanceOnLine(
+                    startPose,
+                    targetPose,
+                    currentPose);
 
                 // Calculate Dot Product
                 double dot = cos(currentPose.rotation) *
@@ -106,6 +116,13 @@ namespace devils
 
                 // Calculate Turn Speed
                 double turnSpeed = options.rotationGain * angleDiff;
+
+                // Calculate Distance Percent
+                double distancePercent = std::fabs(distanceToTarget / totalDistance);
+                distancePercent = std::clamp(distancePercent, 0.0, 1.0);
+
+                // Calculate
+                turnSpeed *= distancePercent;
                 turnSpeed = std::clamp(turnSpeed, -options.maxSpeed, options.maxSpeed);
 
                 // Check if we are at the target

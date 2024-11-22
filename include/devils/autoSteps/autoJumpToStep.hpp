@@ -5,11 +5,17 @@
 
 namespace devils
 {
+    // Forward Declaration
+    class AbsoluteStepConverter;
+
     /**
      * Represents a pause step in an autonomous routine.
      */
     class AutoJumpToStep : public IAutoStep
     {
+        // Allow the absolute step converter to access private members
+        friend class AbsoluteStepConverter;
+
     public:
         /**
          * Creates a new pause step.

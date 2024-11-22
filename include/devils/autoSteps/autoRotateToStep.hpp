@@ -7,11 +7,17 @@
 
 namespace devils
 {
+    // Forward Declaration
+    class AbsoluteStepConverter;
+
     /**
      * Represents a rotational step in an autonomous routine.
      */
     class AutoRotateToStep : public IAutoStep
     {
+        // Allow the absolute step converter to access private members
+        friend class AbsoluteStepConverter;
+
     public:
         struct Options
         {

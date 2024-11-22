@@ -135,5 +135,28 @@ namespace devils
         {
             return (finalVelocity * finalVelocity - initialVelocity * initialVelocity) / (2 * distance);
         }
+
+        /**
+         * Calculates the distance between b and c along the line defined by a and b.
+         * @param a The first point on the line.
+         * @param b The second point on the line. Also the point to measure from.
+         * @param c The point to measure to.
+         * @return The distance between b and c along the line defined by a and b.
+         */
+        static double distanceOnLine(
+            Vector2 a,
+            Vector2 b,
+            Vector2 c)
+        {
+            double numerator = (c.x - a.x) * (b.x - a.x) + (c.y - a.y) * (b.y - a.y);
+            double denominator = (b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y);
+            double t = numerator / denominator;
+
+            double x = (b.x - ((1 - t) * a.x + t * b.x));
+            double y = (b.y - ((1 - t) * a.y + t * b.y));
+            double distance = std::sqrt(x * x + y * y);
+
+            return distance;
+        }
     };
 }

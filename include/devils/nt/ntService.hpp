@@ -14,13 +14,14 @@ namespace devils
     {
     public:
         // Constructor
-        NTService()
+        NTService() : Runnable(100)
         {
             // Call Reset
             NetworkTables::reset();
 
             // Run on startup
-            runAsync();
+            if (ENABLE_SERVICE)
+                runAsync();
         }
 
         /**
@@ -29,7 +30,7 @@ namespace devils
         void onUpdate() override
         {
             // Heartbeat
-            NetworkTables::sendHeartbeat();
+            // NetworkTables::sendHeartbeat();
 
             // Serialize all network objects
             auto allNetworkObjects = NTObjectBase::getAllNetworkObjects();
@@ -37,5 +38,8 @@ namespace devils
                 if (obj->isDirty())
                     obj->runSerialization();
         }
+
+    private:
+        static constexpr bool ENABLE_SERVICE = true;
     };
 }

@@ -43,19 +43,17 @@ namespace devils
          * @param key The key to update including the full path. (e.g. "/devils/robot/position/x")
          * @param value The value to update.
          */
-        static void updateValue(std::string key, std::string value)
+        static void updateValue(const std::string key, const std::string value)
         {
             // Check if the value has changed
-            for (auto &pair : cache)
-                if (pair.first == key && pair.second == value)
-                    return;
+            if (cache[key] == value)
+                return;
 
             // Update the cache
             cache[key] = value;
 
             // Send the update over serial
             std::cout << "__NTUPDATE__ " << key << " " << value << std::endl;
-            // printf("__NTUPDATE__ %s %s\n", key.c_str(), value.c_str());
         }
 
         /**
@@ -63,7 +61,7 @@ namespace devils
          * @param key The key to update including the full path. (e.g. "/devils/robot/position/x")
          * @param value The value to update.
          */
-        static void updateDoubleValue(std::string key, double value)
+        static void updateDoubleValue(const std::string key, const double value)
         {
             updateValue(key, std::to_string(value));
         }
@@ -73,7 +71,7 @@ namespace devils
          * @param key The key to update including the full path. (e.g. "/devils/robot/position/x")
          * @param value The value to update.
          */
-        static void updateIntValue(std::string key, int value)
+        static void updateIntValue(const std::string key, const int value)
         {
             updateValue(key, std::to_string(value));
         }
@@ -83,7 +81,7 @@ namespace devils
          * @param key The key to update including the full path. (e.g. "/devils/robot/position/x")
          * @param value The value to update.
          */
-        static void updateBoolValue(std::string key, bool value)
+        static void updateBoolValue(const std::string key, const bool value)
         {
             updateValue(key, value ? "true" : "false");
         }

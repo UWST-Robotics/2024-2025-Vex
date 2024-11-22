@@ -21,6 +21,26 @@ namespace devils
         }
 
         /**
+         * Creates a new instance of AutoStepList.
+         * @param steps The steps to execute.
+         * @param loopCount The number of times to loop through the steps.
+         */
+        AutoStepList(std::vector<IAutoStep *> steps, int loopCount = 1)
+            : steps(steps), loopCount(loopCount)
+        {
+        }
+
+        /**
+         * Destroys the AutoStepList and all steps in it.
+         */
+        ~AutoStepList()
+        {
+            // Steps were created with new, so delete them
+            for (auto step : steps)
+                delete step;
+        }
+
+        /**
          * Executes all steps in the list as a pros task.
          * This function will block until all steps are complete.
          */
@@ -30,12 +50,18 @@ namespace devils
             {
                 for (int o = 0; o < steps.size(); o++)
                 {
-                    // Debug
-                    NetworkTables::updateIntValue("CurrentStep", o);
-                    NetworkTables::updateIntValue("CurrentLoop", i);
                     steps[o]->doStep();
                 }
             }
+        }
+
+        /**
+         * Gets all the steps in the list.
+         * @return The steps in the list.
+         */
+        std::vector<IAutoStep *> &getAllSteps()
+        {
+            return steps;
         }
 
     private:
