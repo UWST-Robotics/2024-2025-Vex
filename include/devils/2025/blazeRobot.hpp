@@ -94,7 +94,7 @@ namespace devils
                 chassis.move(leftY, rightX);
 
                 // Delay to prevent the CPU from being overloaded
-                pros::delay(10);
+                pros::delay(20);
             }
         }
 

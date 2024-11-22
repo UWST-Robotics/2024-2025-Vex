@@ -34,7 +34,7 @@ namespace devils
         /**
          * Updates the odometry from vertical and horizontal tracking wheels.
          */
-        void onUpdate()
+        void onUpdate() override
         {
 
             // Get Sensor Angles in Degrees

@@ -30,10 +30,10 @@ namespace devils
             double minSpeed = 0.18;
 
             /// @brief The gain for rotation in %/rad
-            double rotationGain = 2.0;
+            double rotationGain = 0.01;
 
             /// @brief The distance to the goal in inches
-            double goalDist = 0.5;
+            double goalDist = 1.0;
 
             /// @brief The default options for the drive step.
             static Options getDefault()
@@ -106,6 +106,7 @@ namespace devils
 
                 // Calculate Turn Speed
                 double turnSpeed = options.rotationGain * angleDiff;
+                turnSpeed = std::clamp(turnSpeed, -options.maxSpeed, options.maxSpeed);
 
                 // Check if we are at the target
                 if (fabs(distanceToTarget) < options.goalDist)
@@ -120,6 +121,8 @@ namespace devils
 
             // Stop
             chassis.stop();
+
+            pros::delay(POST_DRIVE_DELAY);
         }
 
     protected:
@@ -132,5 +135,8 @@ namespace devils
 
         // Drive Step Variables
         Pose targetPose = Pose();
+
+    private:
+        static constexpr double POST_DRIVE_DELAY = 500; // ms
     };
 }

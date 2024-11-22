@@ -34,8 +34,6 @@ namespace devils
             {
                 double proximity = sensor->getProximity();
                 isRingDetected = proximity > PROXIMITY_THRESHOLD;
-                NetworkTables::updateBoolValue("RingDetected", isRingDetected);
-                NetworkTables::updateDoubleValue("Proximity", proximity);
             }
             bool isGrabbed = isGoalGrabbed();
             bool isForwards = targetSpeed > 0;
@@ -85,8 +83,13 @@ namespace devils
          */
         void setGoalGrabbed(bool isGrabbed)
         {
+            // Update the mogo actuation time
+            bool didChange = isGrabbed != isGoalGrabbed();
+            if (didChange)
+                mogoActuationTime = pros::millis();
+
+            // Actuate the grabber
             grabberPneumatic.setExtended(isGrabbed);
-            mogoActuationTime = pros::millis();
         }
 
         /**
@@ -102,7 +105,7 @@ namespace devils
         static constexpr double PROXIMITY_THRESHOLD = 0.3;
         static constexpr double NO_MOGO_CONVEYOR_SPEED = 0.6;
         static constexpr double MOGO_CONVEYOR_SPEED = 1.0;
-        static constexpr double MOGO_ACTUATION_DELAY = 300;
+        static constexpr double MOGO_ACTUATION_DELAY = 600;
 
         int mogoActuationTime = 0;
 

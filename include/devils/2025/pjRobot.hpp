@@ -22,6 +22,7 @@ namespace devils
 
             // Initialize Hardware
             imu.calibrate();
+            imu.setHeadingScale(IMU_HEADING_SCALE);
 
             // Initialize Subsystems
             conveyor.useSensor(&opticalSensor);
@@ -34,6 +35,7 @@ namespace devils
         {
             conveyor.runAsync();
             intakeLauncher.extend();
+            imu.calibrate();
             imu.waitUntilCalibrated();
             imu.setHeading(0);
 
@@ -45,7 +47,7 @@ namespace devils
             // Stop Autonomous Tasks
             conveyor.stopAsync();
 
-            double intakeSpeed = 0.5;
+            double intakeSpeed = 1.0;
             intakeLauncher.extend();
 
             // Loop
@@ -73,18 +75,11 @@ namespace devils
                 if (grabInput)
                     conveyor.setGoalGrabbed(!conveyor.isGoalGrabbed());
 
-                // Debug Intake Speed
-                if (intakeSpeedUp)
-                    intakeSpeed += 0.05;
-                else if (intakeSpeedDown)
-                    intakeSpeed -= 0.05;
-                mainController.print(0, 0, "Intake Speed: %f", intakeSpeed);
-
                 // Move Chassis
                 chassis.move(leftY, leftX);
 
                 // Delay to prevent the CPU from being overloaded
-                pros::delay(10);
+                pros::delay(20);
             }
         }
 
@@ -103,6 +98,7 @@ namespace devils
         static constexpr double WHEEL_RADIUS = 1.625;                         // in
         static constexpr double WHEEL_BASE = 12.0;                            // in
         static constexpr double DEAD_WHEEL_RADIUS = 1.0;                      // in
+        static constexpr double IMU_HEADING_SCALE = 1.014;                    // %
 
         // Hardware
         ADIPneumatic grabberPneumatic = ADIPneumatic("GrabberPneumatic", 1);
@@ -132,7 +128,7 @@ namespace devils
             1.0,  // decelDist
             0.8,  // maxSpeed
             0.15, // minSpeed
-            2.0,  // rotationGain
+            0.5,  // rotationGain
             1.0   // goalDist
         };
 
@@ -141,7 +137,7 @@ namespace devils
             16.0, // decelDist
             0.3,  // maxSpeed
             0.18, // minSpeed
-            2.0,  // rotationGain
+            0.5,  // rotationGain
             0.3   // goalDist
         };
 
@@ -152,39 +148,49 @@ namespace devils
             new AutoJumpToStep(odometry, -64, -48, 0),
 
             // Section 1
-            new AutoIntakeStep(intake, 0.5),
+            new AutoIntakeStep(intake, 1.0),
             new AutoDriveStep(chassis, odometry, 15.0), // 1
             new AutoRotateToStep(chassis, odometry, M_PI),
-            new AutoDriveStep(chassis, odometry, -23.0),
+            new AutoDriveStep(chassis, odometry, -29.0),
             new AutoGrabMogoStep(conveyor, true),
+            new AutoDriveStep(chassis, odometry, 6.0),
             new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
+            new AutoPauseStep(chassis, 500),
             new AutoDriveStep(chassis, odometry, 23.0), // 2
+            new AutoPauseStep(chassis, 500),
             new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
-            new AutoDriveStep(chassis, odometry, 44.0), // 3
+            new AutoDriveStep(chassis, odometry, 45.0), // 3
 
             new AutoPauseStep(chassis, 2000),
-            new AutoDriveStep(chassis, odometry, 3.0),
-            new AutoDriveStep(chassis, odometry, -3.0),
+            new AutoDriveStep(chassis, odometry, -4.0),
+            new AutoDriveStep(chassis, odometry, 4.0),
             new AutoPauseStep(chassis, 2000),
 
-            new AutoDriveStep(chassis, odometry, -12.0),
+            new AutoDriveStep(chassis, odometry, -11.0),
             new AutoRotateToStep(chassis, odometry, M_PI * 0.25),
-            new AutoDriveStep(chassis, odometry, -14.0),
+            new AutoDriveStep(chassis, odometry, -12.0),
             new AutoGrabMogoStep(conveyor, false),
+            new AutoPauseStep(chassis, 1000),
 
             // Section 2
             new AutoDriveStep(chassis, odometry, 10.0),
             new AutoRotateToStep(chassis, odometry, 0),
-            new AutoDriveStep(chassis, odometry, 48.0),
-            new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
-            new AutoDriveStep(chassis, odometry, 6.0),
+            new AutoDriveStep(chassis, odometry, 44.0),
 
-            // Section 3
-            new AutoDriveStep(chassis, odometry, -6.0),
+            new AutoPauseStep(chassis, 1000),
+            new AutoDriveStep(chassis, odometry, -20.0),
+            new AutoRotateToStep(chassis, odometry, M_PI * -0.15),
+            new AutoPauseStep(chassis, 1000),
+            new AutoDriveStep(chassis, odometry, 18.0),
+            new AutoPauseStep(chassis, 1000),
+            new AutoDriveStep(chassis, odometry, -18.0),
+            new AutoRotateToStep(chassis, odometry, 0),
+            new AutoDriveStep(chassis, odometry, 24.0),
+
             new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
             new AutoDriveStep(chassis, odometry, -34.0),
             new AutoGrabMogoStep(conveyor, true),
-            new AutoRotateToStep(chassis, odometry, M_PI * 0.7),
+            new AutoRotateToStep(chassis, odometry, M_PI * 0.8),
             new AutoDriveStep(chassis, odometry, 34.0),
 
             new AutoRotateToStep(chassis, odometry, M_PI),

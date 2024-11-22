@@ -19,16 +19,16 @@ namespace devils
             double accelDist = M_PI * 0.1;
 
             /// @brief The distance to start decelerating in rads
-            double decelDist = M_PI * 0.6;
+            double decelDist = M_PI * 0.7;
 
             /// @brief The maximum speed in %
-            double maxSpeed = 0.4;
+            double maxSpeed = 0.3;
 
             /// @brief The minimum speed in %
             double minSpeed = 0.15;
 
             /// @brief The distance to the goal in radians
-            double goalDist = 0.005;
+            double goalDist = 0.01;
 
             /// @brief Whether to use the minimum distance between the start and target
             bool useMinimumDistance = true;
@@ -96,6 +96,9 @@ namespace devils
 
             // Stop Chassis
             chassis.stop();
+
+            // Delay
+            pros::delay(POST_DRIVE_DELAY);
         }
 
         Options &getOptions()
@@ -115,6 +118,8 @@ namespace devils
         double targetAngle = 0;
 
     private:
+        static constexpr double POST_DRIVE_DELAY = 500; // ms
+
         /**
          * Gets the angle difference between two angles.
          * Uses the minimum distance if the option is enabled.
