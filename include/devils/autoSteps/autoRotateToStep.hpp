@@ -22,19 +22,22 @@ namespace devils
         struct Options
         {
             /// @brief The distance to start accelerating in rads
-            double accelDist = M_PI * 0.1;
+            double accelDist = M_PI * 0.2;
 
             /// @brief The distance to start decelerating in rads
-            double decelDist = M_PI * 0.7;
+            double decelDist = M_PI * 0.5;
 
             /// @brief The maximum speed in %
             double maxSpeed = 0.3;
 
-            /// @brief The minimum speed in %
-            double minSpeed = 0.15;
+            /// @brief The minimum acceleration speed in %
+            double minAccelSpeed = 0.2;
+
+            /// @brief The minimum deceleration speed in %
+            double minDecelSpeed = 0.16;
 
             /// @brief The distance to the goal in radians
-            double goalDist = 0.01;
+            double goalDist = 0.015;
 
             /// @brief Whether to use the minimum distance between the start and target
             bool useMinimumDistance = true;
@@ -86,7 +89,8 @@ namespace devils
                     distanceToTarget,
                     options.accelDist,
                     options.decelDist,
-                    options.minSpeed,
+                    options.minAccelSpeed,
+                    options.minDecelSpeed,
                     options.maxSpeed);
 
                 // Check if we are at the target

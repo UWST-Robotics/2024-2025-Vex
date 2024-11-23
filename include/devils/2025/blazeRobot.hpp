@@ -44,8 +44,10 @@ namespace devils
 
         void opcontrol() override
         {
-            bool shouldIntake = false;
             intakeLauncher.extend();
+
+            bool isConveyorUp = true;
+            bool isConveyorPaused = false;
 
             // Loop
             while (true)
@@ -55,9 +57,11 @@ namespace devils
                 double leftX = mainController.get_analog(ANALOG_LEFT_X) / 127.0;
                 double rightX = mainController.get_analog(ANALOG_RIGHT_X) / 127.0;
                 double rightY = mainController.get_analog(ANALOG_RIGHT_Y) / 127.0;
-                bool intakeToggle = mainController.get_digital_new_press(DIGITAL_R1);
+                bool intakeIn = mainController.get_digital(DIGITAL_R1);
                 bool intakeOut = mainController.get_digital(DIGITAL_R2);
                 bool grabInput = mainController.get_digital_new_press(DIGITAL_A);
+                bool conveyorUp = mainController.get_digital_new_press(DIGITAL_UP);
+                bool conveyorDown = mainController.get_digital_new_press(DIGITAL_DOWN);
 
                 // Curve Joystick Inputs
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1);
@@ -65,30 +69,52 @@ namespace devils
                 rightX = JoystickCurve::curve(rightX, 3.0, 0.05);
                 rightY = JoystickCurve::curve(rightY, 3.0, 0.1);
 
-                // Move Conveyor/Intake
-                if (intakeOut)
+                rightX *= 0.5;
+
+                // Move Intake
+                if (intakeOut || !isConveyorUp)
                 {
-                    conveyor.forceMove(-1);
-                    intake.move(-0.5);
+                    intake.move(-1.0);
                 }
-                else if (shouldIntake)
+                else if (intakeIn)
                 {
-                    conveyor.moveAutomatic();
-                    intake.move(0.5);
+                    intake.move(1.0);
+                    isConveyorPaused = false;
                 }
                 else
                 {
-                    conveyor.forceMove(0);
                     intake.move(0);
+                }
+
+                // Move Conveyor
+                if (conveyorUp)
+                    isConveyorUp = true;
+                else if (conveyorDown)
+                    isConveyorUp = false;
+
+                // Unpause if the goal is released
+                if (!conveyor.isGoalGrabbed())
+                    isConveyorPaused = false;
+
+                if (isConveyorPaused)
+                {
+                    conveyor.forceMove(0);
+                }
+                else if (isConveyorUp)
+                {
+                    conveyor.moveAutomatic(1.0);
+                }
+                else
+                {
+                    conveyor.moveAutomatic(-0.5);
                 }
 
                 // Grab Mogo
                 if (grabInput)
+                {
                     conveyor.setGoalGrabbed(!conveyor.isGoalGrabbed());
-
-                // Intake
-                if (intakeToggle)
-                    shouldIntake = !shouldIntake;
+                    isConveyorPaused = true;
+                }
 
                 // Move Chassis
                 chassis.move(leftY, rightX);
@@ -145,7 +171,8 @@ namespace devils
             1.0,  // accelDist
             1.0,  // decelDist
             0.8,  // maxSpeed
-            0.15, // minSpeed
+            0.15, // minAccelSpeed
+            0.1,  // minDecelSpeed
             2.0,  // rotationGain
             1.0   // goalDist
         };
@@ -154,7 +181,8 @@ namespace devils
             3.0,  // accelDist
             16.0, // decelDist
             0.3,  // maxSpeed
-            0.18, // minSpeed
+            0.18, // minAccelSpeed
+            0.1,  // minDecelSpeed
             2.0,  // rotationGain
             0.3   // goalDist
         };
@@ -167,37 +195,36 @@ namespace devils
             // Section 1
             new AutoIntakeStep(intake, 0.5),
             new AutoPauseStep(chassis, 500),
-            new AutoDriveStep(chassis, odometry, 16.0), // 1
+            new AutoDriveStep(chassis, odometry, 17.0), // 1
             new AutoRotateToStep(chassis, odometry, M_PI * 0.25),
-            new AutoDriveStep(chassis, odometry, 34.0), // 2
+            new AutoDriveStep(chassis, odometry, 32.0), // 2
             new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
-            new AutoDriveStep(chassis, odometry, -24.0),
+            new AutoDriveStep(chassis, odometry, -30.0),
             new AutoGrabMogoStep(conveyor, true),
+            new AutoDriveStep(chassis, odometry, 4.5),
             new AutoRotateToStep(chassis, odometry, 0),
-            new AutoDriveStep(chassis, odometry, 24.0), // 3
-            new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
-            new AutoDriveStep(chassis, odometry, 6.0), // 4
-            new AutoPauseStep(chassis, 1000),
-            new AutoDriveStep(chassis, odometry, -6.0),
+            new AutoDriveStep(chassis, odometry, 24.0),          // 3
+            new AutoRotateToStep(chassis, odometry, M_PI * 0.5), // Always rotate in the positive direction
             new AutoRotateToStep(chassis, odometry, M_PI),
-            new AutoDriveStep(chassis, odometry, 48.0), // 5
+            new AutoDriveStep(chassis, odometry, 47.5), // 5
             new AutoRotateToStep(chassis, odometry, M_PI * 0.75),
-            new AutoDriveStep(chassis, odometry, 12.0), // 6
+            new AutoDriveStep(chassis, odometry, 16), // 6
 
             new AutoPauseStep(chassis, 1500),
-            new AutoDriveStep(chassis, odometry, 3.0),
             new AutoDriveStep(chassis, odometry, -3.0),
+            new AutoDriveStep(chassis, odometry, 3.0),
             new AutoPauseStep(chassis, 1500),
 
             new AutoDriveStep(chassis, odometry, -10.0),
             new AutoRotateToStep(chassis, odometry, M_PI * -0.25),
-            new AutoDriveStep(chassis, odometry, -10.0),
+            new AutoDriveStep(chassis, odometry, -14.0),
             new AutoGrabMogoStep(conveyor, false),
+            new AutoPauseStep(chassis, 500),
 
-            new AutoDriveStep(chassis, odometry, 12.0),
+            new AutoDriveStep(chassis, odometry, 18.0),
             new AutoRotateToStep(chassis, odometry, 0),
-            new AutoDriveStep(chassis, odometry, 48.0),
-            new AutoRotateToStep(chassis, odometry, M_PI * 0.75),
+            new AutoDriveStep(chassis, odometry, 40.0),
+            new AutoRotateToStep(chassis, odometry, M_PI * 0.7),
             new AutoDriveStep(chassis, odometry, -33.0),
             new AutoGrabMogoStep(conveyor, true),
             new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
@@ -206,19 +233,15 @@ namespace devils
             new AutoDriveStep(chassis, odometry, 24.0), // 2
             new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
             new AutoDriveStep(chassis, odometry, 24.0), // 3
-            new AutoRotateToStep(chassis, odometry, M_PI * -0.35),
-            new AutoDriveStep(chassis, odometry, 24.0), // 4
-            new AutoDriveStep(chassis, odometry, -24.0),
             new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
             new AutoDriveStep(chassis, odometry, -24.0),
             new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
-            new AutoDriveStep(chassis, odometry, -10.0, highSpeed),
-            new AutoPauseStep(chassis, 1000),
-            new AutoDriveStep(chassis, odometry, 8.0, slowSpeed),
-            new AutoDriveStep(chassis, odometry, -8.0, highSpeed),
+            new AutoDriveStep(chassis, odometry, -12.0, highSpeed),
             new AutoGrabMogoStep(conveyor, false),
             new AutoPauseStep(chassis, 1500),
             new AutoDriveStep(chassis, odometry, 24.0),
         });
+
+        EyesRenderer eyes = EyesRenderer();
     };
 }

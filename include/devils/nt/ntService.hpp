@@ -40,6 +40,8 @@ namespace devils
         }
 
     private:
-        static constexpr bool ENABLE_SERVICE = true;
+        // Disable during competition to prevent serial spam
+        // This causes intermittent crashing on the V5 brain
+        static constexpr bool ENABLE_SERVICE = false;
     };
 }

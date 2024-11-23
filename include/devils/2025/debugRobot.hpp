@@ -48,7 +48,8 @@ namespace devils
             1.0,  // accelDist
             1.0,  // decelDist
             0.8,  // maxSpeed
-            0.15, // minSpeed
+            0.15, // minAccelSpeed
+            0.1,  // minDecelSpeed
             2.0,  // rotationGain
             1.0   // goalDist
         };
@@ -58,6 +59,7 @@ namespace devils
             16.0, // decelDist
             0.3,  // maxSpeed
             0.18, // minSpeed
+            0.1,  // minDecelSpeed
             2.0,  // rotationGain
             0.3   // goalDist
         };
@@ -91,7 +93,7 @@ namespace devils
             // new AutoGrabMogoStep(conveyor, false),
 
             // Section 2
-            new AutoDriveStep(chassis, odometry, 10.0),
+            new AutoDriveStep(chassis, odometry, 12.0),
             new AutoRotateToStep(chassis, odometry, 0),
             new AutoDriveStep(chassis, odometry, 44.0),
 
@@ -105,8 +107,8 @@ namespace devils
             new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
             new AutoDriveStep(chassis, odometry, -34.0),
             // new AutoGrabMogoStep(conveyor, true),
-            new AutoRotateToStep(chassis, odometry, M_PI * 0.8),
-            new AutoDriveStep(chassis, odometry, 34.0),
+            new AutoRotateToStep(chassis, odometry, M_PI * 0.75),
+            new AutoDriveStep(chassis, odometry, 28.0),
 
             new AutoRotateToStep(chassis, odometry, M_PI),
             new AutoDriveStep(chassis, odometry, 5.0, slowSpeed),
@@ -114,9 +116,7 @@ namespace devils
             new AutoDriveStep(chassis, odometry, 5.0, slowSpeed),
             new AutoRotateToStep(chassis, odometry, 0),
             new AutoDriveStep(chassis, odometry, 5.0, slowSpeed),
-            new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
-            new AutoDriveStep(chassis, odometry, 5.0, slowSpeed),
-            new AutoRotateToStep(chassis, odometry, M_PI * -0.3),
+            new AutoRotateToStep(chassis, odometry, M_PI * -0.25),
             // new AutoGrabMogoStep(conveyor, false),
 
             // Section 4
@@ -131,7 +131,7 @@ namespace devils
             new AutoRotateToStep(chassis, odometry, 0),
             new AutoDriveStep(chassis, odometry, 23.0),
             new AutoRotateToStep(chassis, odometry, M_PI * 0.75),
-            new AutoDriveStep(chassis, odometry, -16.0, highSpeed),
+            new AutoDriveStep(chassis, odometry, -12.0, highSpeed),
             new AutoPauseStep(chassis, 1000),
             new AutoDriveStep(chassis, odometry, 6.0),
             new AutoDriveStep(chassis, odometry, -6.0, highSpeed),
@@ -140,5 +140,7 @@ namespace devils
             new AutoDriveStep(chassis, odometry, 24.0),
         });
         AutoStepList absoluteRoutine = AbsoluteStepConverter::relativeToAbsolute(autoRoutine);
+
+        EyesRenderer eyes = EyesRenderer();
     };
 }

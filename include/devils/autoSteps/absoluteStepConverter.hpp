@@ -5,6 +5,7 @@
 #include "autoDriveToStep.hpp"
 #include "autoRotateStep.hpp"
 #include "autoRotateToStep.hpp"
+#include "autoRotateTowardStep.hpp"
 
 namespace devils
 {
@@ -52,9 +53,14 @@ namespace devils
                         currentPose.y + driveStep->distance * std::sin(currentPose.rotation),
                         currentPose.rotation);
 
+                    // Create Rotate To Step
+                    AutoRotateTowardStep *newRotateStep = new AutoRotateTowardStep(driveStep->chassis, driveStep->odomSource, currentPose);
+                    newSteps.push_back(newRotateStep);
+
                     // Create Drive To Step
-                    AutoDriveToStep *newStep = new AutoDriveToStep(driveStep->chassis, driveStep->odomSource, currentPose, driveStep->options);
-                    newSteps.push_back(newStep);
+                    AutoDriveToStep *newDriveStep = new AutoDriveToStep(driveStep->chassis, driveStep->odomSource, currentPose, driveStep->options);
+                    newSteps.push_back(newDriveStep);
+
                     continue;
                 }
 

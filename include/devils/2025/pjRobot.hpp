@@ -40,7 +40,7 @@ namespace devils
             imu.waitUntilCalibrated();
             imu.setHeading(0);
 
-            autoRoutine.doStep();
+            absoluteRoutine.doStep();
         }
 
         void opcontrol() override
@@ -128,7 +128,8 @@ namespace devils
             1.0,  // accelDist
             1.0,  // decelDist
             0.8,  // maxSpeed
-            0.15, // minSpeed
+            0.15, // minAccelSpeed
+            0.1,  // minDecelSpeed
             0.5,  // rotationGain
             1.0   // goalDist
         };
@@ -137,7 +138,8 @@ namespace devils
             3.0,  // accelDist
             16.0, // decelDist
             0.3,  // maxSpeed
-            0.18, // minSpeed
+            0.18, // minAccelSpeed
+            0.15, // minDecelSpeed
             0.5,  // rotationGain
             0.3   // goalDist
         };
@@ -150,40 +152,35 @@ namespace devils
 
             // Section 1
             new AutoIntakeStep(intake, 1.0),
-            new AutoDriveStep(chassis, odometry, 15.0), // 1
+            new AutoDriveStep(chassis, odometry, 18.0), // 1
             new AutoRotateToStep(chassis, odometry, M_PI),
-            new AutoDriveStep(chassis, odometry, -29.0),
+            new AutoDriveStep(chassis, odometry, -24.0, highSpeed),
+            new AutoPauseStep(chassis, 500),
             new AutoGrabMogoStep(conveyor, true),
-            new AutoDriveStep(chassis, odometry, 6.0),
+            new AutoDriveStep(chassis, odometry, 0.0), // <-- Recenters the robot after the high speed drive
             new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
-            new AutoPauseStep(chassis, 500),
             new AutoDriveStep(chassis, odometry, 23.0), // 2
-            new AutoPauseStep(chassis, 500),
             new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
             new AutoDriveStep(chassis, odometry, 45.0), // 3
 
-            new AutoPauseStep(chassis, 2000),
+            new AutoPauseStep(chassis, 1000),
             new AutoDriveStep(chassis, odometry, -4.0),
             new AutoDriveStep(chassis, odometry, 4.0),
-            new AutoPauseStep(chassis, 2000),
-
-            new AutoDriveStep(chassis, odometry, -11.0),
-            new AutoRotateToStep(chassis, odometry, M_PI * 0.25),
-            new AutoDriveStep(chassis, odometry, -12.0),
-            new AutoGrabMogoStep(conveyor, false),
             new AutoPauseStep(chassis, 1000),
 
+            new AutoDriveStep(chassis, odometry, -12.0),
+            new AutoRotateToStep(chassis, odometry, M_PI * 0.25),
+            new AutoDriveStep(chassis, odometry, -16.0),
+            new AutoGrabMogoStep(conveyor, false),
+
             // Section 2
-            new AutoDriveStep(chassis, odometry, 10.0),
+            new AutoDriveStep(chassis, odometry, 14.0),
             new AutoRotateToStep(chassis, odometry, 0),
             new AutoDriveStep(chassis, odometry, 44.0),
 
-            new AutoPauseStep(chassis, 1000),
             new AutoDriveStep(chassis, odometry, -20.0),
             new AutoRotateToStep(chassis, odometry, M_PI * -0.15),
-            new AutoPauseStep(chassis, 1000),
             new AutoDriveStep(chassis, odometry, 18.0),
-            new AutoPauseStep(chassis, 1000),
             new AutoDriveStep(chassis, odometry, -18.0),
             new AutoRotateToStep(chassis, odometry, 0),
             new AutoDriveStep(chassis, odometry, 24.0),
@@ -191,33 +188,31 @@ namespace devils
             new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
             new AutoDriveStep(chassis, odometry, -34.0),
             new AutoGrabMogoStep(conveyor, true),
-            new AutoRotateToStep(chassis, odometry, M_PI * 0.8),
-            new AutoDriveStep(chassis, odometry, 34.0),
+            new AutoRotateToStep(chassis, odometry, M_PI * 0.75),
+            new AutoDriveStep(chassis, odometry, 28.0),
 
             new AutoRotateToStep(chassis, odometry, M_PI),
-            new AutoDriveStep(chassis, odometry, 5.0, slowSpeed),
-            new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
-            new AutoDriveStep(chassis, odometry, 5.0, slowSpeed),
-            new AutoRotateToStep(chassis, odometry, 0),
-            new AutoDriveStep(chassis, odometry, 5.0, slowSpeed),
+            new AutoDriveStep(chassis, odometry, 6.0, slowSpeed),
             new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
-            new AutoDriveStep(chassis, odometry, 5.0, slowSpeed),
-            new AutoRotateToStep(chassis, odometry, M_PI * -0.3),
+            new AutoDriveStep(chassis, odometry, 6.0, slowSpeed),
+            new AutoRotateToStep(chassis, odometry, 0),
+            new AutoDriveStep(chassis, odometry, 6.0, slowSpeed),
+            new AutoRotateToStep(chassis, odometry, M_PI * -0.25),
             new AutoGrabMogoStep(conveyor, false),
 
             // Section 4
             new AutoDriveStep(chassis, odometry, 34.0),
             new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
-            new AutoDriveStep(chassis, odometry, -33.0),
+            new AutoDriveStep(chassis, odometry, -30.0),
             new AutoGrabMogoStep(conveyor, true),
             new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
-            new AutoDriveStep(chassis, odometry, 24.0),
+            new AutoDriveStep(chassis, odometry, 21.0),
             new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
             new AutoDriveStep(chassis, odometry, 32.0),
             new AutoRotateToStep(chassis, odometry, 0),
             new AutoDriveStep(chassis, odometry, 23.0),
             new AutoRotateToStep(chassis, odometry, M_PI * 0.75),
-            new AutoDriveStep(chassis, odometry, -16.0, highSpeed),
+            new AutoDriveStep(chassis, odometry, -12.0, highSpeed),
             new AutoPauseStep(chassis, 1000),
             new AutoDriveStep(chassis, odometry, 6.0),
             new AutoDriveStep(chassis, odometry, -6.0, highSpeed),
@@ -225,5 +220,8 @@ namespace devils
             new AutoGrabMogoStep(conveyor, false),
             new AutoDriveStep(chassis, odometry, 24.0),
         });
+        AutoStepList absoluteRoutine = AbsoluteStepConverter::relativeToAbsolute(autoRoutine);
+
+        EyesRenderer eyes = EyesRenderer();
     };
 }

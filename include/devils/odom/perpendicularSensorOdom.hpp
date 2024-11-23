@@ -38,11 +38,11 @@ namespace devils
         {
 
             // Get Sensor Angles in Degrees
-            double verticalRotations = verticalSensor.getAngle() / (2 * M_PI);
+            double verticalAngle = verticalSensor.getAngle();
             if (errno != 0)
                 return;
 
-            double horizontalRotations = horizontalSensor.getAngle() / (2 * M_PI);
+            double horizontalAngle = horizontalSensor.getAngle();
             if (errno != 0)
                 return;
 
@@ -50,23 +50,49 @@ namespace devils
             uint32_t deltaT = lastUpdateTimestamp - pros::millis();
             lastUpdateTimestamp = pros::millis();
 
-            // Get Distance traveled over circumference
-            double vertical = verticalRotations * wheelRadius * 2 * M_PI;
-            double horizontal = horizontalRotations * wheelRadius * 2 * M_PI;
+            // Calculate arc length
+            // Arc Length = r * theta
+            double vertical = verticalAngle * wheelRadius;
+            double horizontal = horizontalAngle * wheelRadius;
+
+            // Update IMU
+            // Also calculate the change in rotation
+            double deltaRotation = 0;
+            if (imu != nullptr)
+            {
+                double heading = imu->getHeading();
+                if (errno == 0)
+                {
+                    deltaRotation = heading - lastRotation;
+                    lastRotation = heading;
+                    currentPose.rotation = heading;
+                }
+            }
+
+            // Apply Sensor Offsets
+            if (verticalSensorOffset != nullptr &&
+                horizontalSensorOffset != nullptr)
+            {
+                // Calculate radius of rotation for each sensor
+                // We only care about the x and y components since the sensors are perpendicular to the other axis
+                double verticalOffsetRadius = std::fabs(verticalSensorOffset->x);
+                double horizontalOffsetRadius = std::fabs(horizontalSensorOffset->y);
+
+                // Calculate Arc Length
+                // Arc Length = r * theta
+                double verticalArcLength = verticalOffsetRadius * deltaRotation;
+                double horizontalArcLength = horizontalOffsetRadius * deltaRotation;
+
+                // Subtract Arc Length
+                vertical -= verticalArcLength;
+                horizontal -= horizontalArcLength;
+            }
 
             // Get Delta Distance
             double deltaVertical = vertical - lastVertical;
             double deltaHorizontal = horizontal - lastHorizontal;
             lastVertical = vertical;
             lastHorizontal = horizontal;
-
-            // Update IMU
-            if (imu != nullptr)
-            {
-                double heading = imu->getHeading();
-                if (errno == 0)
-                    currentPose.rotation = heading;
-            }
 
             // Calculate trigonometric values
             double rotation = currentPose.rotation;
@@ -107,6 +133,19 @@ namespace devils
             this->imu = imu;
         }
 
+        /**
+         * Sets the sensor offsets for the odometry system.
+         * Accounts for the difference in sensor placement on the robot.
+         * @param verticalSensorOffset The offset for the vertical sensor relative to the robot's center of rotation.
+         * @param horizontalSensorOffset The offset for the horizontal sensor relative to the robot's center of rotation.
+         */
+        void setSensorOffsets(Vector2 &verticalSensorOffset,
+                              Vector2 &horizontalSensorOffset)
+        {
+            this->verticalSensorOffset = &verticalSensorOffset;
+            this->horizontalSensorOffset = &horizontalSensorOffset;
+        }
+
     private:
         const double wheelRadius;
         RotationSensor &verticalSensor;
@@ -117,9 +156,11 @@ namespace devils
         Pose currentPose = Pose();
         uint32_t lastUpdateTimestamp = 0;
 
-        double lastLeft = 0;
-        double lastRight = 0;
         double lastVertical = 0;
         double lastHorizontal = 0;
+        double lastRotation = 0;
+
+        Vector2 *verticalSensorOffset = nullptr;
+        Vector2 *horizontalSensorOffset = nullptr;
     };
 }

@@ -71,3 +71,6 @@
 #include "autoSteps/autoPauseStep.hpp"
 #include "autoSteps/autoJumpToStep.hpp"
 #include "autoSteps/absoluteStepConverter.hpp"
+
+// Display
+#include "display/eyesRenderer.hpp"

@@ -27,19 +27,22 @@ namespace devils
             double accelDist = 3.0;
 
             /// @brief The distance to start decelerating in inches
-            double decelDist = 16.0;
+            double decelDist = 12.0;
 
             /// @brief The maximum speed in %
-            double maxSpeed = 0.5;
+            double maxSpeed = 0.4;
 
-            /// @brief The minimum speed in %
-            double minSpeed = 0.18;
+            /// @brief The minimum speed during acceleration in %
+            double minAccelSpeed = 0.2;
+
+            /// @brief The minimum speed during deceleration in %
+            double minDecelSpeed = 0.15;
 
             /// @brief The gain for rotation in %/rad
-            double rotationGain = 0.2;
+            double rotationGain = 0.05;
 
             /// @brief The distance to the goal in inches
-            double goalDist = 1.0;
+            double goalDist = 1.5;
 
             /// @brief The default options for the drive step.
             static Options getDefault()
@@ -71,7 +74,6 @@ namespace devils
         {
             // Calculate Target Pose
             Pose startPose = odomSource.getPose();
-            double totalDistance = startPose.distanceTo(targetPose);
 
             // Control Loop
             while (true)
@@ -99,7 +101,8 @@ namespace devils
                     distanceToTarget,
                     options.accelDist,
                     options.decelDist,
-                    options.minSpeed,
+                    options.minAccelSpeed,
+                    options.minDecelSpeed,
                     options.maxSpeed);
 
                 // Calculate Angle
@@ -118,7 +121,7 @@ namespace devils
                 double turnSpeed = options.rotationGain * angleDiff;
 
                 // Calculate Distance Percent
-                double distancePercent = std::fabs(distanceToTarget / totalDistance);
+                double distancePercent = std::fabs(distanceToTarget / options.decelDist);
                 distancePercent = std::clamp(distancePercent, 0.0, 1.0);
 
                 // Calculate
