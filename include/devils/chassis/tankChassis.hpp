@@ -1,5 +1,5 @@
 #pragma once
-#include "chassis.hpp"
+#include "chassisBase.hpp"
 #include "../hardware/smartMotorGroup.hpp"
 #include <vector>
 #include <iostream>
@@ -8,9 +8,9 @@
 namespace devils
 {
     /**
-     * Represents a chassis driven by the differential of two motors.
+     * Represents a chassis driven by the differential of two sets of wheels.
      */
-    class TankChassis : public BaseChassis
+    class TankChassis : public ChassisBase
     {
     public:
         /**
@@ -20,13 +20,14 @@ namespace devils
          * @param rightMotorPorts The ports of the right motors. Negative ports are reversed.
          */
         TankChassis(
-            std::string name,
-            const std::initializer_list<int8_t> leftMotorPorts,
-            const std::initializer_list<int8_t> rightMotorPorts) : leftMotors(name + ".LeftMotors", leftMotorPorts),
-                                                                   rightMotors(name + ".RightMotors", rightMotorPorts)
+            SmartMotorGroup &leftMotors,
+            SmartMotorGroup &rightMotors)
+            : leftMotors(leftMotors),
+              rightMotors(rightMotors)
         {
-            leftMotors.setBrakeMode(USE_BRAKE_MODE);
-            rightMotors.setBrakeMode(USE_BRAKE_MODE);
+            // Disable brake mode by default to prevent overheating
+            leftMotors.setBrakeMode(false);
+            rightMotors.setBrakeMode(false);
         }
 
         /**
@@ -89,9 +90,7 @@ namespace devils
         }
 
     private:
-        static constexpr bool USE_BRAKE_MODE = false;
-
-        SmartMotorGroup leftMotors;
-        SmartMotorGroup rightMotors;
+        SmartMotorGroup &leftMotors;
+        SmartMotorGroup &rightMotors;
     };
 }

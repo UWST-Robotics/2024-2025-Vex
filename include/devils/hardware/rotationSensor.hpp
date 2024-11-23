@@ -2,6 +2,7 @@
 #include "pros/rotation.hpp"
 #include "../utils/logger.hpp"
 #include "../geometry/units.hpp"
+#include "../nt/objects/ntHardware.hpp"
 #include <string>
 
 namespace devils
@@ -9,21 +10,23 @@ namespace devils
     /**
      * Represents a V5 rotational sensor.
      */
-    class RotationSensor
+    class RotationSensor : private NTHardware
     {
     public:
         /**
-         * Creates a new IMU.
+         * Creates a new Rotation Sensor.
          * @param name The name of the rotational sensor (for logging purposes)
          * @param port The port of the rotational sensor (from 1 to 21). Negative ports are reversed.
          */
-        RotationSensor(std::string name, int8_t port)
-            : name(name),
+        RotationSensor(
+            const std::string name,
+            const int8_t port)
+            : NTHardware(name, "RotationSensor", port),
               rotationSensor(port)
         {
             rotationSensor.set_position(0);
-            if (errno != 0 && LOGGING_ENABLED)
-                Logger::error(name + ": rotationSensor port is invalid");
+            if (errno != 0)
+                reportFault("Invalid port");
         }
 
         /**
@@ -32,10 +35,14 @@ namespace devils
          */
         double getAngle()
         {
+            errno = 0;
             double angle = rotationSensor.get_position();
-            if (angle == PROS_ERR && LOGGING_ENABLED)
-                Logger::error(name + ": rotation sensor get angle failed");
-            return angle == PROS_ERR ? 0 : Units::centidegToRad(angle);
+            if (angle == PROS_ERR)
+            {
+                reportFault("Get rotation sensor angle failed");
+                return 0;
+            }
+            return Units::centidegToRad(angle);
         }
 
         /**
@@ -45,15 +52,30 @@ namespace devils
         double getVelocity()
         {
             double velocity = rotationSensor.get_velocity();
-            if (velocity == PROS_ERR_F && LOGGING_ENABLED)
-                Logger::error(name + ": rotation sensor get velocity failed");
-            return velocity == PROS_ERR_F ? 0 : Units::centidegToRad(velocity);
+            if (velocity == PROS_ERR_F)
+            {
+                reportFault("Get rotation sensor velocity failed");
+                return 0;
+            }
+            return Units::centidegToRad(velocity);
+        }
+
+    protected:
+        void serializeHardware(std::string &ntPrefix) override
+        {
+            NetworkTables::updateDoubleValue(ntPrefix + "/position", getAngle());
+            NetworkTables::updateDoubleValue(ntPrefix + "/velocity", getVelocity());
+        }
+
+        void checkHealth() override
+        {
+            if (!rotationSensor.is_installed())
+                reportFault("Disconnected");
+            else
+                clearFaults();
         }
 
     private:
-        static constexpr bool LOGGING_ENABLED = true;
-
-        std::string name;
         pros::Rotation rotationSensor;
     };
 }

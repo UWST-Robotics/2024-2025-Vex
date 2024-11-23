@@ -1,15 +1,19 @@
 #pragma once
+
+#include <string>
+#include <cmath>
 #include "pros/motors.hpp"
+#include "pros/error.h"
 #include "motor.hpp"
 #include "../utils/logger.hpp"
-#include <string>
+#include "../nt/objects/ntHardware.hpp"
 
 namespace devils
 {
     /**
      * Represents a motor object. All events are logged.
      */
-    class SmartMotor : public IMotor
+    class SmartMotor : public IMotor, protected NTHardware
     {
     public:
         /**
@@ -19,11 +23,11 @@ namespace devils
          * @throws std::runtime_error if the motor could not be created, likely due to an invalid port.
          */
         SmartMotor(std::string name, int8_t port)
-            : name(name),
+            : NTHardware(name, "SmartMotor", port),
               motor(port)
         {
             if (errno != 0)
-                throw std::runtime_error(name + ": motor creation failed");
+                reportFault("Invalid Port");
         }
 
         /**
@@ -36,8 +40,7 @@ namespace devils
             // Move Motor
             int32_t status = motor.move(voltage * 127);
             if (status != 1)
-                throw std::runtime_error(name + ": motor move failed");
-            _checkHealth();
+                reportFault("Move Voltage Failed");
         }
 
         /**
@@ -48,69 +51,50 @@ namespace devils
         {
             int32_t status = motor.brake();
             if (status != 1)
-                throw std::runtime_error(name + ": motor stop failed");
-            _checkHealth();
+                reportFault("Stop Failed");
         }
 
         /**
          * Gets the current position of the motor in encoder ticks.
-         * 
+         *
          * \note
-         * 1800 ticks/rev with 36:1 gears (red cartridge), 
+         * 1800 ticks/rev with 36:1 gears (red cartridge),
          * 900 ticks/rev with 18:1 gears (green cartridge),
          * 300 ticks/rev with 6:1 gears (blue cartridge)
-         * 
-         * @return The current position of the motor in encoder ticks.
+         *
+         * @return The current position of the motor in encoder ticks or `PROS_ERR_F` if the position could not be retrieved.
          * @throws std::runtime_error if the position could not be retrieved.
          */
         double getPosition() override
         {
             double position = motor.get_position();
             if (position == PROS_ERR_F)
-                throw std::runtime_error(name + ": motor get position failed");
+                reportFault("Get Position Failed");
             return position;
         }
 
         /**
          * Returns the current speed of the motor in RPM.
-         * @return The current speed of the motor in RPM.
-         * @throws std::runtime_error if the speed could not be retrieved.
+         * @return The current speed of the motor in RPM or `PROS_ERR_F` if the speed could not be retrieved.
          */
         double getVelocity()
         {
             double velocity = motor.get_actual_velocity();
             if (velocity == PROS_ERR_F)
-                throw std::runtime_error(name + ": motor get velocity failed");
+                reportFault("Get Velocity Failed");
             return velocity;
         }
 
         /**
          * Gets the current temperature of the motor in celsius.
-         * @return The current temperature of the motor in celsius.
-         * @throws std::runtime_error if the temperature could not be retrieved.
+         * @return The current temperature of the motor in celsius or `PROS_ERR_F` if the temperature could not be retrieved.
          */
         double getTemperature()
         {
             double temperature = motor.get_temperature();
             if (temperature == PROS_ERR_F)
-                throw std::runtime_error(name + ": get temperature failed");
-            return temperature == PROS_ERR_F ? PROS_ERR_F : temperature;
-        }
-
-        /**
-         * Checks and logs the current health of the motor. Should be called after every motor command (move, stop, etc).
-         */
-        void _checkHealth()
-        {
-            int32_t isOverTemp = motor.is_over_temp();
-            int32_t isOverCurrent = motor.is_over_current();
-
-            if ((isOverTemp == PROS_ERR || isOverCurrent == PROS_ERR) && LOGGING_ENABLED)
-                Logger::warn(name + ": motor health check failed");
-            else if (isOverTemp == 1 && LOGGING_ENABLED)
-                Logger::warn(name + ": motor is over temperature");
-            else if (isOverCurrent == 1 && LOGGING_ENABLED)
-                Logger::warn(name + ": motor is over current");
+                reportFault("Get Temperature Failed");
+            return temperature;
         }
 
         /**
@@ -127,14 +111,56 @@ namespace devils
         {
             int32_t status = motor.set_brake_mode(useBrakeMode ? pros::E_MOTOR_BRAKE_BRAKE : pros::E_MOTOR_BRAKE_COAST);
             if (status != 1)
-                throw std::runtime_error(name + ": motor set brake mode failed");
+                reportFault("Set Brake Mode Failed");
+        }
+
+    protected:
+        void serializeHardware(std::string &ntPrefix) override
+        {
+            NetworkTables::updateDoubleValue(ntPrefix + "/temperature", getTemperature());
+            NetworkTables::updateDoubleValue(ntPrefix + "/position", getPosition());
+            NetworkTables::updateDoubleValue(ntPrefix + "/velocity", getVelocity());
+        }
+
+        void checkHealth() override
+        {
+            // Check if Motor is Connected
+            // isConnected = motor.is_installed();
+            isConnected = true; // TODO: Fix this
+
+            // Get Motor Fault Bitmask
+            uint32_t motorFaults = motor.get_faults();
+            isOverTemp = motorFaults & 0x01;
+            isDriverFault = motorFaults & 0x02;
+            isOverCurrent = motorFaults & 0x04;
+            isDriverOverCurrent = motorFaults & 0x08;
+
+            // Report Faults
+            if (!isConnected)
+                reportFault("Disconnected");
+            else if (isOverTemp)
+                reportFault("Over Temperature");
+            else if (isDriverFault)
+                reportFault("Driver Fault");
+            else if (isOverCurrent)
+                reportFault("Over Current");
+            else if (isDriverOverCurrent)
+                reportFault("Driver Over Current");
+            else
+                clearFaults();
         }
 
     private:
-        static constexpr bool LOGGING_ENABLED = false;
-
-        double currentVoltage = 0;
-        std::string name;
+        // Hardware
         pros::Motor motor;
+
+        // Motor State
+        bool isPortOutOfRange = false;
+        bool isPortTaken = false;
+        bool isOverTemp = false;
+        bool isDriverFault = false;
+        bool isOverCurrent = false;
+        bool isDriverOverCurrent = false;
+        bool isConnected = true;
     };
 }

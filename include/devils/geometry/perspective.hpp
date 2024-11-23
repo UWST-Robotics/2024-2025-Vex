@@ -1,6 +1,6 @@
 #pragma once
 #include "../utils/logger.hpp"
-#include "Vector2.hpp"
+#include "vector2.hpp"
 #include "units.hpp"
 #include "pose.hpp"
 #include <cmath>

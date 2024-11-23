@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <sstream>
 
 namespace devils
 {
@@ -10,6 +11,9 @@ namespace devils
     class StringUtils
     {
     public:
+        // Private constructor to prevent instantiation
+        StringUtils() = delete;
+
         /**
          * Splits a string by a delimiter.
          * @param str The string to split.
@@ -38,9 +42,5 @@ namespace devils
             result.push_back(buffer);
             return result;
         }
-
-    private:
-        // Private constructor to prevent instantiation
-        StringUtils() = delete;
     };
 }

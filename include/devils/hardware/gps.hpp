@@ -5,13 +5,14 @@
 #include "../geometry/units.hpp"
 #include "../geometry/polygon.hpp"
 #include "../odom/odomSource.hpp"
+#include "../nt/objects/ntHardware.hpp"
 
 namespace devils
 {
     /**
      * Represents a Vex V5 GPS
      */
-    class GPS : public OdomSource, public Runnable
+    class GPS : public OdomSource, public Runnable, private NTHardware
     {
     public:
         /**
@@ -21,18 +22,18 @@ namespace devils
          * @param gpsPort The port of the GPS
          */
         GPS(std::string name, uint8_t gpsPort)
-            : name(name),
+            : NTHardware(name, "GPS", gpsPort),
               gps(gpsPort, 0, 0, 0, 0, 0)
         {
             if (errno != 0)
-                Logger::error(name + ": GPS port is invalid");
+                reportFault("Invalid port");
             gps.set_data_rate(20);
         }
 
         /**
          * Updates the odometry with the latest GPS data
          */
-        void update() override
+        void onUpdate() override
         {
             double gpsX = gps.get_position_x();
             double gpsY = gps.get_position_y();
@@ -40,7 +41,7 @@ namespace devils
 
             if (gpsX == PROS_ERR_F || gpsY == PROS_ERR_F || gpsHeading == PROS_ERR_F)
             {
-                Logger::error(name + ": GPS update failed");
+                reportFault("Get GPS position failed");
                 return;
             }
 
@@ -56,7 +57,7 @@ namespace devils
             // Check Within Bounds
             if (gpsX < -MAX_GPS_X || gpsX > MAX_GPS_X || gpsY < -MAX_GPS_Y || gpsY > MAX_GPS_Y)
             {
-                Logger::warn(name + ": GPS out of bounds");
+                reportFault("GPS out of bounds");
                 return;
             }
 
@@ -103,7 +104,7 @@ namespace devils
                 gpsYaw);
 
             if (status != 1)
-                Logger::error(name + ": GPS set position failed");
+                reportFault("Set GPS position failed");
         }
 
         /**
@@ -120,7 +121,7 @@ namespace devils
             rotationalOffset = rotation;
 
             if (result != 1)
-                Logger::error(name + ": GPS set offset failed");
+                reportFault("Set GPS offset failed");
         }
 
         /**
@@ -134,13 +135,28 @@ namespace devils
             return (pros::millis() - calibrationStartTime) < CALIBRATION_TIME;
         }
 
+    protected:
+        void serializeHardware(std::string &ntPrefix) override
+        {
+            NetworkTables::updateDoubleValue(ntPrefix + "/x", currentPose.x);
+            NetworkTables::updateDoubleValue(ntPrefix + "/y", currentPose.y);
+            NetworkTables::updateDoubleValue(ntPrefix + "/rotation", currentPose.rotation);
+        }
+
+        void checkHealth() override
+        {
+            if (!gps.is_installed())
+                reportFault("Disconnected");
+            else
+                clearFaults();
+        }
+
     private:
         static constexpr int CALIBRATION_TIME = 7000;             // ms
         static constexpr double GPS_ROTATION_OFFSET = M_PI * 0.5; // PROS defaults to north as 0 degrees
         static constexpr double MAX_GPS_X = 72;
         static constexpr double MAX_GPS_Y = 72;
 
-        std::string name;
         pros::Gps gps;
         Pose currentPose = Pose(0, 0, 0);
         double rotationalOffset = 0;

@@ -2,6 +2,7 @@
 #include "pros/adi.hpp"
 #include "motor.hpp"
 #include "../utils/logger.hpp"
+#include "../nt/objects/ntHardware.hpp"
 #include <string>
 
 namespace devils
@@ -9,7 +10,7 @@ namespace devils
     /**
      * Represents an LED connected to the ADI ports.
      */
-    class LED
+    class LED : private NTHardware
     {
     public:
         /**
@@ -18,11 +19,11 @@ namespace devils
          * @param port The ADI port of the LED (from 1 to 8)
          */
         LED(std::string name, uint8_t port)
-            : name(name),
+            : NTHardware(name, "LED", port),
               led(port)
         {
-            if (errno != 0 && LOGGING_ENABLED)
-                Logger::error(name + ": adi port is invalid");
+            if (errno != 0)
+                reportFault("Invalid port");
         }
 
         /**
@@ -30,9 +31,10 @@ namespace devils
          */
         void enable()
         {
+            isEnabled = true;
             int32_t status = led.set_value(false);
-            if (status != 1 && LOGGING_ENABLED)
-                Logger::error(name + ": led enable failed");
+            if (status != 1)
+                reportFault("LED enable failed");
         }
 
         /**
@@ -40,9 +42,10 @@ namespace devils
          */
         void disable()
         {
+            isEnabled = false;
             int32_t status = led.set_value(true);
-            if (status != 1 && LOGGING_ENABLED)
-                Logger::error(name + ": led disable failed");
+            if (status != 1)
+                reportFault("LED disable failed");
         }
 
         /**
@@ -57,10 +60,28 @@ namespace devils
                 disable();
         }
 
-    private:
-        static constexpr bool LOGGING_ENABLED = true;
+        /**
+         * Gets the state of the LED.
+         * @return True if the LED is on, false if it is off.
+         */
+        bool getEnabled()
+        {
+            return isEnabled;
+        }
 
-        std::string name;
+    protected:
+        void serializeHardware(std::string &ntPrefix) override
+        {
+            NetworkTables::UpdateValue(ntPrefix + "/enabled", isEnabled);
+        }
+
+        void checkHealth() override
+        {
+            clearFaults();
+        }
+
+    private:
+        bool isEnabled = false;
         pros::ADIDigitalOut led;
     };
 }

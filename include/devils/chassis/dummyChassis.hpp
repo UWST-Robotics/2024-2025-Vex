@@ -1,10 +1,11 @@
 #pragma once
-#include "chassis.hpp"
+#include "chassisBase.hpp"
 #include "../hardware/smartMotorGroup.hpp"
 #include <vector>
 #include <iostream>
 #include "../utils/logger.hpp"
 #include "../odom/odomSource.hpp"
+#include "../utils/runnable.hpp"
 
 namespace devils
 {
@@ -13,9 +14,15 @@ namespace devils
      * This is useful for testing autonomous routines without a physical robot.
      * Can be used as an OdomSource.
      */
-    class DummyChassis : public BaseChassis, OdomSource, AutoRunnable
+    class DummyChassis : public ChassisBase, public OdomSource, public Runnable
     {
     public:
+        DummyChassis()
+        {
+            // Run on startup
+            runAsync();
+        }
+
         void move(double forward, double turn, double strafe = 0) override
         {
             forward = std::clamp(forward, -1.0, 1.0) * forwardSpeed;
@@ -27,7 +34,7 @@ namespace devils
             lastStrafe = strafe;
         }
 
-        void update() override
+        void onUpdate() override
         {
             // TODO: Multiply acceleration by delta time
 
@@ -39,6 +46,7 @@ namespace devils
 
             // Update Pose
             currentPose = currentPose + currentAcceleration;
+            currentPose.rotation = std::fmod(currentPose.rotation, 2 * M_PI);
         }
 
         void setPose(Pose &pose) override
@@ -52,9 +60,9 @@ namespace devils
         }
 
     private:
-        static constexpr double TRANSLATION_ACCEL = 0.3; // in/s^2
-        static constexpr double ROTATION_ACCEL = 0.15; // rad/s^2
-        static constexpr double DRAG = 0.2; // %
+        static constexpr double TRANSLATION_ACCEL = 0.4; // in/s^2
+        static constexpr double ROTATION_ACCEL = 0.04;   // rad/s^2
+        static constexpr double DRAG = 0.25;             // %
 
         double lastForward = 0;
         double lastTurn = 0;

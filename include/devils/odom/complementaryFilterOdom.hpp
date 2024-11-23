@@ -33,7 +33,7 @@ namespace devils
         /**
          * Updates the odometry with the latest data from the sources
          */
-        void update() override
+        void onUpdate() override
         {
             // Get the current pose from each source
             Pose absolutePose = absoluteOdom->getPose();
@@ -50,6 +50,7 @@ namespace devils
 
                 // Weight the absolute and relative rotations.
                 // Accounts for normalization in the rotation.
+                // TODO: Fix this
                 // double diffRad = Units::diffRad(absolutePose.rotation, relativePose.rotation);
                 // currentPose.rotation = Units::normalizeRadians(relativePose.rotation + diffRad * absoluteWeight);
 
