@@ -92,6 +92,7 @@ namespace devils
 
             // Tasks
             conveyor.stopAsync();
+            conveyor.setGoalGrabbed(false);
         }
 
         // Constants
