@@ -5,6 +5,16 @@
 namespace devils
 {
     /**
+     * Represents the parameters of a PID controller.
+     */
+    struct PIDParams
+    {
+        double p;
+        double i;
+        double d;
+    };
+
+    /**
      * Represents a feedback controller that uses a PID algorithm.
      */
     class PIDController
@@ -23,6 +33,13 @@ namespace devils
             : pGain(pGain),
               iGain(iGain),
               dGain(dGain)
+        {
+        }
+
+        PIDController(PIDParams params)
+            : pGain(params.p),
+              iGain(params.i),
+              dGain(params.d)
         {
         }
 

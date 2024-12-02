@@ -32,7 +32,7 @@ namespace devils
             ChassisBase &chassis,
             OdomSource &odomSource,
             double distance,
-            Options options = Options::getDefault())
+            Options options = Options::defaultOptions)
             : AutoDriveToStep(chassis, odomSource, Pose(0, 0, 0), options),
               distance(distance)
         {

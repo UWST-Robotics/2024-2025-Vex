@@ -6,6 +6,7 @@
 #include "devils/utils/math.hpp"
 #include "devils/odom/odomSource.hpp"
 #include "devils/chassis/chassisBase.hpp"
+#include "devils/utils/pidController.hpp"
 
 namespace devils
 {
@@ -23,32 +24,20 @@ namespace devils
     public:
         struct Options
         {
-            /// @brief The distance to start accelerating in inches
-            double accelDist = 3.0;
+            /// @brief The PID parameters for translation. Uses delta inches as the error.
+            PIDParams translationPID = PIDParams{0.1, 0.0, 0.0};
 
-            /// @brief The distance to start decelerating in inches
-            double decelDist = 12.0;
+            /// @brief The PID parameters for rotation. Uses delta radians as the error.
+            PIDParams rotationPID = PIDParams{0.05, 0.0, 0.0};
 
             /// @brief The maximum speed in %
             double maxSpeed = 0.4;
-
-            /// @brief The minimum speed during acceleration in %
-            double minAccelSpeed = 0.2;
-
-            /// @brief The minimum speed during deceleration in %
-            double minDecelSpeed = 0.15;
-
-            /// @brief The gain for rotation in %/rad
-            double rotationGain = 0.05;
 
             /// @brief The distance to the goal in inches
             double goalDist = 1.5;
 
             /// @brief The default options for the drive step.
-            static Options getDefault()
-            {
-                return Options();
-            }
+            static Options defaultOptions;
         };
 
         /**
@@ -62,11 +51,13 @@ namespace devils
             ChassisBase &chassis,
             OdomSource &odomSource,
             Pose targetPose,
-            Options options = Options::getDefault())
+            Options options = Options::defaultOptions)
             : chassis(chassis),
               odomSource(odomSource),
               targetPose(targetPose),
-              options(options)
+              options(options),
+              translationPID(options.translationPID),
+              rotationPID(options.rotationPID)
         {
         }
 
@@ -74,6 +65,10 @@ namespace devils
         {
             // Calculate Target Pose
             Pose startPose = odomSource.getPose();
+
+            // Reset PID Controllers
+            translationPID.reset();
+            rotationPID.reset();
 
             // Control Loop
             while (true)
@@ -96,14 +91,8 @@ namespace devils
                 distanceToTarget *= std::copysign(1.0, dot);
 
                 // Calculate Speed
-                double speed = Math::trapezoidProfile(
-                    distanceToStart,
-                    distanceToTarget,
-                    options.accelDist,
-                    options.decelDist,
-                    options.minAccelSpeed,
-                    options.minDecelSpeed,
-                    options.maxSpeed);
+                double speed = translationPID.update(distanceToTarget);
+                speed = std::clamp(speed, -options.maxSpeed, options.maxSpeed);
 
                 // Calculate Angle
                 double targetAngleRads = std::atan2(
@@ -118,14 +107,7 @@ namespace devils
                 double angleDiff = Math::angleDiff(targetAngleRads, currentPose.rotation);
 
                 // Calculate Turn Speed
-                double turnSpeed = options.rotationGain * angleDiff;
-
-                // Calculate Distance Percent
-                double distancePercent = std::fabs(distanceToTarget / options.decelDist);
-                distancePercent = std::clamp(distancePercent, 0.0, 1.0);
-
-                // Calculate
-                turnSpeed *= distancePercent;
+                double turnSpeed = rotationPID.update(angleDiff);
                 turnSpeed = std::clamp(turnSpeed, -options.maxSpeed, options.maxSpeed);
 
                 // Check if we are at the target
@@ -154,9 +136,14 @@ namespace devils
         OdomSource &odomSource;
 
         // Drive Step Variables
+        PIDController translationPID;
+        PIDController rotationPID;
         Pose targetPose = Pose();
 
     private:
         static constexpr double POST_DRIVE_DELAY = 500; // ms
     };
+
+    // Define the default options
+    AutoDriveToStep::Options AutoDriveToStep::Options::defaultOptions = AutoDriveToStep::Options();
 }

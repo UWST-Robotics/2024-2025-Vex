@@ -31,7 +31,7 @@ namespace devils
             ChassisBase &chassis,
             OdomSource &odomSource,
             Pose targetPose,
-            Options options = Options::getDefault())
+            Options options = Options::defaultOptions)
             : AutoRotateToStep(chassis, odomSource, 0, options),
               targetPose(targetPose)
         {

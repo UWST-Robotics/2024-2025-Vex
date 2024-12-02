@@ -4,6 +4,7 @@
 #include "devils/odom/odomSource.hpp"
 #include "devils/chassis/chassisBase.hpp"
 #include "devils/utils/math.hpp"
+#include "devils/utils/pidController.hpp"
 
 namespace devils
 {
@@ -21,32 +22,20 @@ namespace devils
     public:
         struct Options
         {
-            /// @brief The distance to start accelerating in rads
-            double accelDist = M_PI * 0.2;
-
-            /// @brief The distance to start decelerating in rads
-            double decelDist = M_PI * 0.5;
+            /// @brief The PID parameters to snap to an angle. Uses delta radians as the error.
+            PIDParams pidParams = PIDParams{0.1, 0.0, 0.0};
 
             /// @brief The maximum speed in %
             double maxSpeed = 0.3;
 
-            /// @brief The minimum acceleration speed in %
-            double minAccelSpeed = 0.2;
-
-            /// @brief The minimum deceleration speed in %
-            double minDecelSpeed = 0.16;
-
             /// @brief The distance to the goal in radians
             double goalDist = 0.015;
 
-            /// @brief Whether to use the minimum distance between the start and target
+            /// @brief Setting this to false will rotate to the absolute angle instead of the minimum distance.
             bool useMinimumDistance = true;
 
             /// @brief The default options for the rotational step.
-            static Options getDefault()
-            {
-                return Options();
-            }
+            static Options defaultOptions;
         };
 
         /**
@@ -60,19 +49,19 @@ namespace devils
             ChassisBase &chassis,
             OdomSource &odomSource,
             double targetAngle,
-            Options options = Options::getDefault())
+            Options options = Options::defaultOptions)
             : chassis(chassis),
               odomSource(odomSource),
               targetAngle(targetAngle),
-              options(options)
+              options(options),
+              rotationPID(options.pidParams)
         {
         }
 
         void doStep() override
         {
-            // Calculate Target Pose
-            Pose startPose = odomSource.getPose();
-            double startAngle = startPose.rotation;
+            // Reset PID
+            rotationPID.reset();
 
             // Control Loop
             while (true)
@@ -80,18 +69,11 @@ namespace devils
                 // Calculate distance to start and target
                 Pose currentPose = odomSource.getPose();
                 double currentAngle = currentPose.rotation;
-                double distanceToStart = angleDiff(startAngle, currentAngle);
                 double distanceToTarget = angleDiff(targetAngle, currentAngle);
 
                 // Calculate Speed
-                double speed = Math::trapezoidProfile(
-                    distanceToStart,
-                    distanceToTarget,
-                    options.accelDist,
-                    options.decelDist,
-                    options.minAccelSpeed,
-                    options.minDecelSpeed,
-                    options.maxSpeed);
+                double speed = rotationPID.update(distanceToTarget);
+                speed = std::clamp(speed, -options.maxSpeed, options.maxSpeed);
 
                 // Check if we are at the target
                 if (fabs(distanceToTarget) < options.goalDist)
@@ -124,6 +106,9 @@ namespace devils
         ChassisBase &chassis;
         OdomSource &odomSource;
 
+        // PID
+        PIDController rotationPID;
+
         // Drive Step Variables
         double targetAngle = 0;
 
@@ -145,4 +130,7 @@ namespace devils
             return a - b;
         }
     };
+
+    // Initialize Default Options
+    AutoRotateToStep::Options AutoRotateToStep::Options::defaultOptions = AutoRotateToStep::Options();
 }
