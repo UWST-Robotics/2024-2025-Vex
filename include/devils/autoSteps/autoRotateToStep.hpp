@@ -75,6 +75,10 @@ namespace devils
                 double speed = rotationPID.update(distanceToTarget);
                 speed = std::clamp(speed, -options.maxSpeed, options.maxSpeed);
 
+                NetworkTables::updateDoubleValue("speed", speed);
+                NetworkTables::updateDoubleValue("angle", currentAngle);
+                NetworkTables::updateDoubleValue("dist", distanceToTarget);
+
                 // Check if we are at the target
                 if (fabs(distanceToTarget) < options.goalDist)
                     break;

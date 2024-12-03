@@ -145,7 +145,8 @@ namespace devils
 
         /**
          * Scales the heading by a given factor.
-         * Used to fix consistent heading drift after rotation.
+         * Used to fix consistent heading drift after a set rotation.
+         * Can be calculated by rotating the robot exactly 360 degrees and doing `2 * PI / getHeading()`.
          * @param scale The scale to multiply the heading by.
          */
         void setHeadingScale(double scale)

@@ -36,6 +36,9 @@ namespace devils
             /// @brief The distance to the goal in inches
             double goalDist = 1.5;
 
+            /// @brief The minimum distance from the target to apply rotation
+            double minDistanceToRotate = 12.0;
+
             /// @brief The default options for the drive step.
             static Options defaultOptions;
         };
@@ -107,8 +110,13 @@ namespace devils
                 double angleDiff = Math::angleDiff(targetAngleRads, currentPose.rotation);
 
                 // Calculate Turn Speed
-                double turnSpeed = rotationPID.update(angleDiff);
-                turnSpeed = std::clamp(turnSpeed, -options.maxSpeed, options.maxSpeed);
+                double turnSpeed = 0;
+
+                if (std::fabs(distanceToTarget) > options.minDistanceToRotate)
+                {
+                    turnSpeed = rotationPID.update(angleDiff);
+                    turnSpeed = std::clamp(turnSpeed, -options.maxSpeed, options.maxSpeed);
+                }
 
                 // Check if we are at the target
                 if (fabs(distanceToTarget) < options.goalDist)
