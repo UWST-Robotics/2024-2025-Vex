@@ -35,10 +35,11 @@ namespace devils
         {
             conveyor.runAsync();
 
-            intakeLauncher.extend();
             imu.calibrate();
             imu.waitUntilCalibrated();
             imu.setHeading(0);
+
+            intakeLauncher.extend();
 
             autoRoutine.doStep();
         }
@@ -92,7 +93,7 @@ namespace devils
 
             // Tasks
             conveyor.stopAsync();
-            conveyor.setGoalGrabbed(false);
+            // conveyor.setGoalGrabbed(false);
         }
 
         // Constants

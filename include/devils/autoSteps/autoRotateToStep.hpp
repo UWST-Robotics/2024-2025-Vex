@@ -28,8 +28,14 @@ namespace devils
             /// @brief The maximum speed in %
             double maxSpeed = 0.3;
 
+            /// @brief The minimum speed in %
+            double minSpeed = 0.1;
+
             /// @brief The distance to the goal in radians
             double goalDist = 0.015;
+
+            /// @brief The timeout in ms to allow for the step to complete.
+            double timeout = 2500;
 
             /// @brief Setting this to false will rotate to the absolute angle instead of the minimum distance.
             bool useMinimumDistance = true;
@@ -63,6 +69,9 @@ namespace devils
             // Reset PID
             rotationPID.reset();
 
+            // Start Time
+            double startTime = pros::millis();
+
             // Control Loop
             while (true)
             {
@@ -74,6 +83,7 @@ namespace devils
                 // Calculate Speed
                 double speed = rotationPID.update(distanceToTarget);
                 speed = std::clamp(speed, -options.maxSpeed, options.maxSpeed);
+                speed = std::copysign(std::max(fabs(speed), options.minSpeed), speed);
 
                 NetworkTables::updateDoubleValue("speed", speed);
                 NetworkTables::updateDoubleValue("angle", currentAngle);
@@ -81,6 +91,11 @@ namespace devils
 
                 // Check if we are at the target
                 if (fabs(distanceToTarget) < options.goalDist)
+                    break;
+
+                // Check if we timed out
+                double currentTime = pros::millis();
+                if (currentTime - startTime > options.timeout)
                     break;
 
                 // Move Chassis
@@ -117,7 +132,7 @@ namespace devils
         double targetAngle = 0;
 
     private:
-        static constexpr double POST_DRIVE_DELAY = 500; // ms
+        static constexpr double POST_DRIVE_DELAY = 100; // ms
 
         /**
          * Gets the angle difference between two angles.

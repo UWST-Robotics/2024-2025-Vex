@@ -16,9 +16,12 @@ namespace devils
         void doStep() override
         {
             conveyor.setGoalGrabbed(shouldGrab);
+            pros::delay(ACTUATION_DELAY);
         }
 
     private:
+        static constexpr double ACTUATION_DELAY = 500; // ms
+
         bool shouldGrab;
         ConveyorSystem &conveyor;
     };

@@ -36,6 +36,9 @@ namespace devils
             /// @brief The distance to the goal in inches
             double goalDist = 1.5;
 
+            /// @brief The timeout in ms to allow for the step to complete.
+            double timeout = 2500;
+
             /// @brief The minimum distance from the target to apply rotation
             double minDistanceToRotate = 12.0;
 
@@ -72,6 +75,9 @@ namespace devils
             // Reset PID Controllers
             translationPID.reset();
             rotationPID.reset();
+
+            // Start Time
+            double startTime = pros::millis();
 
             // Control Loop
             while (true)
@@ -122,6 +128,11 @@ namespace devils
                 if (fabs(distanceToTarget) < options.goalDist)
                     break;
 
+                // Check if we timed out
+                double currentTime = pros::millis();
+                if (currentTime - startTime > options.timeout)
+                    break;
+
                 // Move Chassis
                 chassis.move(speed, turnSpeed);
 
@@ -149,7 +160,7 @@ namespace devils
         Pose targetPose = Pose();
 
     private:
-        static constexpr double POST_DRIVE_DELAY = 500; // ms
+        static constexpr double POST_DRIVE_DELAY = 250; // ms
     };
 
     // Define the default options

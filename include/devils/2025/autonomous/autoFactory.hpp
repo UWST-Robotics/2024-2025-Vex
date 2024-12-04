@@ -16,7 +16,7 @@ namespace devils
             ConveyorSystem &conveyor)
         {
             // PID Params
-            PIDParams drivePID = {0.045, 0.0, 0.02};
+            PIDParams drivePID = {0.05, 0.0, 0.02};
             PIDParams rotatePID = {0.5, 0.0, 0.15};
 
             // Default Options
@@ -24,12 +24,15 @@ namespace devils
                 drivePID,
                 rotatePID,
                 0.4, // maxSpeed
-                1.5  // goalDist
+                1.5, // goalDist
+                2500 // timeout
             };
             AutoRotateToStep::Options::defaultOptions = {
                 rotatePID,
-                0.4,  // maxSpeed
-                0.015 // goalDist
+                0.3,   // maxSpeed
+                0.14,  // minSpeed
+                0.015, // goalDist
+                2500   // timeout
             };
 
             // Speed Options
@@ -37,12 +40,15 @@ namespace devils
                 drivePID,
                 rotatePID,
                 0.5, // maxSpeed
-                1.0  // goalDist
+                2.0, // goalDist
+                1500 // timeout
             };
             AutoDriveToStep::Options slowSpeed = {
-                drivePID, rotatePID,
+                drivePID,
+                rotatePID,
                 0.3, // maxSpeed
-                0.3  // goalDist
+                1.0, // goalDist
+                4000 // timeout
             };
 
             // Create Auto Routine
@@ -54,19 +60,18 @@ namespace devils
                 new AutoIntakeStep(intake, 1.0),
                 new AutoDriveStep(chassis, odometry, 18.0), // 1
                 new AutoRotateToStep(chassis, odometry, M_PI),
-                new AutoDriveStep(chassis, odometry, -30.0, highSpeed),
-                new AutoPauseStep(chassis, 500),
+                new AutoDriveStep(chassis, odometry, -34.0), //, highSpeed),
                 new AutoGrabMogoStep(conveyor, true),
-                new AutoDriveStep(chassis, odometry, 6.0), // <-- Recenters the robot after the high speed drive
+                new AutoDriveStep(chassis, odometry, 10.0), // <-- Recenters the robot after the high speed drive
                 new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
                 new AutoDriveStep(chassis, odometry, 23.0), // 2
                 new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
                 new AutoDriveStep(chassis, odometry, 45.0), // 3
 
-                new AutoPauseStep(chassis, 1000),
-                new AutoDriveStep(chassis, odometry, -4.0),
-                new AutoDriveStep(chassis, odometry, 4.0),
-                new AutoPauseStep(chassis, 1000),
+                new AutoPauseStep(chassis, 500),
+                new AutoDriveStep(chassis, odometry, -6.0),
+                new AutoDriveStep(chassis, odometry, 6.0),
+                new AutoPauseStep(chassis, 500),
 
                 new AutoDriveStep(chassis, odometry, -12.0),
                 new AutoRotateToStep(chassis, odometry, M_PI * 0.25),
@@ -86,8 +91,9 @@ namespace devils
                 new AutoDriveStep(chassis, odometry, 24.0),
 
                 new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
-                new AutoDriveStep(chassis, odometry, -34.0),
+                new AutoDriveStep(chassis, odometry, -46.0),
                 new AutoGrabMogoStep(conveyor, true),
+                new AutoDriveStep(chassis, odometry, 12.0),
                 new AutoRotateToStep(chassis, odometry, M_PI * 0.75),
                 new AutoDriveStep(chassis, odometry, 28.0),
 
@@ -103,25 +109,23 @@ namespace devils
                 // Section 4
                 new AutoDriveStep(chassis, odometry, 34.0),
                 new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
-                new AutoDriveStep(chassis, odometry, -30.0),
+                new AutoDriveStep(chassis, odometry, -36.0),
                 new AutoGrabMogoStep(conveyor, true),
+                new AutoDriveStep(chassis, odometry, 6.0),
                 new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
                 new AutoDriveStep(chassis, odometry, 21.0),
                 new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
-                new AutoDriveStep(chassis, odometry, 32.0),
+                new AutoDriveStep(chassis, odometry, 36.0),
                 new AutoRotateToStep(chassis, odometry, 0),
                 new AutoDriveStep(chassis, odometry, 23.0),
                 new AutoRotateToStep(chassis, odometry, M_PI * 0.75),
-                new AutoDriveStep(chassis, odometry, -12.0, highSpeed),
-                new AutoPauseStep(chassis, 1000),
-                new AutoDriveStep(chassis, odometry, 6.0),
-                new AutoDriveStep(chassis, odometry, -6.0, highSpeed),
-                new AutoPauseStep(chassis, 1000),
+                new AutoDriveStep(chassis, odometry, -12.0),
                 new AutoGrabMogoStep(conveyor, false),
+                new AutoDriveStep(chassis, odometry, 6.0),
+                new AutoDriveStep(chassis, odometry, -16.0, highSpeed),
                 new AutoDriveStep(chassis, odometry, 24.0),
             });
-            return autoRoutine;
-            // return AbsoluteStepConverter::relativeToAbsolute(autoRoutine);
+            return AbsoluteStepConverter::relativeToAbsolute(autoRoutine);
         }
 
         static AutoStepList createBlazeAutoRoutine(
@@ -207,8 +211,8 @@ namespace devils
                 new AutoDriveStep(chassis, odometry, 24.0), // 3
                 new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
                 new AutoDriveStep(chassis, odometry, -24.0),
-                new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
-                new AutoDriveStep(chassis, odometry, -12.0, highSpeed),
+                new AutoRotateToStep(chassis, odometry, M_PI * -0.65),
+                new AutoDriveStep(chassis, odometry, -16.0, highSpeed),
                 new AutoGrabMogoStep(conveyor, false),
                 new AutoPauseStep(chassis, 1500),
                 new AutoDriveStep(chassis, odometry, 24.0),
