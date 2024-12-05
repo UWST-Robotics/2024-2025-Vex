@@ -5,6 +5,7 @@
 #include "devils/chassis/chassisBase.hpp"
 #include "devils/utils/math.hpp"
 #include "devils/utils/pidController.hpp"
+#include "devils/odom/poseVelocityCalculator.hpp"
 
 namespace devils
 {
@@ -33,6 +34,9 @@ namespace devils
 
             /// @brief The distance to the goal in radians
             double goalDist = 0.015;
+
+            /// @brief The maximum speed of the robot in rad/s
+            double goalSpeed = 0.01;
 
             /// @brief The timeout in ms to allow for the step to complete.
             double timeout = 2500;
@@ -75,28 +79,29 @@ namespace devils
             // Control Loop
             while (true)
             {
-                // Calculate distance to start and target
+                // Get Current Pose
                 Pose currentPose = odomSource.getPose();
+                double currentVelocity = odomSource.getAngularVelocity();
+
+                // Calculate distance to start and target
                 double currentAngle = currentPose.rotation;
                 double distanceToTarget = angleDiff(targetAngle, currentAngle);
 
-                // Calculate Speed
-                double speed = rotationPID.update(distanceToTarget);
-                speed = std::clamp(speed, -options.maxSpeed, options.maxSpeed);
-                speed = std::copysign(std::max(fabs(speed), options.minSpeed), speed);
-
-                NetworkTables::updateDoubleValue("speed", speed);
-                NetworkTables::updateDoubleValue("angle", currentAngle);
-                NetworkTables::updateDoubleValue("dist", distanceToTarget);
-
                 // Check if we are at the target
-                if (fabs(distanceToTarget) < options.goalDist)
+                bool isAtGoalPose = fabs(distanceToTarget) < options.goalDist;
+                bool isAtGoalVelocity = fabs(currentVelocity) < options.goalSpeed;
+                if (isAtGoalPose && isAtGoalVelocity)
                     break;
 
                 // Check if we timed out
                 double currentTime = pros::millis();
                 if (currentTime - startTime > options.timeout)
                     break;
+
+                // Calculate Speed
+                double speed = rotationPID.update(distanceToTarget);
+                speed = std::clamp(speed, -options.maxSpeed, options.maxSpeed);        // Clamp to max speed
+                speed = std::copysign(std::max(fabs(speed), options.minSpeed), speed); // Clamp to min speed
 
                 // Move Chassis
                 chassis.move(0, speed);
@@ -124,8 +129,6 @@ namespace devils
         // Robot Base
         ChassisBase &chassis;
         OdomSource &odomSource;
-
-        // PID
         PIDController rotationPID;
 
         // Drive Step Variables

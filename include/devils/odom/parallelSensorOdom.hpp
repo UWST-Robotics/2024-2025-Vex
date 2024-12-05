@@ -46,6 +46,16 @@ namespace devils
             this->ticksPerRevolution = ticksPerRevolution;
         }
 
+        Vector2 &getVelocity() override
+        {
+            return PoseVelocityCalculator::getVelocity();
+        }
+
+        double getAngularVelocity() override
+        {
+            return PoseVelocityCalculator::getAngularVelocity();
+        }
+
     private:
         double ticksPerRevolution = 300.0 * (48.0 / 36.0); // ticks
         RotationSensor &leftSensor;

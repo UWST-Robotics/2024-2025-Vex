@@ -41,10 +41,11 @@ namespace devils
                 rightX = JoystickCurve::curve(rightX, 3.0, 0.05);
                 rightY = JoystickCurve::curve(rightY, 3.0, 0.1);
 
-                rightX *= 0.5;
+                // Move Intake
+                intakeMotors.moveVoltage(rightY);
 
                 // Move Chassis
-                chassis.move(leftY, rightX);
+                chassis.move(leftY, leftX * 0.5);
 
                 // Delay to prevent the CPU from being overloaded
                 pros::delay(20);
@@ -58,8 +59,9 @@ namespace devils
         }
 
         // Hardware
-        SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {19});
-        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {-20});
+        SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {20});
+        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {-19});
+        SmartMotorGroup intakeMotors = SmartMotorGroup("IntakeMotors", {-18});
 
         // Subsystems
         TankChassis chassis = TankChassis(leftMotors, rightMotors);

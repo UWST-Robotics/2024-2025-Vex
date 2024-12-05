@@ -127,7 +127,7 @@ namespace devils
 
         // Autonomous Routine
         AutoStepList autoRoutine = AutoFactory::createPJAutoRoutine(chassis, deadWheelOdom, intake, conveyor);
-        // AutoStepList autoRoutine = AutoFactory::createRotationTestRoutine(chassis, deadWheelOdom);
+        // AutoStepList autoRoutine = AutoFactory::createTranslationTestRoutine(chassis, deadWheelOdom);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

@@ -5,6 +5,7 @@
 #include "../utils/logger.hpp"
 #include "../geometry/pose.hpp"
 #include "odomSource.hpp"
+#include "poseVelocityCalculator.hpp"
 #include "pros/rtos.hpp"
 #include "pros/error.h"
 #include <cmath>
@@ -17,7 +18,7 @@ namespace devils
     /**
      * Represents an odometry system using a set of differential wheels
      */
-    class DifferentialWheelOdom : public OdomSource
+    class DifferentialWheelOdom : public OdomSource, public PoseVelocityCalculator
     {
     public:
         /**
@@ -84,6 +85,19 @@ namespace devils
             currentPose.x += deltaX;
             currentPose.y += deltaY;
             currentPose.rotation += deltaRotation;
+
+            // Update Velocity
+            updateVelocity(currentPose);
+        }
+
+        Vector2 &getVelocity() override
+        {
+            return PoseVelocityCalculator::getVelocity();
+        }
+
+        double getAngularVelocity() override
+        {
+            return PoseVelocityCalculator::getAngularVelocity();
         }
 
     private:

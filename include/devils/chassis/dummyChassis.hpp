@@ -5,6 +5,7 @@
 #include <iostream>
 #include "../utils/logger.hpp"
 #include "../odom/odomSource.hpp"
+#include "../odom/poseVelocityCalculator.hpp"
 #include "../utils/runnable.hpp"
 
 namespace devils
@@ -14,7 +15,7 @@ namespace devils
      * This is useful for testing autonomous routines without a physical robot.
      * Can be used as an OdomSource.
      */
-    class DummyChassis : public ChassisBase, public OdomSource, public Runnable
+    class DummyChassis : public ChassisBase, public OdomSource, public Runnable, public PoseVelocityCalculator
     {
     public:
         DummyChassis()
@@ -47,6 +48,9 @@ namespace devils
             // Update Pose
             currentPose = currentPose + currentAcceleration;
             currentPose.rotation = std::fmod(currentPose.rotation, 2 * M_PI);
+
+            // Update Velocity
+            updateVelocity(currentPose);
         }
 
         void setPose(Pose &pose) override
@@ -57,6 +61,16 @@ namespace devils
         Pose &getPose() override
         {
             return currentPose;
+        }
+
+        Vector2 &getVelocity() override
+        {
+            return PoseVelocityCalculator::getVelocity();
+        }
+
+        double getAngularVelocity() override
+        {
+            return PoseVelocityCalculator::getAngularVelocity();
         }
 
     private:

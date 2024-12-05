@@ -7,6 +7,7 @@
 #include "devils/odom/odomSource.hpp"
 #include "devils/chassis/chassisBase.hpp"
 #include "devils/utils/pidController.hpp"
+#include "devils/odom/poseVelocityCalculator.hpp"
 
 namespace devils
 {
@@ -35,6 +36,9 @@ namespace devils
 
             /// @brief The distance to the goal in inches
             double goalDist = 1.5;
+
+            /// @brief The maximum speed of the robot in in/s
+            double goalSpeed = 1;
 
             /// @brief The timeout in ms to allow for the step to complete.
             double timeout = 2500;
@@ -82,8 +86,11 @@ namespace devils
             // Control Loop
             while (true)
             {
-                // Calculate distance to start and target
+                // Get Current State
                 Pose currentPose = odomSource.getPose();
+                Vector2 currentVelocity = odomSource.getVelocity();
+
+                // Calculate distance to start and target
                 double distanceToStart = currentPose.distanceTo(startPose);
                 double distanceToTarget = Math::distanceOnLine(
                     startPose,
@@ -99,6 +106,17 @@ namespace devils
                 // Reverse if needed
                 distanceToTarget *= std::copysign(1.0, dot);
 
+                // Check if we reached the goal
+                bool isAtGoalPose = fabs(distanceToTarget) < options.goalDist;
+                bool isAtGoalVelocity = currentVelocity.magnitude() < options.goalSpeed;
+                if (isAtGoalPose && isAtGoalVelocity)
+                    break;
+
+                // Check if we timed out
+                double currentTime = pros::millis();
+                if (currentTime - startTime > options.timeout)
+                    break;
+
                 // Calculate Speed
                 double speed = translationPID.update(distanceToTarget);
                 speed = std::clamp(speed, -options.maxSpeed, options.maxSpeed);
@@ -108,30 +126,18 @@ namespace devils
                     targetPose.y - currentPose.y,
                     targetPose.x - currentPose.x);
 
-                // Apply direction
                 if (dot < 0)
-                    targetAngleRads += M_PI;
+                    targetAngleRads += M_PI; // Goal point is behind us, target the opposite direction
 
-                // Calculate Angle Difference
                 double angleDiff = Math::angleDiff(targetAngleRads, currentPose.rotation);
 
                 // Calculate Turn Speed
                 double turnSpeed = 0;
-
                 if (std::fabs(distanceToTarget) > options.minDistanceToRotate)
                 {
                     turnSpeed = rotationPID.update(angleDiff);
                     turnSpeed = std::clamp(turnSpeed, -options.maxSpeed, options.maxSpeed);
                 }
-
-                // Check if we are at the target
-                if (fabs(distanceToTarget) < options.goalDist)
-                    break;
-
-                // Check if we timed out
-                double currentTime = pros::millis();
-                if (currentTime - startTime > options.timeout)
-                    break;
 
                 // Move Chassis
                 chassis.move(speed, turnSpeed);
@@ -153,14 +159,14 @@ namespace devils
         // Robot Base
         ChassisBase &chassis;
         OdomSource &odomSource;
-
-        // Drive Step Variables
         PIDController translationPID;
         PIDController rotationPID;
+
+        // Input
         Pose targetPose = Pose();
 
     private:
-        static constexpr double POST_DRIVE_DELAY = 250; // ms
+        static constexpr double POST_DRIVE_DELAY = 100; // ms
     };
 
     // Define the default options

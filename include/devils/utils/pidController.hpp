@@ -65,6 +65,10 @@ namespace devils
          */
         double update(double currentError)
         {
+            // Don't update if the error is the same
+            if (currentError == this->currentError)
+                return getValue();
+
             // Get Delta Time
             double dt = pros::millis() - lastUpdateTimestamp;
             lastUpdateTimestamp = pros::millis();
@@ -90,6 +94,7 @@ namespace devils
          */
         double getValue()
         {
+            // Logger::info("{=" + std::to_string(currentError) + ", I=" + std::to_string(currentIntegral) + ", D=" + std::to_string(currentDerivative) + "}");
             double p = pGain * currentError;
             double i = iGain * currentIntegral;
             double d = dGain * currentDerivative;
