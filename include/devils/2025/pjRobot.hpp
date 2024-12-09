@@ -59,8 +59,6 @@ namespace devils
                 double leftY = mainController.get_analog(ANALOG_LEFT_Y) / 127.0;
                 double leftX = mainController.get_analog(ANALOG_LEFT_X) / 127.0;
                 double intakeInput = mainController.get_analog(ANALOG_RIGHT_Y) / 127.0;
-                bool intakeSpeedUp = mainController.get_digital_new_press(DIGITAL_UP);
-                bool intakeSpeedDown = mainController.get_digital_new_press(DIGITAL_DOWN);
                 bool grabInput = mainController.get_digital_new_press(DIGITAL_A);
 
                 // Curve Joystick Inputs
@@ -69,15 +67,17 @@ namespace devils
                 intakeInput = JoystickCurve::curve(intakeInput, 3.0, 0.1);
 
                 // Move Conveyor/Intake
-                // conveyor.moveAutomatic();
                 conveyor.moveAutomatic(intakeInput);
                 intake.move(intakeInput);
 
                 // Grab Mogo
                 if (grabInput)
                 {
-                    bool isGoalGrabbed = !conveyor.isGoalGrabbed();
+                    // Toggle the goal grabber
+                    bool isGoalGrabbed = !conveyor.goalGrabbed();
                     conveyor.setGoalGrabbed(isGoalGrabbed);
+
+                    // Controller feedback
                     mainController.rumble(isGoalGrabbed ? "-" : "..");
                 }
 

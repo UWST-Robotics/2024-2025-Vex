@@ -68,18 +68,22 @@ namespace devils
                 rightX = JoystickCurve::curve(rightX, 3.0, 0.05);
                 rightY = JoystickCurve::curve(rightY, 3.0, 0.1);
 
-                rightX *= 0.5;
+                rightX *= 0.5; // Decrease turning speed for improved control
 
-                // Move Intake
+                // Reverse Intake
                 if (intakeOut || !isConveyorUp)
                 {
                     intake.move(-1.0);
                 }
+
+                // Intake In
                 else if (intakeIn)
                 {
                     intake.move(1.0);
-                    isConveyorPaused = false;
+                    isConveyorPaused = false; // Unpause the conveyor
                 }
+
+                // Stop Intake
                 else
                 {
                     intake.move(0);
@@ -92,28 +96,32 @@ namespace devils
                     isConveyorUp = false;
 
                 // Unpause if the goal is released
-                if (!conveyor.isGoalGrabbed())
+                if (!conveyor.goalGrabbed())
                     isConveyorPaused = false;
 
+                // Pause Conveyor
                 if (isConveyorPaused)
-                {
                     conveyor.forceMove(0);
-                }
+
+                // Run Forward
                 else if (isConveyorUp)
-                {
                     conveyor.moveAutomatic(0.85);
-                }
+
+                // Eject Rings
                 else
-                {
                     conveyor.moveAutomatic(-0.5);
-                }
 
                 // Grab Mogo
                 if (grabInput)
                 {
-                    bool isGoalGrabbed = !conveyor.isGoalGrabbed();
+                    // Toggle the goal grabber
+                    bool isGoalGrabbed = !conveyor.goalGrabbed();
                     conveyor.setGoalGrabbed(isGoalGrabbed);
+
+                    // Controller feedback
                     mainController.rumble(isGoalGrabbed ? "-" : "..");
+
+                    // Pause the conveyor until intake is activated or mogo is released
                     isConveyorPaused = true;
                 }
 
