@@ -54,8 +54,8 @@ namespace devils
                         currentPose.rotation);
 
                     // Create Rotate To Step
-                    AutoRotateTowardStep *newRotateStep = new AutoRotateTowardStep(driveStep->chassis, driveStep->odomSource, currentPose);
-                    newSteps.push_back(newRotateStep);
+                    // AutoRotateTowardStep *newRotateStep = new AutoRotateTowardStep(driveStep->chassis, driveStep->odomSource, currentPose);
+                    // newSteps.push_back(newRotateStep);
 
                     // Create Drive To Step
                     AutoDriveToStep *newDriveStep = new AutoDriveToStep(driveStep->chassis, driveStep->odomSource, currentPose, driveStep->options);
@@ -125,7 +125,7 @@ namespace devils
             }
 
             // Return New Step List
-            return AutoStepList(newSteps);
+            return AutoStepList(newSteps, autoStepList.loopCount);
         }
     };
 }

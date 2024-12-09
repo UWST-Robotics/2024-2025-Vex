@@ -4,6 +4,7 @@
 #include "../odom/odomSource.hpp"
 #include "../hardware/rotationSensor.hpp"
 #include "../hardware/imu.hpp"
+#include "poseVelocityCalculator.hpp"
 
 namespace devils
 {
@@ -11,7 +12,7 @@ namespace devils
      * Represents an odometry system using a set of perpendicular rotation sensors.
      * If the sensors are parallel, use `ParallelSensorOdometry` instead.
      */
-    class PerpendicularSensorOdometry : public OdomSource, public Runnable
+    class PerpendicularSensorOdometry : public OdomSource, public Runnable, public PoseVelocityCalculator
     {
     public:
         /**
@@ -29,6 +30,16 @@ namespace devils
               wheelRadius(wheelRadius)
         {
             lastUpdateTimestamp = pros::millis();
+        }
+
+        Vector2 &getVelocity() override
+        {
+            return PoseVelocityCalculator::getVelocity();
+        }
+
+        double getAngularVelocity() override
+        {
+            return PoseVelocityCalculator::getAngularVelocity();
         }
 
         /**
@@ -105,6 +116,9 @@ namespace devils
             // Update Pose
             currentPose.x += deltaX;
             currentPose.y += deltaY;
+
+            // Update Velocity
+            updateVelocity(currentPose);
         }
 
         /**

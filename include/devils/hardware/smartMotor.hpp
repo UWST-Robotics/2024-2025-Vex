@@ -98,6 +98,18 @@ namespace devils
         }
 
         /**
+         * Gets the current current draw of the motor in mA.
+         * @return The current current draw of the motor in mA or `PROS_ERR_F` if the current could not be retrieved.
+         */
+        double getCurrent()
+        {
+            double current = motor.get_current_draw();
+            if (current == PROS_ERR_F)
+                reportFault("Get Current Failed");
+            return current;
+        }
+
+        /**
          * Sets the brake mode of the motor.
          *
          * \note

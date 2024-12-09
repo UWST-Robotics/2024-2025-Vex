@@ -4,11 +4,15 @@
 
 namespace devils
 {
+    class AbsoluteStepConverter;
+
     /**
      * Represents a list of AutoSteps.
      */
     class AutoStepList : public IAutoStep
     {
+        friend class AbsoluteStepConverter;
+
     public:
         /**
          * Creates a new instance of AutoStepList.
@@ -28,16 +32,6 @@ namespace devils
         AutoStepList(std::vector<IAutoStep *> steps, int loopCount = 1)
             : steps(steps), loopCount(loopCount)
         {
-        }
-
-        /**
-         * Destroys the AutoStepList and all steps in it.
-         */
-        ~AutoStepList()
-        {
-            // Steps were created with new, so delete them
-            for (auto step : steps)
-                delete step;
         }
 
         /**

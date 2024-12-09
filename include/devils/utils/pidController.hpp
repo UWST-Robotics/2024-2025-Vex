@@ -5,6 +5,16 @@
 namespace devils
 {
     /**
+     * Represents the parameters of a PID controller.
+     */
+    struct PIDParams
+    {
+        double p;
+        double i;
+        double d;
+    };
+
+    /**
      * Represents a feedback controller that uses a PID algorithm.
      */
     class PIDController
@@ -23,6 +33,13 @@ namespace devils
             : pGain(pGain),
               iGain(iGain),
               dGain(dGain)
+        {
+        }
+
+        PIDController(PIDParams params)
+            : pGain(params.p),
+              iGain(params.i),
+              dGain(params.d)
         {
         }
 
@@ -48,6 +65,10 @@ namespace devils
          */
         double update(double currentError)
         {
+            // Don't update if the error is the same
+            if (currentError == this->currentError)
+                return getValue();
+
             // Get Delta Time
             double dt = pros::millis() - lastUpdateTimestamp;
             lastUpdateTimestamp = pros::millis();
@@ -73,6 +94,7 @@ namespace devils
          */
         double getValue()
         {
+            // Logger::info("{=" + std::to_string(currentError) + ", I=" + std::to_string(currentIntegral) + ", D=" + std::to_string(currentDerivative) + "}");
             double p = pGain * currentError;
             double i = iGain * currentIntegral;
             double d = dGain * currentDerivative;

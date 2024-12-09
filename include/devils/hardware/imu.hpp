@@ -7,6 +7,7 @@
 #include "../geometry/units.hpp"
 #include "../geometry/vector3.hpp"
 #include "../odom/odomSource.hpp"
+#include "../odom/poseVelocityCalculator.hpp"
 #include <string>
 
 namespace devils
@@ -14,7 +15,7 @@ namespace devils
     /**
      * Represents a V5 inertial measurement unit.
      */
-    class IMU : public OdomSource, private NTHardware
+    class IMU : private NTHardware
     {
     public:
         /**
@@ -33,25 +34,6 @@ namespace devils
 
         IMU(const IMU &) = delete;
         IMU &operator=(const IMU &) = delete;
-
-        /**
-         * Converts heading to an `OdomSource` at (0, 0).
-         * @param heading The heading to convert to an `OdomSource`.
-         */
-        Pose &getPose() override
-        {
-            odomPose.rotation = getHeading();
-            return odomPose;
-        }
-
-        /**
-         * Sets the heading of the IMU from a given `Pose`.
-         * @param pose The pose to set the IMU to. Only uses `Pose.rotation`.
-         */
-        void setPose(Pose &pose) override
-        {
-            setHeading(pose.rotation);
-        }
 
         /**
          * Gets the current acceleration of the IMU in inches per second squared.
@@ -145,7 +127,8 @@ namespace devils
 
         /**
          * Scales the heading by a given factor.
-         * Used to fix consistent heading drift after rotation.
+         * Used to fix consistent heading drift after a set rotation.
+         * Can be calculated by rotating the robot exactly 360 degrees and doing `2 * PI / getHeading()`.
          * @param scale The scale to multiply the heading by.
          */
         void setHeadingScale(double scale)

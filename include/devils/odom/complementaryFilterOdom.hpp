@@ -87,6 +87,24 @@ namespace devils
             relativeOdom->setPose(pose);
         }
 
+        /**
+         * Gets the current velocity of the robot
+         * @return The current velocity of the robot
+         */
+        Vector2 &getVelocity() override
+        {
+            return relativeOdom->getVelocity();
+        }
+
+        /**
+         * Gets the current angular velocity of the robot
+         * @return The current angular velocity of the robot
+         */
+        double getAngularVelocity() override
+        {
+            return relativeOdom->getAngularVelocity();
+        }
+
     private:
         OdomSource *absoluteOdom;
         OdomSource *relativeOdom;

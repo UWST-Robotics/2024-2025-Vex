@@ -47,10 +47,28 @@ namespace devils
             }
 
             // Stop the conveyor system if we are actuating the mogo
-            bool isActuating = pros::millis() - mogoActuationTime < MOGO_ACTUATION_DELAY;
+            bool isActuating = mogoActuationTimer.running();
             if (isActuating && isForwards)
             {
                 conveyorMotors.stop();
+                return;
+            }
+
+            // Start stalled cooldown timer if the stalled timer is finished
+            if (stallTimer.finished() && !stallCooldownTimer.running())
+                stallCooldownTimer.start(STALL_REVERSE_DURATION);
+
+            // Start stalled timer if the conveyor is stalled
+            bool isStalled = conveyorMotors.getCurrent() > STALL_CURRENT;
+            if (isStalled && !stallTimer.running() && !stallCooldownTimer.running())
+                stallTimer.start(STALL_MIN_DURATION);
+            else if (!isStalled)
+                stallTimer.stop();
+
+            // Reverse the conveyor system if it the stall cooldown is active
+            if (stallCooldownTimer.running())
+            {
+                conveyorMotors.moveVoltage(STALL_SPEED);
                 return;
             }
 
@@ -86,7 +104,7 @@ namespace devils
             // Update the mogo actuation time
             bool didChange = isGrabbed != isGoalGrabbed();
             if (didChange)
-                mogoActuationTime = pros::millis();
+                mogoActuationTimer.start(MOGO_ACTUATION_DELAY);
 
             // Actuate the grabber
             grabberPneumatic.setExtended(isGrabbed);
@@ -103,11 +121,18 @@ namespace devils
 
     private:
         static constexpr double PROXIMITY_THRESHOLD = 0.3;
-        static constexpr double NO_MOGO_CONVEYOR_SPEED = 0.6;
+        static constexpr double NO_MOGO_CONVEYOR_SPEED = 0.7;
         static constexpr double MOGO_CONVEYOR_SPEED = 1.0;
         static constexpr double MOGO_ACTUATION_DELAY = 600;
 
-        int mogoActuationTime = 0;
+        static constexpr double STALL_MIN_DURATION = 300;
+        static constexpr double STALL_CURRENT = 2000;
+        static constexpr double STALL_REVERSE_DURATION = 1000;
+        static constexpr double STALL_SPEED = -0.4;
+
+        Timer mogoActuationTimer;
+        Timer stallTimer;
+        Timer stallCooldownTimer;
 
         SmartMotorGroup &conveyorMotors;
         ADIPneumatic &grabberPneumatic;

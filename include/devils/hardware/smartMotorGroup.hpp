@@ -81,7 +81,6 @@ namespace devils
          * Returns the average speed of all the motors in RPM.
          * If 1 or more motors fail to return velocity, they are ignored.
          * @return The average speed of all the motors in RPM.
-         * @throws std::runtime_error if no motors returned velocity.
          */
         double getVelocity()
         {
@@ -110,6 +109,40 @@ namespace devils
 
             // Return the mean speed
             return speed / motorCount;
+        }
+
+        /**
+         * Returns the average current of all the motors in mA.
+         * If 1 or more motors fail to return current, they are ignored.
+         * @return The average current of all the motors in mA.
+         */
+        double getCurrent()
+        {
+            // Iterate through motors and get average current
+            int motorCount = 0;
+            double current = 0;
+            for (auto motor : motors)
+            {
+                double motorCurrent = motor->getCurrent();
+
+                // Skip motors that fail to return current
+                if (motorCurrent == PROS_ERR_F)
+                    continue;
+
+                current += motorCurrent;
+                motorCount++;
+            }
+
+            // Log if no motors returned current
+            if (motorCount == 0)
+            {
+                if (LOGGING_ENABLED)
+                    Logger::warn(name + ": no motors returned current");
+                return 0;
+            }
+
+            // Return the mean current
+            return current / motorCount;
         }
 
         /**

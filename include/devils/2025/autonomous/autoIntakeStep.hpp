@@ -8,7 +8,7 @@ namespace devils
     class AutoIntakeStep : public IAutoStep
     {
     public:
-        AutoIntakeStep(IntakeSystem &intake, double intakeSpeed = 0.5)
+        AutoIntakeStep(IntakeSystem &intake, double intakeSpeed = 1.0)
             : intake(intake), intakeSpeed(intakeSpeed)
         {
         }
