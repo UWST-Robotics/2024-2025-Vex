@@ -16,7 +16,7 @@ namespace devils
         DebugRobot()
         {
             // Reset Network Tables
-            networkOdom.setSize(18.0, 18.0);
+            // networkOdom.setSize(18.0, 18.0);
         }
 
         void autonomous() override
@@ -39,7 +39,7 @@ namespace devils
         DummyChassis chassis = DummyChassis();
 
         // Additional Network Objects
-        NTOdom networkOdom = NTOdom("DummyOdom", chassis);
+        // NTOdom networkOdom = NTOdom("DummyOdom", chassis);
         // NTPath networkPath = NTPath("TestPath", path);
 
         // Renderer

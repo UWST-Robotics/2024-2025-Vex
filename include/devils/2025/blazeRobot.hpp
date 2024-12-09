@@ -18,7 +18,7 @@ namespace devils
         BlazeRobot()
         {
             // Initialize NT
-            deadWheelOdomNT.setSize(EXTERIOR_WIDTH, EXTERIOR_HEIGHT);
+            // deadWheelOdomNT.setSize(EXTERIOR_WIDTH, EXTERIOR_HEIGHT);
 
             // Initialize Hardware
             imu.calibrate();
@@ -99,6 +99,9 @@ namespace devils
                 if (!conveyor.goalGrabbed())
                     isConveyorPaused = false;
 
+                // Disable Auto Reject
+                conveyor.setSortingEnabled(false);
+
                 // Pause Conveyor
                 if (isConveyorPaused)
                     conveyor.forceMove(0);
@@ -173,7 +176,7 @@ namespace devils
         // TankChassisOdom chassisOdom = TankChassisOdom(chassis, WHEEL_RADIUS, WHEEL_BASE);
         // TankChassisOdom chassisOdomNoIMU = TankChassisOdom(chassis, WHEEL_RADIUS, WHEEL_BASE);
         PerpendicularSensorOdometry deadWheelOdom = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
-        NTOdom deadWheelOdomNT = NTOdom("DeadWheelOdom", deadWheelOdom);
+        // NTOdom deadWheelOdomNT = NTOdom("DeadWheelOdom", deadWheelOdom);
 
         // Autonomous
         AutoStepList autoRoutine = AutoFactory::createBlazeAutoRoutine(chassis, deadWheelOdom, intake, conveyor);

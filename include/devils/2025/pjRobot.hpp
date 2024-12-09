@@ -18,7 +18,7 @@ namespace devils
         PJRobot()
         {
             // Initialize NT
-            networkOdom.setSize(15.0, 15.0);
+            // networkOdom.setSize(15.0, 15.0);
 
             // Initialize Hardware
             imu.calibrate();
@@ -65,6 +65,9 @@ namespace devils
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1);
                 leftX = JoystickCurve::curve(leftX, 3.0, 0.05);
                 intakeInput = JoystickCurve::curve(intakeInput, 3.0, 0.1);
+
+                // Disable Auto Reject
+                conveyor.setSortingEnabled(false);
 
                 // Move Conveyor/Intake
                 conveyor.moveAutomatic(intakeInput);
@@ -127,7 +130,7 @@ namespace devils
         ConveyorSystem conveyor = ConveyorSystem(conveyorMotors, grabberPneumatic);
         // TankChassisOdom chassisOdom = TankChassisOdom(chassis, WHEEL_RADIUS, WHEEL_BASE);
         PerpendicularSensorOdometry deadWheelOdom = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
-        NTOdom networkOdom = NTOdom("DeadWheelOdom", deadWheelOdom);
+        // NTOdom networkOdom = NTOdom("DeadWheelOdom", deadWheelOdom);
 
         // Autonomous Routine
         AutoStepList autoRoutine = AutoFactory::createPJAutoRoutine(chassis, deadWheelOdom, intake, conveyor);
