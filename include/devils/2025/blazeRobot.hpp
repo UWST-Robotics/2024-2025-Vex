@@ -101,7 +101,7 @@ namespace devils
                 }
                 else if (isConveyorUp)
                 {
-                    conveyor.moveAutomatic(1.0);
+                    conveyor.moveAutomatic(0.85);
                 }
                 else
                 {
@@ -111,7 +111,9 @@ namespace devils
                 // Grab Mogo
                 if (grabInput)
                 {
-                    conveyor.setGoalGrabbed(!conveyor.isGoalGrabbed());
+                    bool isGoalGrabbed = !conveyor.isGoalGrabbed();
+                    conveyor.setGoalGrabbed(isGoalGrabbed);
+                    mainController.rumble(isGoalGrabbed ? "-" : "..");
                     isConveyorPaused = true;
                 }
 

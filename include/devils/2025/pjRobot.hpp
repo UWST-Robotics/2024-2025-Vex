@@ -75,7 +75,11 @@ namespace devils
 
                 // Grab Mogo
                 if (grabInput)
-                    conveyor.setGoalGrabbed(!conveyor.isGoalGrabbed());
+                {
+                    bool isGoalGrabbed = !conveyor.isGoalGrabbed();
+                    conveyor.setGoalGrabbed(isGoalGrabbed);
+                    mainController.rumble(isGoalGrabbed ? "-" : "..");
+                }
 
                 // Move Chassis
                 chassis.move(leftY, leftX);

@@ -39,6 +39,7 @@
 
 // Utils
 #include "utils/joystickCurve.hpp"
+#include "utils/timer.hpp"
 
 // Path
 #include "path/path.hpp"

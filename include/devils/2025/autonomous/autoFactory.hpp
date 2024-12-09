@@ -123,7 +123,7 @@ namespace devils
                 new AutoGrabMogoStep(conveyor, false),
                 new AutoDriveStep(chassis, odometry, 12.0),
                 new AutoDriveStep(chassis, odometry, -18.0, highSpeed),
-                new AutoDriveStep(chassis, odometry, 24.0),
+                new AutoDriveStep(chassis, odometry, 18.0),
                 new AutoDriveStep(chassis, odometry, -18.0, highSpeed),
                 new AutoDriveStep(chassis, odometry, 24.0),
             });
@@ -137,41 +137,46 @@ namespace devils
             ConveyorSystem &conveyor)
         {
             // PID Params
-            PIDParams drivePID = {0.04, 0.0, 0.0};
-            PIDParams rotatePID = {0.3, 0.0, 0.0};
+            PIDParams drivePID = {0.09, 0.0, 10};
+            PIDParams rotatePID = {1.4, 0.0, 100.0};
 
             // Default Options
             AutoDriveToStep::Options::defaultOptions = {
                 drivePID,
                 rotatePID,
-                0.4, // maxSpeed
-                1.5  // goalDist
+                0.5,   // maxSpeed
+                2.0,   // goalDist
+                0.002, // goalSpeed
             };
             AutoRotateToStep::Options::defaultOptions = {
                 rotatePID,
-                0.4, // maxSpeed
-                1.0  // goalDist
+                0.5,   // maxSpeed
+                0.15,  // minSpeed
+                0.02,  // goalDist
+                0.002, // goalSpeed
             };
 
             // Speed Options
             AutoDriveToStep::Options highSpeed = {
                 drivePID,
                 rotatePID,
-                0.8, // maxSpeed
-                1.0  // goalDist
+                1.0,  // maxSpeed
+                2.0,  // goalDist
+                0.002 // goalSpeed
             };
             AutoDriveToStep::Options slowSpeed = {
-                drivePID, rotatePID,
-                0.3, // maxSpeed
-                0.3  // goalDist
+                drivePID,
+                rotatePID,
+                0.3,  // maxSpeed
+                1.0,  // goalDist
+                0.001 // goalSpeed
             };
 
             // Create the auto routine
             AutoStepList autoRoutine = AutoStepList({
                 new AutoJumpToStep(odometry, -64, 0, 0),
 
-                // Section 1
-                new AutoIntakeStep(intake, 0.5),
+                new AutoIntakeStep(intake, 1.0),
                 new AutoPauseStep(chassis, 500),
                 new AutoDriveStep(chassis, odometry, 17.0), // 1
                 new AutoRotateToStep(chassis, odometry, M_PI * 0.25),
@@ -181,42 +186,51 @@ namespace devils
                 new AutoGrabMogoStep(conveyor, true),
                 new AutoDriveStep(chassis, odometry, 4.5),
                 new AutoRotateToStep(chassis, odometry, 0),
-                new AutoDriveStep(chassis, odometry, 24.0),          // 3
-                new AutoRotateToStep(chassis, odometry, M_PI * 0.5), // Always rotate in the positive direction
-                new AutoRotateToStep(chassis, odometry, M_PI),
-                new AutoDriveStep(chassis, odometry, 47.5), // 5
-                new AutoRotateToStep(chassis, odometry, M_PI * 0.75),
-                new AutoDriveStep(chassis, odometry, 16), // 6
+                new AutoDriveStep(chassis, odometry, 24.0), // 3
 
-                new AutoPauseStep(chassis, 1500),
-                new AutoDriveStep(chassis, odometry, -3.0),
-                new AutoDriveStep(chassis, odometry, 3.0),
+                new AutoDriveStep(chassis, odometry, -24.0),
+                new AutoRotateToStep(chassis, odometry, M_PI * 0.15),
+                new AutoDriveStep(chassis, odometry, 16.0), // 4
+                new AutoPauseStep(chassis, 1000),
+                new AutoDriveStep(chassis, odometry, -16.0),
+
+                new AutoRotateToStep(chassis, odometry, M_PI),
+                new AutoDriveStep(chassis, odometry, 23.5), // 5
+                new AutoRotateToStep(chassis, odometry, M_PI * 0.75),
+                new AutoDriveStep(chassis, odometry, 12), // 6
+
+                new AutoPauseStep(chassis, 500),
+                new AutoDriveStep(chassis, odometry, -6.0),
+                new AutoDriveStep(chassis, odometry, 6.0),
                 new AutoPauseStep(chassis, 1500),
 
                 new AutoDriveStep(chassis, odometry, -10.0),
                 new AutoRotateToStep(chassis, odometry, M_PI * -0.25),
-                new AutoDriveStep(chassis, odometry, -14.0),
                 new AutoGrabMogoStep(conveyor, false),
-                new AutoPauseStep(chassis, 500),
+                new AutoDriveStep(chassis, odometry, 6.0),
+                new AutoDriveStep(chassis, odometry, -20.0),
 
                 new AutoDriveStep(chassis, odometry, 18.0),
                 new AutoRotateToStep(chassis, odometry, 0),
-                new AutoDriveStep(chassis, odometry, 40.0),
-                new AutoRotateToStep(chassis, odometry, M_PI * 0.7),
-                new AutoDriveStep(chassis, odometry, -33.0),
+                new AutoDriveStep(chassis, odometry, 46.0),
+                new AutoRotateToStep(chassis, odometry, M_PI * 0.75),
+                new AutoDriveStep(chassis, odometry, -40.0),
                 new AutoGrabMogoStep(conveyor, true),
+                new AutoDriveStep(chassis, odometry, 6.0),
                 new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
-                new AutoDriveStep(chassis, odometry, 24.0), // 1
+                new AutoDriveStep(chassis, odometry, 21.0), // 1
                 new AutoRotateToStep(chassis, odometry, 0),
                 new AutoDriveStep(chassis, odometry, 24.0), // 2
                 new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
                 new AutoDriveStep(chassis, odometry, 24.0), // 3
                 new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
                 new AutoDriveStep(chassis, odometry, -24.0),
-                new AutoRotateToStep(chassis, odometry, M_PI * -0.65),
-                new AutoDriveStep(chassis, odometry, -16.0, highSpeed),
+                new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
                 new AutoGrabMogoStep(conveyor, false),
-                new AutoPauseStep(chassis, 1500),
+                new AutoDriveStep(chassis, odometry, 6.0),
+                new AutoDriveStep(chassis, odometry, -19.0, highSpeed),
+                new AutoDriveStep(chassis, odometry, 12.0),
+                new AutoDriveStep(chassis, odometry, -14.0, highSpeed),
                 new AutoDriveStep(chassis, odometry, 24.0),
             });
             return AbsoluteStepConverter::relativeToAbsolute(autoRoutine);
