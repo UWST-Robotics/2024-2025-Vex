@@ -1,7 +1,6 @@
 #pragma once
 
 #include "pros/misc.hpp"
-#include "../nt/ntService.hpp"
 
 namespace devils
 {
@@ -37,8 +36,5 @@ namespace devils
 
         /// @brief The partner game controller.
         pros::Controller partnerController = pros::Controller(pros::E_CONTROLLER_PARTNER);
-
-        /// @brief Network Table Service
-        NTService networkService = NTService();
     };
 }

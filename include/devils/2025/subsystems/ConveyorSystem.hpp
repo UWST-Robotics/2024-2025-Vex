@@ -68,25 +68,19 @@ namespace devils
         {
             // Current State
             bool isGrabbed = goalGrabbed();
-
-            double speed = isGrabbed ? MOGO_CONVEYOR_SPEED : NO_MOGO_CONVEYOR_SPEED;
-            speed = std::min(speed, targetSpeed);
-            bool isForwards = targetSpeed > 0;
-
             RingType currentRing = getCurrentRing();
             bool isRingDetected = currentRing != RingType::NONE;
 
+            // Calculate the speed of the conveyor system
+            double maxSpeed = isGrabbed ? MOGO_CONVEYOR_SPEED : NO_MOGO_CONVEYOR_SPEED;
+            double speed = std::min(maxSpeed, targetSpeed);
+            bool isForwards = targetSpeed > 0;
+
             // Start the cooldown timer if another timer is finished
             if (stallTimer.finished())
-            {
                 startCooldown(STALL_REVERSE_DURATION, STALL_SPEED);
-                stallTimer.stop();
-            }
             if (rejectionTimer.finished())
-            {
                 startCooldown(REJECTION_DURATION, REJECTION_SPEED);
-                rejectionTimer.stop();
-            }
 
             // Start stalled timer if the conveyor is stalled
             bool isStalled = conveyorMotors.getCurrent() > STALL_CURRENT;
@@ -105,14 +99,17 @@ namespace devils
                 rejectionTimer.stop();
 
             // Run the conveyor system on cooldown mode
-            if (cooldownTimer.running())
+            if (cooldownTimer.running() && isForwards)
             {
                 conveyorMotors.moveVoltage(cooldownSpeed);
                 return;
             }
 
             // Prevent rings from being pushed out when we don't have a mogo
-            if (isRingDetected && !isGrabbed && isForwards)
+            if (isRingDetected &&
+                !isGrabbed &&
+                isForwards &&
+                !rejectionTimer.running())
             {
                 conveyorMotors.stop();
                 return;
@@ -236,13 +233,13 @@ namespace devils
         static constexpr double BLUE_HUE = 240;
 
         /// @brief The amount of time to wait before stopping the conveyor system after a blue ring is detected.
-        static constexpr double REJECTION_DELAY = 500;
+        static constexpr double REJECTION_DELAY = 300;
 
         /// @brief The duration to stop the conveyor system when rejecting a blue ring.
-        static constexpr double REJECTION_DURATION = 250;
+        static constexpr double REJECTION_DURATION = 200;
 
         /// @brief The speed to run the conveyor system at when rejecting a blue ring.
-        static constexpr double REJECTION_SPEED = -0.5;
+        static constexpr double REJECTION_SPEED = -0.1;
 
         //      ENCODER OPTIONS
 
