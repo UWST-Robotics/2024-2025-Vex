@@ -93,7 +93,7 @@ namespace devils
             bool shouldFixStall = isStalled && isForwards;
             if (shouldFixStall && !stallTimer.running())
                 stallTimer.start(STALL_MIN_DURATION);
-            else if (!shouldFixStall) // Aborts if the conveyor is no longer stalled
+            else if (!shouldFixStall)
                 stallTimer.stop();
 
             // Start the rejection timer if a blue ring is detected
@@ -101,6 +101,8 @@ namespace devils
             bool shouldReject = isBlueRing && isForwards && enableSorting;
             if (shouldReject && !rejectionTimer.running())
                 rejectionTimer.start(REJECTION_DELAY);
+            else if (!shouldReject)
+                rejectionTimer.stop();
 
             // Run the conveyor system on cooldown mode
             if (cooldownTimer.running())
