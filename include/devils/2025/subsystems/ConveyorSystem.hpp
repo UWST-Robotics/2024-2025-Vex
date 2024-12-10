@@ -46,14 +46,9 @@ namespace devils
             if (proximity < PROXIMITY_THRESHOLD)
                 return RingType::NONE;
 
-            // Convert hue to radians
-            double hueRadians = Units::degToRad(hue);
-            double redRadians = Units::degToRad(RED_HUE);
-            double blueRadians = Units::degToRad(BLUE_HUE);
-
             // Calculate the closest to each hue
-            double redDiff = Math::angleDiff(hueRadians, redRadians);
-            double blueDiff = Math::angleDiff(hueRadians, blueRadians);
+            double redDiff = std::abs(Math::angleDiffDeg(hue, RED_HUE));
+            double blueDiff = std::abs(Math::angleDiffDeg(hue, BLUE_HUE));
             if (redDiff < blueDiff)
                 return RingType::RED;
             else
@@ -80,7 +75,10 @@ namespace devils
             if (stallTimer.finished())
                 startCooldown(STALL_REVERSE_DURATION, STALL_SPEED);
             if (rejectionTimer.finished())
-                startCooldown(REJECTION_DURATION, REJECTION_SPEED);
+            {
+                startCooldown(REJECTION_DURATION, POST_REJECTION_SPEED);
+                rejectionTimer.stop();
+            }
 
             // Start stalled timer if the conveyor is stalled
             bool isStalled = conveyorMotors.getCurrent() > STALL_CURRENT;
@@ -90,13 +88,27 @@ namespace devils
             else if (!shouldFixStall)
                 stallTimer.stop();
 
-            // Start the rejection timer if a blue ring is detected
+            // Blue Ring Detection
             bool isBlueRing = currentRing == RingType::BLUE;
             bool shouldReject = isBlueRing && isForwards && enableSorting;
-            if (shouldReject && !rejectionTimer.running())
-                rejectionTimer.start(REJECTION_DELAY);
-            else if (!shouldReject)
-                rejectionTimer.stop();
+            if (shouldReject)
+                isRejectingRing = true;
+
+            // Blue Ring Delay
+            double position = std::fmod(getConveyorPosition(), HOOK_INTERVAL);
+            bool isInRejectionPosition = std::abs(position - HOOK_REJECTION_OFFSET) < HOOK_REJECTION_RANGE;
+            if (isRejectingRing && isInRejectionPosition)
+            {
+                startCooldown(REJECTION_DURATION, POST_REJECTION_SPEED);
+                isRejectingRing = false;
+            }
+
+            // Blue Ring Rejection
+            if (isRejectingRing)
+            {
+                conveyorMotors.moveVoltage(PRE_REJECTION_SPEED);
+                return;
+            }
 
             // Run the conveyor system on cooldown mode
             if (cooldownTimer.running() && isForwards)
@@ -134,6 +146,7 @@ namespace devils
         void useSensor(OpticalSensor *sensor)
         {
             this->sensor = sensor;
+            sensor->setLEDBrightness(100);
         }
 
         /**
@@ -230,16 +243,23 @@ namespace devils
         static constexpr double RED_HUE = 0;
 
         /// @brief The hue of the blue ring in degrees.
-        static constexpr double BLUE_HUE = 240;
+        static constexpr double BLUE_HUE = 200;
 
         /// @brief The amount of time to wait before stopping the conveyor system after a blue ring is detected.
-        static constexpr double REJECTION_DELAY = 300;
+        static constexpr double REJECTION_DELAY = 140;
 
         /// @brief The duration to stop the conveyor system when rejecting a blue ring.
-        static constexpr double REJECTION_DURATION = 200;
+        static constexpr double REJECTION_DURATION = 300;
 
-        /// @brief The speed to run the conveyor system at when rejecting a blue ring.
-        static constexpr double REJECTION_SPEED = -0.1;
+        /// @brief The speed to run the conveyor system before rejecting a blue ring.
+        static constexpr double PRE_REJECTION_SPEED = 1.0;
+
+        /// @brief The speed to run the conveyor system after rejecting a blue ring.
+        static constexpr double POST_REJECTION_SPEED = -0.5;
+
+        static constexpr double HOOK_REJECTION_OFFSET = 12.5;
+
+        static constexpr double HOOK_REJECTION_RANGE = 1;
 
         //      ENCODER OPTIONS
 
@@ -247,12 +267,16 @@ namespace devils
         static constexpr double ENCODER_TICKS_PER_REVOLUTION = 300.0;
 
         /// @brief The amount of teeth on the sprocket.
-        static constexpr int SPROCKET_TEETH = 36;
+        static constexpr int SPROCKET_TEETH = 6;
 
         /// @brief The length of the conveyor system in teeth.
-        static constexpr int CONVEYOR_LENGTH = 15;
+        static constexpr int CONVEYOR_LENGTH = 75; // 82
+
+        /// @brief The distance between each hook in teeth.
+        static constexpr double HOOK_INTERVAL = 25; // 21
 
         // State
+        bool isRejectingRing = false;
         bool enableSorting = false;
         double cooldownSpeed = 0;
 

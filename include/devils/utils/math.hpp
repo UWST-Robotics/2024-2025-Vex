@@ -113,6 +113,19 @@ namespace devils
         }
 
         /**
+         * Calculates the difference between two degree angles.
+         * @param a The first angle in degrees.
+         * @param b The second angle in degrees.
+         * @return The minimum difference between the two angles in degrees.
+         */
+        static double angleDiffDeg(double a, double b)
+        {
+            double dist = a - b;
+            dist = signedMod(dist + 180, 360) - 180;
+            return dist;
+        }
+
+        /**
          * Calculates the end velocity over a specified distance given initial velocity and acceleration.
          * @param initialVelocity The initial velocity in units per second.
          * @param acceleration Constant acceleration in units per second squared.

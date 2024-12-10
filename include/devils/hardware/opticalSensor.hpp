@@ -88,6 +88,17 @@ namespace devils
             return brightness;
         }
 
+        /**
+         * Sets the brightness of the LED on the Optical Sensor.
+         * @param brightness The brightness of the LED from 0 to 100.
+         */
+        void setLEDBrightness(uint8_t brightness)
+        {
+            int32_t result = sensor.set_led_pwm(100);
+            if (result == PROS_ERR)
+                reportFault("Failed to set LED brightness");
+        }
+
     protected:
         void serializeHardware(std::string &ntPrefix) override
         {

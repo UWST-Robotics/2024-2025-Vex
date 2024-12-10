@@ -60,6 +60,7 @@ namespace devils
                 double leftX = mainController.get_analog(ANALOG_LEFT_X) / 127.0;
                 double intakeInput = mainController.get_analog(ANALOG_RIGHT_Y) / 127.0;
                 bool grabInput = mainController.get_digital_new_press(DIGITAL_A);
+                bool sortingInput = mainController.get_digital(DIGITAL_L1) || mainController.get_digital(DIGITAL_L2);
 
                 // Curve Joystick Inputs
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1);
@@ -67,7 +68,7 @@ namespace devils
                 intakeInput = JoystickCurve::curve(intakeInput, 3.0, 0.1);
 
                 // Disable Auto Reject
-                conveyor.setSortingEnabled(false);
+                conveyor.setSortingEnabled(sortingInput);
 
                 // Move Conveyor/Intake
                 conveyor.moveAutomatic(intakeInput);
