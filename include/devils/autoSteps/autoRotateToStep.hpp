@@ -135,7 +135,7 @@ namespace devils
         double targetAngle = 0;
 
     private:
-        static constexpr double POST_DRIVE_DELAY = 100; // ms
+        static constexpr double POST_DRIVE_DELAY = 50; // ms
 
         /**
          * Gets the angle difference between two angles.

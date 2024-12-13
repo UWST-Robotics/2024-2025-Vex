@@ -95,12 +95,24 @@ namespace devils
                 isRejectingRing = true;
 
             // Blue Ring Delay
-            double position = std::fmod(getConveyorPosition(), HOOK_INTERVAL);
-            bool isInRejectionPosition = std::abs(position - HOOK_REJECTION_OFFSET) < HOOK_REJECTION_RANGE;
+            double position = std::fmod(getConveyorPosition(), hookInterval);
+            bool isInRejectionPosition = std::abs(position - rejectionOffset) < HOOK_REJECTION_RANGE;
             if (isRejectingRing && isInRejectionPosition)
             {
                 startCooldown(REJECTION_DURATION, POST_REJECTION_SPEED);
                 isRejectingRing = false;
+            }
+
+            // if (isLadyBrownUp)
+            // {
+            //     conveyorMotors.moveVoltage(-LADY_BROWN_SPEED);
+            //     return;
+            // }
+
+            if (isLadyBrownDown)
+            {
+                conveyorMotors.moveVoltage(LADY_BROWN_SPEED);
+                return;
             }
 
             // Blue Ring Rejection
@@ -192,7 +204,7 @@ namespace devils
         double getConveyorPosition()
         {
             double revolutions = conveyorMotors.getPosition() / ENCODER_TICKS_PER_REVOLUTION;
-            return Math::signedMod(revolutions * SPROCKET_TEETH, CONVEYOR_LENGTH);
+            return Math::signedMod(revolutions * SPROCKET_TEETH, conveyorLength);
         }
 
         /**
@@ -206,19 +218,43 @@ namespace devils
             this->enableSorting = enableSorting;
         }
 
+        /**
+         * Sets the parameters of the automated rejection system.
+         * @param conveyorLength The length of the conveyor system in teeth.
+         * @param hookInterval The distance between each hook in teeth.
+         * @param rejectionOffset The offset to reject a blue ring in teeth.
+         */
+        void setAutoRejectParams(double conveyorLength, double hookInterval, double rejectionOffset)
+        {
+            this->conveyorLength = conveyorLength;
+            this->hookInterval = hookInterval;
+            this->rejectionOffset = rejectionOffset;
+        }
+
+        /**
+         * Sets the state of the lady brown system.
+         * @param isDown True if the lady brown is down, false otherwise.
+         * @param isUp True if the lady brown is up, false otherwise.
+         */
+        void setLadyBrownState(bool isDown, bool isUp)
+        {
+            isLadyBrownDown = isDown;
+            isLadyBrownUp = isUp;
+        }
+
     private:
         //      SENSOR OPTIONS
 
         /// @brief The optical sensor threshold to detect a ring.
-        static constexpr double PROXIMITY_THRESHOLD = 0.3;
+        static constexpr double PROXIMITY_THRESHOLD = 0.2;
 
         //      MOGO ACTUATION OPTIONS
 
         /// @brief The speed of the conveyor system when a mogo is not grabbed.
-        static constexpr double NO_MOGO_CONVEYOR_SPEED = 0.7;
+        static constexpr double NO_MOGO_CONVEYOR_SPEED = 0.5;
 
         /// @brief The speed of the conveyor system when a mogo is grabbed.
-        static constexpr double MOGO_CONVEYOR_SPEED = 1.0;
+        static constexpr double MOGO_CONVEYOR_SPEED = 0.75;
 
         /// @brief The delay to delay the conveyor system after pneumatic actuation.
         static constexpr double MOGO_ACTUATION_DELAY = 600;
@@ -257,8 +293,7 @@ namespace devils
         /// @brief The speed to run the conveyor system after rejecting a blue ring.
         static constexpr double POST_REJECTION_SPEED = -0.5;
 
-        static constexpr double HOOK_REJECTION_OFFSET = 12.5;
-
+        /// @brief The max range of the hook to reject a blue ring.
         static constexpr double HOOK_REJECTION_RANGE = 1;
 
         //      ENCODER OPTIONS
@@ -267,15 +302,20 @@ namespace devils
         static constexpr double ENCODER_TICKS_PER_REVOLUTION = 300.0;
 
         /// @brief The amount of teeth on the sprocket.
-        static constexpr int SPROCKET_TEETH = 6;
+        static constexpr int SPROCKET_TEETH = 12;
 
-        /// @brief The length of the conveyor system in teeth.
-        static constexpr int CONVEYOR_LENGTH = 75; // 82
+        //      LADY BROWN OPTIONS
 
-        /// @brief The distance between each hook in teeth.
-        static constexpr double HOOK_INTERVAL = 25; // 21
+        static constexpr double LADY_BROWN_SPEED = 0.3;
+
+        // Conveyor Params
+        double conveyorLength = 76;
+        double hookInterval = 25.3;
+        double rejectionOffset = 12.5;
 
         // State
+        bool isLadyBrownUp = false;
+        bool isLadyBrownDown = false;
         bool isRejectingRing = false;
         bool enableSorting = false;
         double cooldownSpeed = 0;

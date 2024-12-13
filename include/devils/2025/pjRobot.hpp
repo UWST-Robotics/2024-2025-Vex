@@ -40,6 +40,7 @@ namespace devils
             imu.setHeading(0);
 
             intakeLauncher.extend();
+            conveyor.setSortingEnabled(true);
 
             autoRoutine.doStep();
         }
@@ -51,6 +52,9 @@ namespace devils
 
             double intakeSpeed = 1.0;
             intakeLauncher.extend();
+
+            // Game Timer
+            gameTimer.start(50000); // 50s
 
             // Loop
             while (true)
@@ -71,7 +75,7 @@ namespace devils
                 conveyor.setSortingEnabled(sortingInput);
 
                 // Move Conveyor/Intake
-                conveyor.moveAutomatic(intakeInput);
+                conveyor.moveAutomatic(intakeInput * 0.75);
                 intake.move(intakeInput);
 
                 // Grab Mogo
@@ -84,6 +88,10 @@ namespace devils
                     // Controller feedback
                     mainController.rumble(isGoalGrabbed ? "-" : "..");
                 }
+
+                // Check Timer
+                if (gameTimer.finished())
+                    mainController.rumble("....");
 
                 // Move Chassis
                 chassis.move(leftY, leftX);
@@ -98,6 +106,9 @@ namespace devils
             // Stop the robot
             chassis.stop();
             intakeLauncher.retract();
+
+            // Game Timer
+            gameTimer.stop();
 
             // Tasks
             conveyor.stopAsync();
@@ -126,6 +137,7 @@ namespace devils
         IMU imu = IMU("IMU", 13);
 
         // Subsystems
+        Timer gameTimer = Timer();
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
         IntakeSystem intake = IntakeSystem(intakeMotors);
         ConveyorSystem conveyor = ConveyorSystem(conveyorMotors, grabberPneumatic);
@@ -135,7 +147,7 @@ namespace devils
 
         // Autonomous Routine
         AutoStepList autoRoutine = AutoFactory::createPJAutoRoutine(chassis, deadWheelOdom, intake, conveyor);
-        // AutoStepList autoRoutine = AutoFactory::createTranslationTestRoutine(chassis, deadWheelOdom);
+        // AutoStepList autoRoutine = AutoFactory::createCenterTestRoutine(chassis, deadWheelOdom, intake, conveyor);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();
