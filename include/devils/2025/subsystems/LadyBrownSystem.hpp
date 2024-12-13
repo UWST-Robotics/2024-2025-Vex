@@ -5,7 +5,7 @@
 
 namespace devils
 {
-    class LadyBrownSystem
+    class LadyBrownSystem : public Runnable
     {
     public:
         LadyBrownSystem(
@@ -16,6 +16,11 @@ namespace devils
               sensor(sensor),
               conveyor(conveyor)
         {
+        }
+
+        void onUpdate() override
+        {
+            idle();
         }
 
         void setPosition(double targetPosition)
@@ -56,7 +61,7 @@ namespace devils
     private:
         // Constants
         static constexpr double LOWERED_POSITION = 0;  // deg
-        static constexpr double IDLE_POSITION = 50;    // deg
+        static constexpr double IDLE_POSITION = 60;    // deg
         static constexpr double RAISED_POSITION = 180; // deg
 
         static constexpr double DECEL_DISTANCE = 90; // deg

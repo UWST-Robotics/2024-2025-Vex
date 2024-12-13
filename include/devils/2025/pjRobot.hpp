@@ -35,12 +35,12 @@ namespace devils
         {
             conveyor.runAsync();
 
+            intakeLauncher.extend();
+            conveyor.setSortingEnabled(true);
+
             imu.calibrate();
             imu.waitUntilCalibrated();
             imu.setHeading(0);
-
-            intakeLauncher.extend();
-            conveyor.setSortingEnabled(true);
 
             autoRoutine.doStep();
         }
@@ -91,7 +91,10 @@ namespace devils
 
                 // Check Timer
                 if (gameTimer.finished())
-                    mainController.rumble("....");
+                {
+                    mainController.rumble("..........");
+                    gameTimer.stop();
+                }
 
                 // Move Chassis
                 chassis.move(leftY, leftX);

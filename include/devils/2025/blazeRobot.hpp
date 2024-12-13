@@ -28,21 +28,22 @@ namespace devils
             // Initialize Subsystems
             Pose initialPose = Pose(-60, 0);
             conveyor.useSensor(&conveyorSensor);
+            conveyor.setAutoRejectParams(CONVEYOR_LENGTH, HOOK_INTERVAL, REJECT_OFFSET);
 
             deadWheelOdom.useIMU(&imu);
             deadWheelOdom.setPose(initialPose);
             deadWheelOdom.runAsync();
-
-            // Set Conveyor Parameters
-            conveyor.setAutoRejectParams(CONVEYOR_LENGTH, HOOK_INTERVAL, REJECT_OFFSET);
         }
 
         void autonomous() override
         {
-            conveyor.runAsync();
+            imu.calibrate();
             imu.waitUntilCalibrated();
+            imu.setHeading(0);
 
             conveyor.setSortingEnabled(true);
+            conveyor.runAsync();
+            ladyBrown.runAsync();
 
             autoRoutine.doStep();
         }
@@ -52,6 +53,10 @@ namespace devils
             bool isConveyorUp = true;
             bool isConveyorPaused = false;
             bool isWackerDown = false;
+
+            // Stop Tasks
+            conveyor.stopAsync();
+            ladyBrown.stopAsync();
 
             // Loop
             while (true)
@@ -116,7 +121,7 @@ namespace devils
                     isConveyorPaused = false;
 
                 // Disable Auto Reject
-                conveyor.setSortingEnabled(false);
+                conveyor.setSortingEnabled(true);
 
                 // Pause Conveyor
                 if (isConveyorPaused)
@@ -124,7 +129,7 @@ namespace devils
 
                 // Run Forward
                 else if (isConveyorUp)
-                    conveyor.moveAutomatic(0.85);
+                    conveyor.moveAutomatic(1.0);
 
                 // Eject Rings
                 else
@@ -163,10 +168,11 @@ namespace devils
             // Stop the robot
             chassis.stop();
             wackerPneumatic.retract();
+            conveyor.setGoalGrabbed(false);
 
             // Tasks
+            ladyBrown.stopAsync();
             conveyor.stopAsync();
-            conveyor.setGoalGrabbed(false);
         }
 
         // Constants
@@ -178,7 +184,7 @@ namespace devils
         static constexpr double DEAD_WHEEL_RADIUS = 1.0;                      // in
         static constexpr double CONVEYOR_LENGTH = 84.0;                       // teeth
         static constexpr double HOOK_INTERVAL = 21.0;                         // teeth
-        static constexpr double REJECT_OFFSET = 14;                           // teeth
+        static constexpr double REJECT_OFFSET = 13;                           // teeth
 
         // Hardware
         ADIPneumatic grabberPneumatic = ADIPneumatic("GrabberPneumatic", 1);

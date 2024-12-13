@@ -103,15 +103,23 @@ namespace devils
                 isRejectingRing = false;
             }
 
-            // if (isLadyBrownUp)
-            // {
-            //     conveyorMotors.moveVoltage(-LADY_BROWN_SPEED);
-            //     return;
-            // }
+            // Run the conveyor system on cooldown mode
+            if (cooldownTimer.running() && isForwards)
+            {
+                conveyorMotors.moveVoltage(cooldownSpeed);
+                return;
+            }
 
+            if (isLadyBrownUp)
+            {
+                conveyorMotors.moveVoltage(LADY_BROWN_UP_SPEED);
+                return;
+            }
+
+            // Lady Brown Down
             if (isLadyBrownDown)
             {
-                conveyorMotors.moveVoltage(LADY_BROWN_SPEED);
+                conveyorMotors.moveVoltage(LADY_BROWN_DOWN_SPEED);
                 return;
             }
 
@@ -119,13 +127,6 @@ namespace devils
             if (isRejectingRing)
             {
                 conveyorMotors.moveVoltage(PRE_REJECTION_SPEED);
-                return;
-            }
-
-            // Run the conveyor system on cooldown mode
-            if (cooldownTimer.running() && isForwards)
-            {
-                conveyorMotors.moveVoltage(cooldownSpeed);
                 return;
             }
 
@@ -279,10 +280,7 @@ namespace devils
         static constexpr double RED_HUE = 0;
 
         /// @brief The hue of the blue ring in degrees.
-        static constexpr double BLUE_HUE = 200;
-
-        /// @brief The amount of time to wait before stopping the conveyor system after a blue ring is detected.
-        static constexpr double REJECTION_DELAY = 140;
+        static constexpr double BLUE_HUE = 160;
 
         /// @brief The duration to stop the conveyor system when rejecting a blue ring.
         static constexpr double REJECTION_DURATION = 300;
@@ -306,7 +304,8 @@ namespace devils
 
         //      LADY BROWN OPTIONS
 
-        static constexpr double LADY_BROWN_SPEED = 0.3;
+        static constexpr double LADY_BROWN_DOWN_SPEED = 0.3;
+        static constexpr double LADY_BROWN_UP_SPEED = -0.5;
 
         // Conveyor Params
         double conveyorLength = 76;
