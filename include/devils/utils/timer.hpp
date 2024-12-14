@@ -45,6 +45,15 @@ namespace devils
             return isStarted && pros::millis() - startTime >= duration;
         }
 
+        /**
+         * Gets the time remaining on the timer.
+         * @return The time remaining on the timer in milliseconds.
+         */
+        double timeRemaining()
+        {
+            return duration - (pros::millis() - startTime);
+        }
+
     private:
         bool isStarted = false;
         uint32_t startTime = 0;

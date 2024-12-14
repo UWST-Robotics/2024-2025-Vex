@@ -37,7 +37,7 @@ namespace devils
 
         void autonomous() override
         {
-            imu.calibrate();
+            // imu.calibrate();
             imu.waitUntilCalibrated();
             imu.setHeading(0);
 
@@ -53,6 +53,12 @@ namespace devils
             bool isConveyorUp = true;
             bool isConveyorPaused = false;
             bool isWackerDown = false;
+
+            // Start Tasks
+            conveyor.runAsync();
+            ladyBrown.runAsync();
+
+            startRoutine.doStep();
 
             // Stop Tasks
             conveyor.stopAsync();
@@ -121,7 +127,7 @@ namespace devils
                     isConveyorPaused = false;
 
                 // Disable Auto Reject
-                conveyor.setSortingEnabled(true);
+                conveyor.setSortingEnabled(false);
 
                 // Pause Conveyor
                 if (isConveyorPaused)
@@ -215,6 +221,7 @@ namespace devils
         // NTOdom deadWheelOdomNT = NTOdom("DeadWheelOdom", deadWheelOdom);
 
         // Autonomous
+        AutoStepList startRoutine = AutoFactory::createBlazeStartRoutine(chassis, deadWheelOdom, intake, conveyor);
         AutoStepList autoRoutine = AutoFactory::createBlazeAutoRoutine(chassis, deadWheelOdom, intake, conveyor, wacker);
 
         // Renderer

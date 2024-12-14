@@ -38,7 +38,7 @@ namespace devils
             intakeLauncher.extend();
             conveyor.setSortingEnabled(true);
 
-            imu.calibrate();
+            // imu.calibrate();
             imu.waitUntilCalibrated();
             imu.setHeading(0);
 
@@ -54,7 +54,7 @@ namespace devils
             intakeLauncher.extend();
 
             // Game Timer
-            gameTimer.start(50000); // 50s
+            gameTimer.start(60000); // 60 seconds
 
             // Loop
             while (true)
@@ -90,11 +90,13 @@ namespace devils
                 }
 
                 // Check Timer
-                if (gameTimer.finished())
-                {
-                    mainController.rumble("..........");
-                    gameTimer.stop();
-                }
+                bool final10 = gameTimer.timeRemaining() < 10000;
+                bool isFinished = gameTimer.finished();
+                if (final10 && !isFinished)
+                    mainController.rumble("..");
+
+                // Print Motor Temps
+                mainController.print(0, 0, "Temp: %f", conveyorMotors.getTemperature());
 
                 // Move Chassis
                 chassis.move(leftY, leftX);
