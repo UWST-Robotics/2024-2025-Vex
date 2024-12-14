@@ -39,7 +39,7 @@ namespace devils
             double goalSpeed = 0.01;
 
             /// @brief The timeout in ms to allow for the step to complete.
-            double timeout = 2500;
+            double timeout = 1000;
 
             /// @brief Setting this to false will rotate to the absolute angle instead of the minimum distance.
             bool useMinimumDistance = true;
@@ -135,7 +135,7 @@ namespace devils
         double targetAngle = 0;
 
     private:
-        static constexpr double POST_DRIVE_DELAY = 100; // ms
+        static constexpr double POST_DRIVE_DELAY = 50; // ms
 
         /**
          * Gets the angle difference between two angles.

@@ -145,6 +145,35 @@ namespace devils
             return current / motorCount;
         }
 
+        double getTemperature()
+        {
+            // Iterate through motors and get average temperature
+            int motorCount = 0;
+            double temperature = 0;
+            for (auto motor : motors)
+            {
+                double motorTemperature = motor->getTemperature();
+
+                // Skip motors that fail to return temperature
+                if (motorTemperature == PROS_ERR_F)
+                    continue;
+
+                temperature += motorTemperature;
+                motorCount++;
+            }
+
+            // Log if no motors returned temperature
+            if (motorCount == 0)
+            {
+                if (LOGGING_ENABLED)
+                    Logger::warn(name + ": no motors returned temperature");
+                return 0;
+            }
+
+            // Return the mean temperature
+            return temperature / motorCount;
+        }
+
         /**
          * Gets the motors in the motor group.
          * @return The motors in the motor group.

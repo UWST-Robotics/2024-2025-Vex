@@ -18,7 +18,7 @@ namespace devils
          * @param inches The inches to convert.
          * @return The inches in meters.
          */
-        static double inToMeters(double inches)
+        static inline double inToMeters(double inches)
         {
             return inches * 0.0254;
         }
@@ -28,7 +28,7 @@ namespace devils
          * @param meters The meters to convert.
          * @return The meters in inches.
          */
-        static double metersToIn(double meters)
+        static inline double metersToIn(double meters)
         {
             return meters / 0.0254;
         }
@@ -49,7 +49,7 @@ namespace devils
          * @param degrees The degrees to convert.
          * @return The degrees in radians.
          */
-        static double degToRad(double degrees)
+        static inline double degToRad(double degrees)
         {
             return degrees * (M_PI / 180.0);
         }
@@ -59,7 +59,7 @@ namespace devils
          * @param centidegrees The centidegrees to convert.
          * @return The centidegrees in radians.
          */
-        static double centidegToRad(double centidegrees)
+        static inline double centidegToRad(double centidegrees)
         {
             return centidegrees * (M_PI / 18000.0);
         }
@@ -79,7 +79,7 @@ namespace devils
          * Converts radians to degrees.
          * @param radians The radians to convert.
          */
-        static double radToDeg(double radians)
+        static inline double radToDeg(double radians)
         {
             return radians * (180.0 / M_PI);
         }

@@ -166,7 +166,7 @@ namespace devils
         Pose targetPose = Pose();
 
     private:
-        static constexpr double POST_DRIVE_DELAY = 100; // ms
+        static constexpr double POST_DRIVE_DELAY = 50; // ms
     };
 
     // Define the default options
