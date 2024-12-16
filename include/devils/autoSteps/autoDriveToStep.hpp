@@ -41,7 +41,7 @@ namespace devils
             double goalSpeed = 1;
 
             /// @brief The timeout in ms to allow for the step to complete.
-            double timeout = 2500;
+            double timeout = 2000;
 
             /// @brief The minimum distance from the target to apply rotation
             double minDistanceToRotate = 12.0;

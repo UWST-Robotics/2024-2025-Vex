@@ -4,6 +4,7 @@
 #include "autoIntakeStep.hpp"
 #include "autoMogoStep.hpp"
 #include "autoWackStep.hpp"
+#include "autoConveyorStep.hpp"
 
 namespace devils
 {
@@ -31,8 +32,8 @@ namespace devils
             AutoRotateToStep::Options::defaultOptions = {
                 rotatePID,
                 0.5,   // maxSpeed
-                0.15,  // minSpeed
-                0.02,  // goalDist
+                0.12,  // minSpeed
+                0.07,  // goalDist
                 0.002, // goalSpeed
             };
 
@@ -83,9 +84,11 @@ namespace devils
                 // Start Sequence
                 new AutoJumpToStep(odometry, -66, -48, 0),
                 new AutoIntakeStep(intake, 1.0),
+                new AutoPauseStep(chassis, 500), // Wait for intake to extend
 
                 // NE Mogo
                 new AutoDriveStep(chassis, odometry, 18.0), // 1
+                new AutoPauseStep(chassis, 500),            // Wait for rings to intake
                 new AutoRotateToStep(chassis, odometry, M_PI),
                 new AutoDriveStep(chassis, odometry, -24.0),
 
@@ -110,7 +113,7 @@ namespace devils
                 new AutoDriveStep(chassis, odometry, -20.0),
 
                 // Center Mogo
-                new AutoDriveStep(chassis, odometry, 16.0),
+                new AutoDriveStep(chassis, odometry, 15.0),
                 new AutoRotateToStep(chassis, odometry, 0),
                 new AutoDriveStep(chassis, odometry, 48.0),
                 new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
@@ -156,8 +159,6 @@ namespace devils
                 new AutoGrabMogoStep(conveyor, false),
                 new AutoDriveStep(chassis, odometry, 6.0),
                 new AutoDriveStep(chassis, odometry, -22.0, highSpeed),
-                new AutoDriveStep(chassis, odometry, 12.0),
-                new AutoDriveStep(chassis, odometry, -12.0),
 
                 // Climb
                 new AutoDriveStep(chassis, odometry, 28.0), // 68
@@ -204,10 +205,10 @@ namespace devils
             AutoDriveToStep::Options slowSpeed = {
                 drivePID,
                 drivingRotatePID,
-                0.3,   // maxSpeed
+                0.25,  // maxSpeed
                 2.0,   // goalDist
                 0.002, // goalSpeed
-                2000,  // timeout
+                1500,  // timeout
             };
 
             // Subroutines
@@ -242,12 +243,13 @@ namespace devils
                 // Start Sequence
                 new AutoJumpToStep(odometry, -64, 0, 0),
                 new AutoIntakeStep(intake, 1.0),
+                new AutoConveyorStep(conveyor, 1.0),
 
                 // Red Wall Stake
-                new AutoDriveStep(chassis, odometry, 6.0, slowSpeed), // 1
-                new AutoDriveStep(chassis, odometry, -6.9, slowSpeed),
+                new AutoDriveStep(chassis, odometry, 6.0), // 1
+                new AutoDriveStep(chassis, odometry, -6.9),
                 new AutoGrabMogoStep(conveyor, true),
-                new AutoPauseStep(chassis, 2000),
+                new AutoPauseStep(chassis, 1000),
                 new AutoGrabMogoStep(conveyor, false),
 
                 // SW Mogo
@@ -306,12 +308,12 @@ namespace devils
                 // Blue Wall Stake
                 new AutoRotateToStep(chassis, odometry, M_PI * -0.41),
 
-                new AutoPauseStep(chassis, 6000), // Wait for PJ
+                new AutoPauseStep(chassis, 5000), // Wait for PJ
 
                 new AutoDriveStep(chassis, odometry, 51.0), // 1
                 new AutoRotateToStep(chassis, odometry, M_PI),
                 new AutoDriveStep(chassis, odometry, 12.0),
-                new AutoDriveStep(chassis, odometry, -16),
+                new AutoDriveStep(chassis, odometry, -16, slowSpeed),
                 new AutoGrabMogoStep(conveyor, true),
                 new AutoPauseStep(chassis, 5000),
                 new AutoGrabMogoStep(conveyor, false),
@@ -362,7 +364,7 @@ namespace devils
             AutoDriveToStep::Options::defaultOptions = {
                 drivePID,
                 drivingRotatePID,
-                0.3,   // maxSpeed
+                0.25,  // maxSpeed
                 2.0,   // goalDist
                 0.002, // goalSpeed
                 1000,  // timeout
