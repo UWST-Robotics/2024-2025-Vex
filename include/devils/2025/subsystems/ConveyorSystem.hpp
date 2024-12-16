@@ -26,7 +26,7 @@ namespace devils
 
         void onUpdate()
         {
-            moveAutomatic();
+            moveAutomatic(asyncSpeed);
         }
 
         /**
@@ -243,6 +243,11 @@ namespace devils
             isLadyBrownUp = isUp;
         }
 
+        void setAsyncSpeed(double asyncSpeed)
+        {
+            this->asyncSpeed = asyncSpeed;
+        }
+
     private:
         //      SENSOR OPTIONS
 
@@ -255,7 +260,7 @@ namespace devils
         static constexpr double NO_MOGO_CONVEYOR_SPEED = 0.5;
 
         /// @brief The speed of the conveyor system when a mogo is grabbed.
-        static constexpr double MOGO_CONVEYOR_SPEED = 0.75;
+        static constexpr double MOGO_CONVEYOR_SPEED = 0.8;
 
         /// @brief The delay to delay the conveyor system after pneumatic actuation.
         static constexpr double MOGO_ACTUATION_DELAY = 600;
@@ -311,6 +316,7 @@ namespace devils
         double conveyorLength = 76;
         double hookInterval = 25.3;
         double rejectionOffset = 12.5;
+        double asyncSpeed = 1.0;
 
         // State
         bool isLadyBrownUp = false;
