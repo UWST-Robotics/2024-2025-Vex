@@ -54,14 +54,6 @@
 #include "trajectory/structs/trajectoryConstraints.hpp"
 #include "trajectory/structs/trajectoryState.hpp"
 
-// Network
-#include "nt/networkTables.hpp"
-#include "nt/ntService.hpp"
-#include "nt/ntObjectBase.hpp"
-#include "nt/objects/ntOdom.hpp"
-#include "nt/objects/ntPath.hpp"
-#include "nt/objects/ntHardware.hpp"
-
 // AutoSteps
 #include "autoSteps/common/autoStep.hpp"
 #include "autoSteps/common/autoStepList.hpp"
@@ -75,3 +67,6 @@
 
 // Display
 #include "display/eyesRenderer.hpp"
+
+// BlueBox
+#include "../bluebox/blueBox.h"

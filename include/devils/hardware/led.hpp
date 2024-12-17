@@ -2,7 +2,7 @@
 #include "pros/adi.hpp"
 #include "motor.hpp"
 #include "../utils/logger.hpp"
-#include "../nt/objects/ntHardware.hpp"
+#include "hardwareBase.hpp"
 #include <string>
 
 namespace devils
@@ -10,7 +10,7 @@ namespace devils
     /**
      * Represents an LED connected to the ADI ports.
      */
-    class LED : private NTHardware
+    class LED : private HardwareBase
     {
     public:
         /**
@@ -19,7 +19,7 @@ namespace devils
          * @param port The ADI port of the LED (from 1 to 8)
          */
         LED(std::string name, uint8_t port)
-            : NTHardware(name, "LED", port),
+            : HardwareBase(name, "LED", port),
               led(port)
         {
             if (errno != 0)
@@ -70,17 +70,14 @@ namespace devils
         }
 
     protected:
-        void serializeHardware(std::string &ntPrefix) override
+        void serialize() override
         {
-            NetworkTables::UpdateValue(ntPrefix + "/enabled", isEnabled);
-        }
-
-        void checkHealth() override
-        {
-            clearFaults();
+            ntEnabled.set(isEnabled);
         }
 
     private:
+        NTValue<bool> ntEnabled = ntGroup.makeValue("enabled", false);
+
         bool isEnabled = false;
         pros::ADIDigitalOut led;
     };

@@ -2,7 +2,6 @@
 #include <string>
 #include "pros/rtos.hpp"
 #include "common/autoStep.hpp"
-#include "devils/nt/networkTables.hpp"
 #include "devils/utils/math.hpp"
 #include "devils/odom/odomSource.hpp"
 #include "devils/chassis/chassisBase.hpp"

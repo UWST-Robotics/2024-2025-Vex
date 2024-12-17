@@ -5,7 +5,7 @@
 #include "../utils/logger.hpp"
 #include "../geometry/perspective.hpp"
 #include "structs/visionObject.hpp"
-#include "../nt/objects/ntHardware.hpp"
+#include "hardwareBase.hpp"
 #include <string>
 
 namespace devils
@@ -13,7 +13,7 @@ namespace devils
     /**
      * Represents a vision sensor object. All events are logged.
      */
-    class VisionSensor : private NTHardware
+    class VisionSensor : private HardwareBase
     {
     public:
         // Thank you James Pearman for these measurements
@@ -29,7 +29,7 @@ namespace devils
          * @param port The port of the motor (from 1 to 21)
          */
         VisionSensor(std::string name, uint8_t port)
-            : NTHardware(name, "VisionSensor", port),
+            : HardwareBase(name, "VisionSensor", port),
               sensor(port, pros::E_VISION_ZERO_CENTER)
         {
             if (errno != 0)
@@ -69,14 +69,9 @@ namespace devils
         }
 
     protected:
-        void serializeHardware(std::string &ntPrefix) override
+        void serialize() override
         {
             // TODO: Serialize Hardware
-        }
-
-        void checkHealth() override
-        {
-            clearFaults();
         }
 
     private:

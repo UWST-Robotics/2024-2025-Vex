@@ -3,7 +3,7 @@
 #include "pros/imu.hpp"
 #include "pros/error.h"
 #include "../utils/logger.hpp"
-#include "../nt/objects/ntHardware.hpp"
+#include "hardwareBase.hpp"
 #include "../geometry/units.hpp"
 #include "../geometry/vector3.hpp"
 #include "../odom/odomSource.hpp"
@@ -15,7 +15,7 @@ namespace devils
     /**
      * Represents a V5 inertial measurement unit.
      */
-    class IMU : private NTHardware
+    class IMU : private HardwareBase
     {
     public:
         /**
@@ -25,7 +25,7 @@ namespace devils
          * @param port The port of the IMU (from 1 to 21)
          */
         IMU(std::string name, uint8_t port)
-            : NTHardware(name, "IMU", port),
+            : HardwareBase(name, "IMU", port),
               imu(port)
         {
             if (errno != 0)
@@ -156,21 +156,18 @@ namespace devils
         }
 
     protected:
-        void serializeHardware(std::string &ntPrefix) override
+        void serialize() override
         {
+            // Network Tables
             auto acceleration = getAccel();
+            ntHeading.set(Units::radToDeg(getHeading()));
+            ntPitch.set(Units::radToDeg(getPitch()));
+            ntRoll.set(Units::radToDeg(getRoll()));
+            ntYaw.set(Units::radToDeg(getYaw()));
+            ntAccelX.set(acceleration.x);
+            ntAccelY.set(acceleration.y);
+            ntAccelZ.set(acceleration.z);
 
-            NetworkTables::updateDoubleValue(ntPrefix + "/heading", Units::radToDeg(getHeading()));
-            NetworkTables::updateDoubleValue(ntPrefix + "/pitch", Units::radToDeg(getPitch()));
-            NetworkTables::updateDoubleValue(ntPrefix + "/roll", Units::radToDeg(getRoll()));
-            NetworkTables::updateDoubleValue(ntPrefix + "/yaw", Units::radToDeg(getYaw()));
-            NetworkTables::updateDoubleValue(ntPrefix + "/accelX", acceleration.x);
-            NetworkTables::updateDoubleValue(ntPrefix + "/accelY", acceleration.y);
-            NetworkTables::updateDoubleValue(ntPrefix + "/accelZ", acceleration.z);
-        }
-
-        void checkHealth() override
-        {
             // Status Check
             pros::ImuStatus imuStatus = imu.get_status();
             isCalibrating = imuStatus == pros::ImuStatus::calibrating;
@@ -186,11 +183,17 @@ namespace devils
                 reportFault("Calibrating");
             else if (isErrored)
                 reportFault("Unknown Error");
-            else
-                clearFaults();
         }
 
     private:
+        NTValue<double> ntHeading = ntGroup.makeValue("heading", 0.0);
+        NTValue<double> ntPitch = ntGroup.makeValue("pitch", 0.0);
+        NTValue<double> ntRoll = ntGroup.makeValue("roll", 0.0);
+        NTValue<double> ntYaw = ntGroup.makeValue("yaw", 0.0);
+        NTValue<double> ntAccelX = ntGroup.makeValue("accelX", 0.0);
+        NTValue<double> ntAccelY = ntGroup.makeValue("accelY", 0.0);
+        NTValue<double> ntAccelZ = ntGroup.makeValue("accelZ", 0.0);
+
         double headingScale = 1;
         double headingOffset = 0;
         bool isCalibrating = false;
