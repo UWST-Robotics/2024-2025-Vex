@@ -17,15 +17,13 @@ namespace devils
          */
         PJRobot()
         {
-            // Initialize NT
-            // networkOdom.setSize(15.0, 15.0);
-
             // Initialize Hardware
             imu.calibrate();
             imu.setHeadingScale(IMU_HEADING_SCALE);
 
             // Initialize Subsystems
             conveyor.useSensor(&opticalSensor);
+            conveyor.setAutoRejectParams(CONVEYOR_LENGTH, HOOK_INTERVAL, REJECT_OFFSET);
 
             deadWheelOdom.useIMU(&imu);
             deadWheelOdom.runAsync();
@@ -42,19 +40,19 @@ namespace devils
             imu.waitUntilCalibrated();
             imu.setHeading(0);
 
-            autoRoutine.doStep();
+            autoRoutine->run();
         }
 
         void opcontrol() override
         {
             // Stop Autonomous Tasks
-            conveyor.stopAsync();
+            conveyor.stop();
 
             double intakeSpeed = 1.0;
             intakeLauncher.extend();
 
             // Game Timer
-            gameTimer.start(60000); // 60 seconds
+            gameTimer.start(); // 60 seconds
 
             // Loop
             while (true)
@@ -71,7 +69,7 @@ namespace devils
                 leftX = JoystickCurve::curve(leftX, 3.0, 0.05);
                 intakeInput = JoystickCurve::curve(intakeInput, 3.0, 0.1);
 
-                // Disable Auto Reject
+                // Toggle Auto Reject
                 conveyor.setSortingEnabled(sortingInput);
 
                 // Move Conveyor/Intake
@@ -116,16 +114,16 @@ namespace devils
             gameTimer.stop();
 
             // Tasks
-            conveyor.stopAsync();
-            // conveyor.setGoalGrabbed(false);
+            conveyor.stop();
         }
 
         // Constants
-        static constexpr double TICKS_PER_REVOLUTION = 300.0 * (48.0 / 36.0); // ticks
-        static constexpr double WHEEL_RADIUS = 1.625;                         // in
-        static constexpr double WHEEL_BASE = 12.0;                            // in
-        static constexpr double DEAD_WHEEL_RADIUS = 1.0;                      // in
-        static constexpr double IMU_HEADING_SCALE = 1.014;                    // %
+        static constexpr double DEAD_WHEEL_RADIUS = 1.0;       // in
+        static constexpr double IMU_HEADING_SCALE = 1.014;     // %
+        static constexpr double CONVEYOR_LENGTH = 76.0;        // teeth
+        static constexpr double HOOK_INTERVAL = 25.3;          // teeth
+        static constexpr double REJECT_OFFSET = 12.5;          // teeth
+        static constexpr uint32_t GAME_TIMER_DURATION = 60000; // ms
 
         // Hardware
         ADIPneumatic grabberPneumatic = ADIPneumatic("GrabberPneumatic", 1);
@@ -142,17 +140,14 @@ namespace devils
         IMU imu = IMU("IMU", 13);
 
         // Subsystems
-        Timer gameTimer = Timer();
+        Timer gameTimer = Timer(GAME_TIMER_DURATION);
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
         IntakeSystem intake = IntakeSystem(intakeMotors);
         ConveyorSystem conveyor = ConveyorSystem(conveyorMotors, grabberPneumatic);
-        // TankChassisOdom chassisOdom = TankChassisOdom(chassis, WHEEL_RADIUS, WHEEL_BASE);
         PerpendicularSensorOdometry deadWheelOdom = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
-        // NTOdom networkOdom = NTOdom("DeadWheelOdom", deadWheelOdom);
 
         // Autonomous Routine
-        AutoStepList autoRoutine = AutoFactory::createPJAutoRoutine(chassis, deadWheelOdom, intake, conveyor);
-        // AutoStepList autoRoutine = AutoFactory::createCenterTestRoutine(chassis, deadWheelOdom, intake, conveyor);
+        AutoStepList *autoRoutine = AutoFactory::createPJAutoRoutine(chassis, deadWheelOdom, intake, conveyor);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

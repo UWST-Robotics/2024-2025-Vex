@@ -15,8 +15,6 @@ namespace devils
          */
         DebugRobot()
         {
-            // Reset Network Tables
-            // networkOdom.setSize(18.0, 18.0);
         }
 
         void autonomous() override

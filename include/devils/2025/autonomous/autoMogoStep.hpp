@@ -5,7 +5,7 @@
 
 namespace devils
 {
-    class AutoGrabMogoStep : public IAutoStep
+    class AutoGrabMogoStep : public AutoStep
     {
     public:
         AutoGrabMogoStep(ConveyorSystem &conveyor, bool shouldGrab = true)
@@ -13,16 +13,22 @@ namespace devils
         {
         }
 
-        void doStep() override
+        void onStart() override
         {
             conveyor.setGoalGrabbed(shouldGrab);
-            pros::delay(ACTUATION_DELAY);
+            actuationTimer.start();
+        }
+
+        bool checkFinished() override
+        {
+            return actuationTimer.finished();
         }
 
     private:
         static constexpr double ACTUATION_DELAY = 500; // ms
 
         bool shouldGrab;
+        Timer actuationTimer = Timer(ACTUATION_DELAY);
         ConveyorSystem &conveyor;
     };
 }

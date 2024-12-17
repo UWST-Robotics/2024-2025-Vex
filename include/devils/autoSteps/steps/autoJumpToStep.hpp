@@ -1,24 +1,15 @@
 #pragma once
 #include "pros/rtos.hpp"
-#include "common/autoStep.hpp"
-#include "devils/odom/odomSource.hpp"
+#include "../common/autoStep.hpp"
+#include "../../odom/odomSource.hpp"
 
 namespace devils
 {
-    // Forward Declaration
-    class AbsoluteStepConverter;
-
-    /**
-     * Represents a pause step in an autonomous routine.
-     */
-    class AutoJumpToStep : public IAutoStep
+    class AutoJumpToStep : public AutoStep
     {
-        // Allow the absolute step converter to access private members
-        friend class AbsoluteStepConverter;
-
     public:
         /**
-         * Creates a new pause step.
+         * Jumps the odometry state to a given pose. Usually ran at the start of an auto routine.
          * @param chassis The chassis to control.
          * @param x The x position to jump to in inches.
          * @param y The y position to jump to in inches.
@@ -30,12 +21,24 @@ namespace devils
         {
         }
 
-        void doStep() override
+        /**
+         * Jumps the odometry state to a given pose. Usually ran at the start of an auto routine.
+         * @param chassis The chassis to control.
+         * @param pose The pose to jump to.
+         */
+        AutoJumpToStep(OdomSource &odom, Pose pose)
+            : odom(odom),
+              targetPose(pose)
+        {
+        }
+
+        void onStart() override
         {
             odom.setPose(targetPose);
         }
 
     protected:
+        // Params
         OdomSource &odom;
         Pose targetPose;
     };

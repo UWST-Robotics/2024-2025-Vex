@@ -19,50 +19,51 @@ namespace devils
          */
         BlazeRobot()
         {
-            // Initialize NT
-            // deadWheelOdomNT.setSize(EXTERIOR_WIDTH, EXTERIOR_HEIGHT);
-
             // Initialize Hardware
             imu.calibrate();
 
             // Initialize Subsystems
-            Pose initialPose = Pose(-60, 0);
             conveyor.useSensor(&conveyorSensor);
             conveyor.setAutoRejectParams(CONVEYOR_LENGTH, HOOK_INTERVAL, REJECT_OFFSET);
 
             deadWheelOdom.useIMU(&imu);
-            deadWheelOdom.setPose(initialPose);
             deadWheelOdom.runAsync();
         }
 
         void autonomous() override
         {
-            // imu.calibrate();
+            // Initialize Conveyor
+            conveyor.setSortingEnabled(true);
+
+            // Initialize IMU
             imu.waitUntilCalibrated();
             imu.setHeading(0);
 
-            conveyor.setSortingEnabled(true);
             conveyor.runAsync();
             ladyBrown.runAsync();
 
-            autoRoutine.doStep();
+            autoRoutine->run();
         }
 
         void opcontrol() override
         {
-            bool isConveyorUp = true;
-            bool isConveyorPaused = false;
-            bool isWackerDown = false;
+            // Initialize Conveyor
+            conveyor.setSortingEnabled(false);
 
             // Start Tasks
             conveyor.runAsync();
             ladyBrown.runAsync();
 
-            startRoutine.doStep();
+            startRoutine->run();
 
             // Stop Tasks
-            conveyor.stopAsync();
-            ladyBrown.stopAsync();
+            conveyor.stop();
+            ladyBrown.stop();
+
+            // Teleop State
+            bool isConveyorUp = true;
+            bool isConveyorPaused = false;
+            bool isWackerDown = false;
 
             // Loop
             while (true)
@@ -126,9 +127,6 @@ namespace devils
                 if (!conveyor.goalGrabbed())
                     isConveyorPaused = false;
 
-                // Disable Auto Reject
-                conveyor.setSortingEnabled(false);
-
                 // Pause Conveyor
                 if (isConveyorPaused)
                     conveyor.forceMove(0);
@@ -177,20 +175,15 @@ namespace devils
             conveyor.setGoalGrabbed(false);
 
             // Tasks
-            ladyBrown.stopAsync();
-            conveyor.stopAsync();
+            ladyBrown.stop();
+            conveyor.stop();
         }
 
         // Constants
-        static constexpr double TICKS_PER_REVOLUTION = 300.0 * (48.0 / 36.0); // ticks
-        static constexpr double WHEEL_RADIUS = 1.625;                         // in
-        static constexpr double WHEEL_BASE = 12.0;                            // in
-        static constexpr double EXTERIOR_WIDTH = 15.0;                        // in
-        static constexpr double EXTERIOR_HEIGHT = 15.0;                       // in
-        static constexpr double DEAD_WHEEL_RADIUS = 1.0;                      // in
-        static constexpr double CONVEYOR_LENGTH = 84.0;                       // teeth
-        static constexpr double HOOK_INTERVAL = 21.0;                         // teeth
-        static constexpr double REJECT_OFFSET = 13;                           // teeth
+        static constexpr double DEAD_WHEEL_RADIUS = 1.0; // in
+        static constexpr double CONVEYOR_LENGTH = 84.0;  // teeth
+        static constexpr double HOOK_INTERVAL = 21.0;    // teeth
+        static constexpr double REJECT_OFFSET = 13;      // teeth
 
         // Hardware
         ADIPneumatic grabberPneumatic = ADIPneumatic("GrabberPneumatic", 1);
@@ -215,14 +208,11 @@ namespace devils
         ConveyorSystem conveyor = ConveyorSystem(conveyorMotors, grabberPneumatic);
         WackerSystem wacker = WackerSystem(wackerPneumatic);
         LadyBrownSystem ladyBrown = LadyBrownSystem(ladyBrownMotors, ladyBrownSensor, conveyor);
-        // TankChassisOdom chassisOdom = TankChassisOdom(chassis, WHEEL_RADIUS, WHEEL_BASE);
-        // TankChassisOdom chassisOdomNoIMU = TankChassisOdom(chassis, WHEEL_RADIUS, WHEEL_BASE);
         PerpendicularSensorOdometry deadWheelOdom = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
-        // NTOdom deadWheelOdomNT = NTOdom("DeadWheelOdom", deadWheelOdom);
 
         // Autonomous
-        AutoStepList startRoutine = AutoFactory::createBlazeStartRoutine(chassis, deadWheelOdom, intake, conveyor);
-        AutoStepList autoRoutine = AutoFactory::createBlazeAutoRoutine(chassis, deadWheelOdom, intake, conveyor, wacker);
+        AutoStepList *startRoutine = AutoFactory::createBlazeStartRoutine(chassis, deadWheelOdom, intake, conveyor);
+        AutoStepList *autoRoutine = AutoFactory::createBlazeAutoRoutine(chassis, deadWheelOdom, intake, conveyor, wacker);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

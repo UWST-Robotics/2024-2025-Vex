@@ -5,7 +5,7 @@
 
 namespace devils
 {
-    class AutoConveyorStep : public IAutoStep
+    class AutoConveyorStep : public AutoStep
     {
     public:
         AutoConveyorStep(ConveyorSystem &conveyor, double conveyorSpeed = 1.0)
@@ -13,10 +13,15 @@ namespace devils
         {
         }
 
-        void doStep() override
+        void onStart() override
         {
             conveyor.setAsyncSpeed(conveyorSpeed);
             conveyor.runAsync();
+        }
+
+        bool checkFinished() override
+        {
+            return true;
         }
 
     private:

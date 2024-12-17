@@ -1,27 +1,18 @@
 #pragma once
 #include "pros/rtos.hpp"
-#include "common/autoStep.hpp"
-#include "devils/autoSteps/autoRotateToStep.hpp"
-#include "devils/odom/odomSource.hpp"
-#include "devils/chassis/chassisBase.hpp"
-#include "devils/utils/math.hpp"
+#include "autoRotateToStep.hpp"
+#include "../common/autoStep.hpp"
+#include "../../odom/odomSource.hpp"
+#include "../../chassis/chassisBase.hpp"
+#include "../../utils/math.hpp"
 
 namespace devils
 {
-    // Forward Declaration
-    class AbsoluteStepConverter;
-
-    /**
-     * Represents a rotational step in an autonomous routine.
-     */
     class AutoRotateStep : public AutoRotateToStep
     {
-        // Allow the absolute step converter to access private members
-        friend class AbsoluteStepConverter;
-
     public:
         /**
-         * Creates a new rotational step.
+         * Rotates the robot a specific distance along its center of rotation.
          * @param chassis The chassis to control.
          * @param odomSource The odometry source to use.
          * @param distance The distance to rotate in radians.
@@ -37,23 +28,14 @@ namespace devils
         {
         }
 
-        void doStep() override
+        void onStart() override
         {
             // Calculate Target Pose
             Pose startPose = odomSource.getPose();
             this->targetAngle = distance + startPose.rotation;
 
             // Do base step
-            AutoRotateToStep::doStep();
-        }
-
-        /**
-         * Gets the distance of the step in radians.
-         * @return The distance of the step in radians.
-         */
-        double getDistance()
-        {
-            return distance;
+            AutoRotateToStep::onStart();
         }
 
     protected:

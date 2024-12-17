@@ -24,7 +24,7 @@ namespace devils
         {
         }
 
-        void onUpdate()
+        void onUpdate() override
         {
             moveAutomatic(asyncSpeed);
         }
@@ -84,7 +84,7 @@ namespace devils
             bool isStalled = conveyorMotors.getCurrent() > STALL_CURRENT;
             bool shouldFixStall = isStalled && isForwards;
             if (shouldFixStall && !stallTimer.running())
-                stallTimer.start(STALL_MIN_DURATION);
+                stallTimer.start();
             else if (!shouldFixStall)
                 stallTimer.stop();
 
@@ -171,7 +171,8 @@ namespace devils
         void startCooldown(double duration, double speed = 0)
         {
             cooldownSpeed = speed;
-            cooldownTimer.start(duration);
+            cooldownTimer.setDuration(duration);
+            cooldownTimer.start();
         }
 
         /**
@@ -326,9 +327,9 @@ namespace devils
         double cooldownSpeed = 0;
 
         // Timers
-        Timer cooldownTimer;
-        Timer stallTimer;
-        Timer rejectionTimer;
+        Timer cooldownTimer = Timer(0);
+        Timer stallTimer = Timer(STALL_MIN_DURATION);
+        Timer rejectionTimer = Timer(REJECTION_DURATION);
 
         // Hardware
         SmartMotorGroup &conveyorMotors;

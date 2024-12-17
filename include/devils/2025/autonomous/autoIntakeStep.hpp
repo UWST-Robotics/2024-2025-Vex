@@ -5,7 +5,7 @@
 
 namespace devils
 {
-    class AutoIntakeStep : public IAutoStep
+    class AutoIntakeStep : public AutoStep
     {
     public:
         AutoIntakeStep(IntakeSystem &intake, double intakeSpeed = 1.0)
@@ -13,9 +13,14 @@ namespace devils
         {
         }
 
-        void doStep() override
+        void onStart() override
         {
             intake.move(intakeSpeed);
+        }
+
+        bool checkFinished() override
+        {
+            return true;
         }
 
     private:

@@ -1,25 +1,19 @@
 #pragma once
 #include <string>
 #include "pros/rtos.hpp"
-#include "common/autoStep.hpp"
-#include "devils/utils/math.hpp"
-#include "devils/odom/odomSource.hpp"
-#include "devils/chassis/chassisBase.hpp"
-#include "devils/autoSteps/autoDriveToStep.hpp"
+#include "../common/autoStep.hpp"
+#include "../../utils/math.hpp"
+#include "../../odom/odomSource.hpp"
+#include "../../chassis/chassisBase.hpp"
+#include "autoDriveToStep.hpp"
 
 namespace devils
 {
-    // Forward Declaration
-    class AbsoluteStepConverter;
-
     /**
      * Represents a drive step in an autonomous routine.
      */
     class AutoDriveStep : public AutoDriveToStep
     {
-        // Allow the absolute step converter to access private members
-        friend class AbsoluteStepConverter;
-
     public:
         /**
          * Creates a new drive step.
@@ -38,7 +32,7 @@ namespace devils
         {
         }
 
-        void doStep() override
+        void onStart() override
         {
             // Calculate Target Pose
             Pose startPose = odomSource.getPose();
@@ -48,7 +42,7 @@ namespace devils
                 startPose.rotation);
 
             // Do base step
-            AutoDriveToStep::doStep();
+            AutoDriveToStep::onStart();
         }
 
     protected:
