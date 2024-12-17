@@ -11,6 +11,8 @@ namespace devils
         /**
          * Connects to a V5 serial port.
          * Communicates with RS-485 devices over the V5 ports on the brain.
+         * Automatically encodes and decodes data using COBS.
+         *
          * @param port The port to connect to.
          * @param baudrate The baudrate to run the port at.
          */
@@ -25,7 +27,7 @@ namespace devils
          */
         void pushByte(uint8_t byte)
         {
-            buffer.push_back(byte);
+            writeBuffer.push_back(byte);
         }
 
         /**
@@ -97,25 +99,64 @@ namespace devils
         }
 
         /**
+         * Reads from the buffer and decodes the COBS encoded data.
+         * @return The decoded data or nullptr if no bytes are available.
+         */
+        uint8_t *read() const
+        {
+            // Continue reading until there is no more data
+            while (serial.get_read_avail())
+            {
+                // Get the next byte
+                int32_t byte = serial.read_byte();
+                readBuffer.push_back(byte);
+
+                // Check if the byte is the end of the packet
+                if (byte == 0x00)
+                {
+                    // Decode the buffer using COBS
+                    uint8_t output[readBuffer.size()];
+                    COBS::decode(readBuffer.data(), readBuffer.size(), output);
+
+                    // Clear the buffer
+                    readBuffer.clear();
+
+                    // Return the output
+                    return output;
+                }
+            }
+        }
+
+        /**
+         * Checks if there is data available to read.
+         * @return True if there is data available to read, false otherwise.
+         */
+        bool canRead() const
+        {
+            return serial.get_read_avail() > 0;
+        }
+
+        /**
          *  Encodes the buffer using COBS and writes it to the serial port.
          */
         void flush()
         {
             // Encode the buffer using COBS
-            uint8_t output[buffer.size() + 1];
-            COBS::encode(buffer.data(), buffer.size(), output);
+            uint8_t output[writeBuffer.size() + 1];
+            COBS::encode(writeBuffer.data(), writeBuffer.size(), output);
 
             // Write the buffer to the serial port
             serial.write(output, sizeof(output));
 
             // Clear the buffer
-            buffer.clear();
+            writeBuffer.clear();
         }
 
     private:
         static constexpr uint32_t DEFAULT_BAUDRATE = 9600;
 
-        std::vector<uint8_t> buffer;
+        std::vector<uint8_t> writeBuffer;
+        std::vector<uint8_t> readBuffer;
         pros::Serial serial;
     };
 }

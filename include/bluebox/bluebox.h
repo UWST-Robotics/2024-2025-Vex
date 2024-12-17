@@ -2,4 +2,4 @@
 
 #include "ntGroup.hpp"
 #include "ntValue.hpp"
-#include "ntSocket.hpp"
+#include "ntSerial.hpp"

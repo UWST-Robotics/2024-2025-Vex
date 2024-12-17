@@ -93,6 +93,27 @@ namespace devils
             serial.flush();
         }
 
+        /**
+         * Reads changes from the BlueBox and updates `NTValue` objects.
+         * Blocks thread until response is received.
+         */
+        void readChanges()
+        {
+            serial.pushByte(READ_CHANGES_CMD);
+            serial.flush();
+
+            // Wait for response
+            while (!serial.canRead())
+                pros::delay(2);
+
+            // Read response
+            uint8_t *data = serial.read();
+            if (data == nullptr)
+                return;
+
+            // TODO: Deserialize response packet
+        }
+
         static NTSerial *getInstance()
         {
             return instance;
@@ -105,6 +126,7 @@ namespace devils
         static constexpr uint8_t UPDATE_INT_CMD = 0x03;
         static constexpr uint8_t UPDATE_DOUBLE_CMD = 0x04;
         static constexpr uint8_t UPDATE_STRING_CMD = 0x05;
+        static constexpr uint8_t READ_CHANGES_CMD = 0x10;
 
         // Singleton
         static NTSerial *instance;

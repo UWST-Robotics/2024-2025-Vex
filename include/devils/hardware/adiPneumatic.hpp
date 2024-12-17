@@ -71,6 +71,7 @@ namespace devils
             return isExtended;
         }
 
+    protected:
         /**
          * Serializes the pneumatic to the network table.
          */

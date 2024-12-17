@@ -20,5 +20,11 @@ namespace devils
             // TODO: Implement COBS encoding
             return 0;
         }
+
+        static int decode(uint8_t *src, size_t srcLength, uint8_t *destination)
+        {
+            // TODO: Implement COBS decoding
+            return 0;
+        }
     };
 }

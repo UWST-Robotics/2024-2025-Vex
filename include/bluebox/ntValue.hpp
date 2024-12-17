@@ -10,6 +10,12 @@ namespace devils
     class NTValue
     {
     public:
+        /**
+         * Creates a new variable that is syncronized over serial.
+         * Values can be written to using the `set` method or read using the `get` method.
+         * @param path The path of the value in the network table. (e.g. "chassis/velocity")
+         * @param defaultValue The default value of the variable.
+         */
         NTValue(const std::string path, const T defaultValue)
             : path(path),
               value(defaultValue)
@@ -24,6 +30,7 @@ namespace devils
 
         /**
          * Sets the value of the NTValue.
+         * @param value The value to set.
          */
         void set(T value)
         {
@@ -51,6 +58,7 @@ namespace devils
 
         /**
          * Gets the value of the NTValue.
+         * @return The current value of the NTValue.
          */
         T get()
         {
