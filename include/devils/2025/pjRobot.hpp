@@ -139,7 +139,7 @@ namespace devils
         OpticalSensor opticalSensor = OpticalSensor("OpticalSensor", 6);
         RotationSensor verticalSensor = RotationSensor("VerticalOdom", 9);
         RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 2);
-        IMU imu = IMU("IMU", 13);
+        InertialSensor imu = InertialSensor("IMU", 13);
 
         // Subsystems
         Timer gameTimer = Timer();

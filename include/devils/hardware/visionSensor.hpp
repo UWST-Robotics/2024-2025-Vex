@@ -3,7 +3,6 @@
 #include "pros/vision.hpp"
 #include "motor.hpp"
 #include "../utils/logger.hpp"
-#include "../geometry/perspective.hpp"
 #include "structs/visionObject.hpp"
 #include "hardwareBase.hpp"
 #include <string>

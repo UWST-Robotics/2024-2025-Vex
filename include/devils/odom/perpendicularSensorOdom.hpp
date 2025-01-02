@@ -3,7 +3,7 @@
 #include "../utils/runnable.hpp"
 #include "../odom/odomSource.hpp"
 #include "../hardware/rotationSensor.hpp"
-#include "../hardware/imu.hpp"
+#include "../hardware/gyro.hpp"
 #include "poseVelocityCalculator.hpp"
 
 namespace devils
@@ -142,7 +142,7 @@ namespace devils
          * Sets the IMU to use for odometry.
          * @param imu The IMU to use for odometry.
          */
-        void useIMU(IMU *imu)
+        void useIMU(IGyro *imu)
         {
             this->imu = imu;
         }
@@ -165,7 +165,7 @@ namespace devils
         RotationSensor &verticalSensor;
         RotationSensor &horizontalSensor;
 
-        IMU *imu = nullptr;
+        IGyro *imu = nullptr;
 
         Pose currentPose = Pose();
         uint32_t lastUpdateTimestamp = 0;

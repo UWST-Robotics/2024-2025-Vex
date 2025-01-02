@@ -14,7 +14,9 @@
 
 // Hardware
 #include "hardware/gps.hpp"
-#include "hardware/imu.hpp"
+#include "hardware/gyro.hpp"
+#include "hardware/inertialSensor.hpp"
+#include "hardware/inertialSensorGroup.hpp"
 #include "hardware/opticalSensor.hpp"
 #include "hardware/visionSensor.hpp"
 #include "hardware/adiPneumatic.hpp"
@@ -27,9 +29,6 @@
 #include "odom/tankChassisOdom.hpp"
 #include "odom/perpendicularSensorOdom.hpp"
 #include "odom/parallelSensorOdom.hpp"
-
-// Geometry
-#include "geometry/perspectiveFactory.hpp"
 
 // Pros
 #include "api.h"

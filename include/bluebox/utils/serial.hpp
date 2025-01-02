@@ -102,7 +102,7 @@ namespace devils
          * Reads from the buffer and decodes the COBS encoded data.
          * @return The decoded data or nullptr if no bytes are available.
          */
-        uint8_t *read() const
+        uint8_t *read()
         {
             // Continue reading until there is no more data
             while (serial.get_read_avail())
@@ -131,7 +131,7 @@ namespace devils
          * Checks if there is data available to read.
          * @return True if there is data available to read, false otherwise.
          */
-        bool canRead() const
+        bool canRead()
         {
             return serial.get_read_avail() > 0;
         }

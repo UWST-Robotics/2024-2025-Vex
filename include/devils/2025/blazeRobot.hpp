@@ -207,7 +207,7 @@ namespace devils
         RotationSensor ladyBrownSensor = RotationSensor("LadyBrownSensor", -12);
 
         OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 8);
-        IMU imu = IMU("IMU", 15);
+        InertialSensor imu = InertialSensor("IMU", 15);
 
         // Subsystems
         TankChassis chassis = TankChassis(leftMotors, rightMotors);

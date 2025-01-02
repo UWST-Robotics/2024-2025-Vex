@@ -3,6 +3,7 @@
 #include "pros/imu.hpp"
 #include "pros/error.h"
 #include "../utils/logger.hpp"
+#include "gyro.hpp"
 #include "hardwareBase.hpp"
 #include "../geometry/units.hpp"
 #include "../geometry/vector3.hpp"
@@ -15,7 +16,7 @@ namespace devils
     /**
      * Represents a V5 inertial measurement unit.
      */
-    class IMU : private HardwareBase
+    class InertialSensor : private HardwareBase, public IGyro
     {
     public:
         /**
@@ -24,7 +25,7 @@ namespace devils
          * @param name The name of the IMU (for logging purposes)
          * @param port The port of the IMU (from 1 to 21)
          */
-        IMU(std::string name, uint8_t port)
+        InertialSensor(std::string name, uint8_t port)
             : HardwareBase(name, "IMU", port),
               imu(port)
         {
@@ -32,8 +33,8 @@ namespace devils
                 reportFault("Invalid port");
         }
 
-        IMU(const IMU &) = delete;
-        IMU &operator=(const IMU &) = delete;
+        InertialSensor(const InertialSensor &) = delete;
+        InertialSensor &operator=(const InertialSensor &) = delete;
 
         /**
          * Gets the current acceleration of the IMU in inches per second squared.
@@ -57,7 +58,7 @@ namespace devils
          * Gets the current heading of the IMU in radians, unbounded.
          * @return The current heading of the IMU in radians or 0 if the operation failed.
          */
-        double getHeading()
+        double getHeading() override
         {
             errno = 0;
             double heading = imu.get_rotation();

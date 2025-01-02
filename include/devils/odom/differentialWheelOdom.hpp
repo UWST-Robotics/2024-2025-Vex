@@ -1,6 +1,5 @@
 #pragma once
 #include "../chassis/tankChassis.hpp"
-#include "../hardware/imu.hpp"
 #include "../hardware/rotationSensor.hpp"
 #include "../utils/logger.hpp"
 #include "../geometry/pose.hpp"
