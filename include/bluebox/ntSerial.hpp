@@ -44,7 +44,10 @@ namespace bluebox
          */
         void labelID(uint16_t id, const char *name)
         {
-            daemon.writePacket(new UpdateLabelPacket(id, name));
+            UpdateLabelPacket packet;
+            packet.ntID = id;
+            packet.label = name;
+            daemon.writePacket(&packet);
         }
 
         /**
@@ -54,7 +57,12 @@ namespace bluebox
          */
         void updateBoolean(uint16_t id, bool value)
         {
-            daemon.writePacket(new UpdateValuePacket(id, pros::millis(), UpdateValuePacket::ValueType::BOOLEAN, &value));
+            UpdateValuePacket packet;
+            packet.ntID = id;
+            packet.timestamp = pros::millis();
+            packet.valueType = UpdateValuePacket::ValueType::BOOLEAN;
+            packet.newValue = &value;
+            daemon.writePacket(&packet);
         }
 
         /**
@@ -64,7 +72,12 @@ namespace bluebox
          */
         void updateInt(uint16_t id, int value)
         {
-            daemon.writePacket(new UpdateValuePacket(id, pros::millis(), UpdateValuePacket::ValueType::INT, &value));
+            UpdateValuePacket packet;
+            packet.ntID = id;
+            packet.timestamp = pros::millis();
+            packet.valueType = UpdateValuePacket::ValueType::INT;
+            packet.newValue = &value;
+            daemon.writePacket(&packet);
         }
 
         /**
@@ -74,7 +87,12 @@ namespace bluebox
          */
         void updateDouble(uint16_t id, double value)
         {
-            daemon.writePacket(new UpdateValuePacket(id, pros::millis(), UpdateValuePacket::ValueType::DOUBLE, &value));
+            UpdateValuePacket packet;
+            packet.ntID = id;
+            packet.timestamp = pros::millis();
+            packet.valueType = UpdateValuePacket::ValueType::DOUBLE;
+            packet.newValue = &value;
+            daemon.writePacket(&packet);
         }
 
         /**

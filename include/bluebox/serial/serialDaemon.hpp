@@ -5,11 +5,11 @@
 #include "../utils/daemon.hpp"
 #include "pros/serial.hpp"
 #include "pros/error.h"
-#include "serialPacket.hpp"
 #include "../utils/ntLogger.hpp"
 #include "serialPacketDecoder.hpp"
 #include "serialPacketEncoder.hpp"
 #include "packets/genericAckPacket.hpp"
+#include "types/serialPacket.hpp"
 
 namespace bluebox
 {
@@ -74,7 +74,8 @@ namespace bluebox
         int writePacketToSerial(SerialPacket *packet)
         {
             // Set Packet ID
-            packet->setPacketID(SerialPacket::getNextID());
+            static uint8_t packetIDCounter = 0;
+            packet->id = packetIDCounter++;
 
             // Serialize the packet
             static uint8_t *writeBuffer = new uint8_t[MAX_BUFFER_SIZE];
@@ -95,12 +96,12 @@ namespace bluebox
                 int32_t writeRes = serial.write(writeBuffer, packetSize);
                 if (writeRes == PROS_ERR)
                 {
-                    NTLogger::logWarning("Failed to write packet " + std::to_string(packet->getPacketID()) + " to serial port.");
+                    NTLogger::logWarning("Failed to write packet " + std::to_string(packet->id) + " to serial port.");
                     return -1;
                 }
 
                 // Wait for an ack
-                int ackRes = waitForAck(packet->getPacketID());
+                int ackRes = waitForAck(packet->id);
 
                 // Handle Success
                 if (ackRes == 0)
@@ -108,7 +109,7 @@ namespace bluebox
             }
 
             // Log Error
-            NTLogger::logWarning("Failed to send packet " + std::to_string(packet->getPacketID()) +
+            NTLogger::logWarning("Failed to send packet " + std::to_string(packet->id) +
                                  " after " + std::to_string(MAX_RETRIES) + " retries.");
             return -1;
         }
@@ -138,7 +139,7 @@ namespace bluebox
             }
 
             // Check if the ack is for the correct packet
-            if (ackPacket->getPacketID() != packetID)
+            if (ackPacket->targetID != packetID)
             {
                 NTLogger::logWarning("Received ack for wrong packet.");
                 return -1;

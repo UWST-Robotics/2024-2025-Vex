@@ -2,60 +2,51 @@
 
 #include <cstdint>
 #include <string>
-#include "../serialPacket.hpp"
-#include "../packetType.hpp"
+#include "../types/serialPacket.hpp"
+#include "../types/serialPacketType.hpp"
+#include "../../utils/bufferWriter.hpp"
+#include "../../utils/bufferReader.hpp"
 
 namespace bluebox
 {
     struct UpdateLabelPacket : public SerialPacket
     {
-        UpdateLabelPacket(
-            uint16_t ntID,
-            std::string label)
-            : ntID(ntID),
-              label(label),
-              SerialPacket(PacketType::UPDATE_LABEL)
+        uint16_t ntID = 0;
+        std::string label = "";
+    };
+
+    struct UpdateLabelPacketType : public SerialPacketType
+    {
+        UpdateLabelPacketType()
+            : SerialPacketType(SerialPacketTypeID::UPDATE_LABEL)
         {
         }
 
-        size_t serialize(uint8_t *buffer) override
+        SerialPacket *deserialize(EncodedSerialPacket *packet) override
         {
-            // Serialize params
-            buffer[0] = ntID >> 8;
-            buffer[1] = ntID & 0xFF;
-
-            buffer[2] = label.length() >> 8;
-            buffer[3] = label.length() & 0xFF;
-
-            for (int i = 0; i < label.length(); i++)
-                buffer[i + 4] = label[i];
-
-            return 4 + label.length();
+            BufferReader reader(packet->payload, packet->payloadSize);
+            UpdateLabelPacket *newPacket = new UpdateLabelPacket();
+            newPacket->type = packet->type;
+            newPacket->id = packet->id;
+            newPacket->ntID = reader.readUInt16LE();
+            newPacket->label = reader.readString();
+            return newPacket;
         }
 
-        static UpdateLabelPacket *deserialize(uint8_t *payload, uint16_t length)
+        EncodedSerialPacket *serialize(SerialPacket *packet) override
         {
-            // Check if the payload is too small
-            if (length < 4)
+            UpdateLabelPacket *updateLabelPacket = dynamic_cast<UpdateLabelPacket *>(packet);
+            if (updateLabelPacket == nullptr)
                 return nullptr;
 
-            // Extract label params
-            uint16_t ntID = (payload[0] << 8) | payload[1];
-            uint16_t labelLength = (payload[2] << 8) | payload[3];
+            size_t payloadSize = 4 + updateLabelPacket->label.length();
+            uint8_t *payload = new uint8_t[payloadSize];
+            BufferWriter writer(payload, payloadSize);
 
-            // Check if the payload is too small
-            if (length < 4 + labelLength)
-                return nullptr;
+            writer.writeUInt16LE(updateLabelPacket->ntID);
+            writer.writeString(updateLabelPacket->label);
 
-            // Extract label
-            std::string label = std::string((char *)&payload[3], labelLength);
-
-            // Create packet
-            return new UpdateLabelPacket(ntID, label);
+            return EncodedSerialPacket::build(packet, payload, writer.getOffset());
         }
-
-    private:
-        uint16_t ntID;
-        std::string label;
     };
 }

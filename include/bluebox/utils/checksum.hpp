@@ -5,14 +5,15 @@
 namespace bluebox
 {
     /**
-     * Handles checksum calculations for serial communication.
+     * Helper class for calculating checksums.
      */
-    struct SerialChecksum
+    struct Checksum
     {
         /**
-         * Calculates the checksum of a byte array.
+         * Calculates the checksum of a byte array using a simple sum algorithm.
          * @param buffer The buffer to calculate the checksum of.
          * @param length The length of the buffer.
+         * @return The checksum of the buffer.
          */
         static uint16_t calc(uint8_t *buffer, uint16_t length)
         {

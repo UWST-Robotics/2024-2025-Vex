@@ -1,8 +1,9 @@
 #pragma once
 
 #include <cstdint>
-#include "serialPacket.hpp"
-#include "serialChecksum.hpp"
+#include "types/serialPacket.hpp"
+#include "types/encodedSerialPacket.hpp"
+#include "../utils/checksum.hpp"
 
 namespace bluebox
 {
@@ -20,53 +21,33 @@ namespace bluebox
          */
         static size_t encode(SerialPacket *packet, uint8_t *buffer)
         {
-            // Serialize the payload
-            static uint8_t *payloadBuffer = new uint8_t[MAX_BUFFER_SIZE];
-            size_t payloadSize = packet->serialize(payloadBuffer);
+            // Serialize the packet
+            EncodedSerialPacket *encodedPacket = SerialPacketTypes::serialize(packet);
 
-            // Calculate the size of the payload
-            uint16_t packetSize = HEADER_SIZE +
-                                  PACKET_TYPE_SIZE +
-                                  PACKET_ID_SIZE +
-                                  PACKET_LENGTH_SIZE +
-                                  payloadSize +
-                                  CHECKSUM_SIZE;
+            // Create the packet buffer
+            static uint8_t *packetBuffer = new uint8_t[MAX_BUFFER_SIZE];
+            BufferWriter packerWriter(packetBuffer, MAX_BUFFER_SIZE);
 
             // Header
-            buffer[0] = 0xC9;
-            buffer[1] = 0x36;
-            buffer[2] = 0xB8;
-            buffer[3] = 0x47;
+            packerWriter.writeUInt8(0xC9);
+            packerWriter.writeUInt8(0x36);
+            packerWriter.writeUInt8(0xB8);
+            packerWriter.writeUInt8(0x47);
 
-            // Type
-            buffer[4] = (uint8_t)packet->getPacketType();
-
-            // ID
-            buffer[5] = packet->getPacketID();
-
-            // Payload Size
-            buffer[6] = payloadSize >> 8;
-            buffer[7] = payloadSize & 0xFF;
-
-            // Payload
-            uint8_t payloadOffset = HEADER_SIZE + PACKET_TYPE_SIZE + PACKET_ID_SIZE + PACKET_LENGTH_SIZE;
-            for (uint16_t i = 0; i < payloadSize; i++)
-                buffer[payloadOffset + i] = payloadBuffer[i];
+            // Packet
+            packerWriter.writeUInt8((uint8_t)encodedPacket->type);                       // Type
+            packerWriter.writeUInt8(encodedPacket->id);                                  // ID
+            packerWriter.writeUInt16LE(encodedPacket->payloadSize);                      // Payload Size
+            packerWriter.writeBytes(encodedPacket->payload, encodedPacket->payloadSize); // Payload
 
             // Checksum
-            uint16_t checksum = SerialChecksum::calc(buffer, packetSize - CHECKSUM_SIZE);
-            buffer[packetSize - 2] = checksum >> 8;
-            buffer[packetSize - 1] = checksum & 0xFF;
+            uint16_t checksum = Checksum::calc(buffer, packerWriter.getOffset() - 2);
+            packerWriter.writeUInt16LE(checksum);
 
-            return packetSize;
+            return packerWriter.getOffset();
         }
 
     private:
-        static constexpr uint16_t HEADER_SIZE = 4;
-        static constexpr uint16_t PACKET_TYPE_SIZE = 1;
-        static constexpr uint16_t PACKET_ID_SIZE = 1;
-        static constexpr uint16_t PACKET_LENGTH_SIZE = 2;
-        static constexpr uint16_t CHECKSUM_SIZE = 2;
         static constexpr size_t MAX_BUFFER_SIZE = 256;
     };
 }

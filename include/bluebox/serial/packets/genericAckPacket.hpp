@@ -1,25 +1,46 @@
 #pragma once
 
 #include <cstdint>
-#include "../serialPacket.hpp"
-#include "../packetType.hpp"
+#include "../types/serialPacket.hpp"
+#include "../types/serialPacketType.hpp"
+#include "../../utils/bufferWriter.hpp"
+#include "../../utils/bufferReader.hpp"
 
 namespace bluebox
 {
     struct GenericAckPacket : public SerialPacket
     {
-        GenericAckPacket() : SerialPacket(PacketType::GENERIC_ACK)
+        uint8_t targetID = 0;
+    };
+
+    struct GenericAckPacketType : public SerialPacketType
+    {
+        GenericAckPacketType()
+            : SerialPacketType(SerialPacketTypeID::GENERIC_ACK)
         {
         }
 
-        size_t serialize(uint8_t *buffer) override
+        SerialPacket *deserialize(EncodedSerialPacket *packet) override
         {
-            return 0;
+            BufferReader reader(packet->payload, packet->payloadSize);
+            GenericAckPacket *newPacket = new GenericAckPacket();
+            newPacket->type = packet->type;
+            newPacket->id = packet->id;
+            newPacket->targetID = reader.readUInt8();
+            return newPacket;
         }
 
-        static GenericAckPacket *deserialize(uint8_t *payload, uint16_t length)
+        EncodedSerialPacket *serialize(SerialPacket *packet) override
         {
-            return new GenericAckPacket();
+            GenericAckPacket *genericAckPacket = dynamic_cast<GenericAckPacket *>(packet);
+            if (genericAckPacket == nullptr)
+                return nullptr;
+
+            uint8_t *buffer = new uint8_t[1];
+            BufferWriter writer(buffer, 0);
+            writer.writeUInt8(genericAckPacket->targetID);
+
+            return EncodedSerialPacket::build(packet, buffer, writer.getOffset());
         }
     };
 }

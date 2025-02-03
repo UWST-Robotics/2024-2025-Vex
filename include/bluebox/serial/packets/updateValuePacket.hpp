@@ -1,10 +1,12 @@
 #pragma once
 
 #include <cstdint>
-#include "../serialPacket.hpp"
-#include "../packetType.hpp"
 #include <cstring>
+#include "../types/serialPacket.hpp"
+#include "../types/serialPacketType.hpp"
 #include "../../utils/ntLogger.hpp"
+#include "../../utils/bufferWriter.hpp"
+#include "../../utils/bufferReader.hpp"
 
 namespace bluebox
 {
@@ -17,96 +19,73 @@ namespace bluebox
             DOUBLE = 0x03
         };
 
-        UpdateValuePacket(
-            uint16_t ntID,
-            uint16_t timestamp,
-            ValueType valueType,
-            void *newValue)
-            : ntID(ntID),
-              timestamp(timestamp),
-              valueType(valueType),
-              newValue(newValue),
-              SerialPacket(PacketType::UPDATE_VALUE)
+        uint16_t ntID = 0;
+        uint16_t timestamp = 0;
+        ValueType valueType = ValueType::BOOLEAN;
+        void *newValue = nullptr;
+    };
+
+    struct UpdateValuePacketType : public SerialPacketType
+    {
+        UpdateValuePacketType()
+            : SerialPacketType(SerialPacketTypeID::UPDATE_VALUE)
         {
         }
 
-        size_t serialize(uint8_t *buffer) override
+        SerialPacket *deserialize(EncodedSerialPacket *packet) override
         {
-            buffer[0] = ntID >> 8;
-            buffer[1] = ntID & 0xFF;
+            BufferReader reader(packet->payload, packet->payloadSize);
+            UpdateValuePacket *newPacket = new UpdateValuePacket();
+            newPacket->type = packet->type;
+            newPacket->id = packet->id;
+            newPacket->ntID = reader.readUInt16LE();
+            newPacket->timestamp = reader.readUInt16LE();
+            newPacket->valueType = (UpdateValuePacket::ValueType)reader.readUInt8();
 
-            buffer[2] = timestamp >> 8;
-            buffer[3] = timestamp & 0xFF;
-
-            buffer[4] = (uint8_t)valueType;
-
-            switch (valueType)
+            switch (newPacket->valueType)
             {
-            case ValueType::BOOLEAN:
-                buffer[5] = *(bool *)newValue;
+            case UpdateValuePacket::ValueType::BOOLEAN:
+                newPacket->newValue = new bool(reader.readUInt8());
                 break;
-            case ValueType::INT:
-                buffer[5] = *(int16_t *)newValue >> 8;
-                buffer[6] = *(int16_t *)newValue & 0xFF;
+            case UpdateValuePacket::ValueType::INT:
+                newPacket->newValue = new int16_t(reader.readUInt16LE());
                 break;
-            case ValueType::DOUBLE:
-                memcpy(&buffer[5], newValue, 8);
+            case UpdateValuePacket::ValueType::DOUBLE:
+                newPacket->newValue = new double(reader.readDouble());
                 break;
             }
 
-            return 5 + getSize(valueType);
+            return newPacket;
         }
 
-        static UpdateValuePacket *deserialize(uint8_t *payload, uint16_t length)
+        EncodedSerialPacket *serialize(SerialPacket *packet) override
         {
-            if (length < 5)
+            UpdateValuePacket *updateValuePacket = dynamic_cast<UpdateValuePacket *>(packet);
+            if (updateValuePacket == nullptr)
                 return nullptr;
 
-            uint16_t ntID = (payload[0] << 8) | payload[1];
-            uint16_t timestamp = (payload[2] << 8) | payload[3];
-            ValueType valueType = (ValueType)payload[4];
+            size_t payloadSize = 4 + 8;
+            uint8_t *payload = new uint8_t[payloadSize];
+            BufferWriter writer(payload, payloadSize);
 
-            if (length < 5 + UpdateValuePacket::getSize(valueType))
-                return nullptr;
+            writer.writeUInt16LE(updateValuePacket->ntID);
+            writer.writeUInt16LE(updateValuePacket->timestamp);
+            writer.writeUInt8((uint8_t)updateValuePacket->valueType);
 
-            switch (valueType)
+            switch (updateValuePacket->valueType)
             {
-            case ValueType::BOOLEAN:
-                return new UpdateValuePacket(ntID, timestamp, valueType, new bool(payload[5]));
-            case ValueType::INT:
-                return new UpdateValuePacket(ntID, timestamp, valueType, new int16_t((payload[5] << 8) | payload[6]));
-            case ValueType::DOUBLE:
-                return new UpdateValuePacket(ntID, timestamp, valueType, new double(*(double *)&payload[5]));
+            case UpdateValuePacket::ValueType::BOOLEAN:
+                writer.writeUInt8(*(bool *)updateValuePacket->newValue);
+                break;
+            case UpdateValuePacket::ValueType::INT:
+                writer.writeUInt16LE(*(int16_t *)updateValuePacket->newValue);
+                break;
+            case UpdateValuePacket::ValueType::DOUBLE:
+                writer.writeDouble(*(double *)updateValuePacket->newValue);
+                break;
             }
 
-            // Unknown value type
-            NTLogger::logWarning("Unknown value type " + std::to_string((uint8_t)valueType));
-
-            return nullptr;
+            return EncodedSerialPacket::build(packet, payload, writer.getOffset());
         }
-
-    private:
-        /**
-         * Gets the size in bytes of a value type.
-         * @param valueType The value type.
-         * @return The size in bytes of the value type.
-         */
-        static uint16_t getSize(ValueType valueType)
-        {
-            switch (valueType)
-            {
-            case ValueType::BOOLEAN:
-                return 1;
-            case ValueType::INT:
-                return 2;
-            case ValueType::DOUBLE:
-                return 8;
-            }
-        }
-
-        uint16_t ntID;
-        uint16_t timestamp;
-        ValueType valueType;
-        void *newValue;
     };
 }

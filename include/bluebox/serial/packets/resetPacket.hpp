@@ -1,20 +1,36 @@
 #pragma once
 
 #include <cstdint>
-#include "../serialPacket.hpp"
-#include "../packetType.hpp"
+#include "../types/serialPacket.hpp"
+#include "../types/serialPacketType.hpp"
+#include "../../utils/bufferWriter.hpp"
+#include "../../utils/bufferReader.hpp"
 
 namespace bluebox
 {
     struct ResetPacket : public SerialPacket
     {
-        ResetPacket() : SerialPacket(PacketType::RESET)
+    };
+
+    struct ResetPacketType : public SerialPacketType
+    {
+        ResetPacketType()
+            : SerialPacketType(SerialPacketTypeID::RESET)
         {
         }
 
-        size_t serialize(uint8_t *buffer) override
+        SerialPacket *deserialize(EncodedSerialPacket *packet) override
         {
-            return 0;
+            BufferReader reader(packet->payload, packet->payloadSize);
+            ResetPacket *newPacket = new ResetPacket();
+            newPacket->type = packet->type;
+            newPacket->id = packet->id;
+            return newPacket;
+        }
+
+        EncodedSerialPacket *serialize(SerialPacket *packet) override
+        {
+            return EncodedSerialPacket::build(packet, nullptr, 0);
         }
     };
 }
