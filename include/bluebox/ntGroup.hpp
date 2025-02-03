@@ -3,7 +3,7 @@
 #include <string>
 #include "ntValue.hpp"
 
-namespace devils
+namespace bluebox
 {
     class NTGroup
     {

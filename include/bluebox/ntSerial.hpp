@@ -1,22 +1,32 @@
 #pragma once
 
-#include "utils/serial.hpp"
-#include "utils/cobs.hpp"
 #include <cstring>
+#include "serial/serialDaemon.hpp"
+#include "serial/packets/updateValuePacket.hpp"
+#include "serial/packets/updateLabelPacket.hpp"
 
-namespace devils
+namespace bluebox
 {
+    /**
+     * Represents a serial port connection to the BlueBox.
+     * This is a singleton class - only one instance should be created.
+     */
     class NTSerial
     {
     public:
         /**
-         * Serializes `NTValue` updates over a VEX V5 serial port.
-         * @param port The V5 port to push data to.
+         * Creates a new NTSerial instance.
+         * @param port The VEX V5 port to connect to.
          */
-        NTSerial(uint8_t port)
-            : serial(port)
+        NTSerial(uint8_t port) : daemon(port)
         {
+            if (instance != nullptr)
+                delete instance;
             instance = this;
+        }
+        ~NTSerial()
+        {
+            instance = nullptr;
         }
 
         /**
@@ -24,8 +34,7 @@ namespace devils
          */
         void reset()
         {
-            serial.pushByte(RESET_CMD);
-            serial.flush();
+            daemon.writePacket(new ResetPacket());
         }
 
         /**
@@ -35,10 +44,7 @@ namespace devils
          */
         void labelID(uint16_t id, const char *name)
         {
-            serial.pushByte(LABEL_ID_CMD);
-            serial.pushInt16(id);
-            serial.pushString(name);
-            serial.flush();
+            daemon.writePacket(new UpdateLabelPacket(id, name));
         }
 
         /**
@@ -48,10 +54,7 @@ namespace devils
          */
         void updateBoolean(uint16_t id, bool value)
         {
-            serial.pushByte(UPDATE_BOOLEAN_CMD);
-            serial.pushInt16(id);
-            serial.pushByte(value ? 1 : 0);
-            serial.flush();
+            daemon.writePacket(new UpdateValuePacket(id, pros::millis(), UpdateValuePacket::ValueType::BOOLEAN, &value));
         }
 
         /**
@@ -61,10 +64,7 @@ namespace devils
          */
         void updateInt(uint16_t id, int value)
         {
-            serial.pushByte(UPDATE_INT_CMD);
-            serial.pushInt16(id);
-            serial.pushInt32(value);
-            serial.flush();
+            daemon.writePacket(new UpdateValuePacket(id, pros::millis(), UpdateValuePacket::ValueType::INT, &value));
         }
 
         /**
@@ -74,10 +74,7 @@ namespace devils
          */
         void updateDouble(uint16_t id, double value)
         {
-            serial.pushByte(UPDATE_DOUBLE_CMD);
-            serial.pushInt16(id);
-            serial.pushDouble(value);
-            serial.flush();
+            daemon.writePacket(new UpdateValuePacket(id, pros::millis(), UpdateValuePacket::ValueType::DOUBLE, &value));
         }
 
         /**
@@ -87,31 +84,7 @@ namespace devils
          */
         void updateString(uint16_t id, const char *value)
         {
-            serial.pushByte(UPDATE_STRING_CMD);
-            serial.pushInt16(id);
-            serial.pushString(value);
-            serial.flush();
-        }
-
-        /**
-         * Reads changes from the BlueBox and updates `NTValue` objects.
-         * Blocks thread until response is received.
-         */
-        void readChanges()
-        {
-            serial.pushByte(READ_CHANGES_CMD);
-            serial.flush();
-
-            // Wait for response
-            while (!serial.canRead())
-                pros::delay(2);
-
-            // Read response
-            uint8_t *data = serial.read();
-            if (data == nullptr)
-                return;
-
-            // TODO: Deserialize response packet
+            // TODO: Implement
         }
 
         static NTSerial *getInstance()
@@ -120,20 +93,12 @@ namespace devils
         }
 
     private:
-        static constexpr uint8_t RESET_CMD = 0x00;
-        static constexpr uint8_t LABEL_ID_CMD = 0x01;
-        static constexpr uint8_t UPDATE_BOOLEAN_CMD = 0x02;
-        static constexpr uint8_t UPDATE_INT_CMD = 0x03;
-        static constexpr uint8_t UPDATE_DOUBLE_CMD = 0x04;
-        static constexpr uint8_t UPDATE_STRING_CMD = 0x05;
-        static constexpr uint8_t READ_CHANGES_CMD = 0x10;
-
         // Singleton
         static NTSerial *instance;
 
-        Serial serial;
+        SerialDaemon daemon;
     };
 }
 
 // Singleton instance
-devils::NTSerial *devils::NTSerial::instance = nullptr;
+bluebox::NTSerial *bluebox::NTSerial::instance = nullptr;

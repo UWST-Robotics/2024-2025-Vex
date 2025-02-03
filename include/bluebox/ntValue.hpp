@@ -1,10 +1,11 @@
 #pragma once
 
 #include "ntSerial.hpp"
+#include "utils/ntLogger.hpp"
 
 uint16_t idCounter = 0;
 
-namespace devils
+namespace bluebox
 {
     template <typename T>
     class NTValue
@@ -53,7 +54,7 @@ namespace devils
             else if constexpr (std::is_same<T, std::string>::value)
                 serialInstance->updateString(id, value.c_str());
             else
-                Logger::error("NTValue: Unsupported type");
+                NTLogger::logWarning("NTValue is using unsupported type " + std::string(typeid(T).name()));
         }
 
         /**

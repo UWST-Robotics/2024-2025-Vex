@@ -19,30 +19,24 @@ namespace devils
             // networkOdom.setSize(18.0, 18.0);
         }
 
-        void autonomous() override
-        {
-            chassis.stop();
-        }
-
         void opcontrol() override
         {
-            autonomous();
-        }
+            while (true)
+            {
+                testValue.set(rand() * 100);
 
-        void disabled() override
-        {
-            // Stop the robot
-            chassis.stop();
+                pros::delay(1000);
+            }
         }
 
         // Dummy Chassis
-        DummyChassis chassis = DummyChassis();
+        // DummyChassis chassis = DummyChassis();
 
         // Additional Network Objects
-        // NTOdom networkOdom = NTOdom("DummyOdom", chassis);
-        // NTPath networkPath = NTPath("TestPath", path);
+        NTSerial serial = NTSerial(1);
+        NTValue<double> testValue = NTValue<double>("test", 0.0);
 
         // Renderer
-        EyesRenderer eyes = EyesRenderer();
+        // EyesRenderer eyes = EyesRenderer();
     };
 }
