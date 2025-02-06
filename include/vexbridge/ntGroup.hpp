@@ -3,7 +3,7 @@
 #include <string>
 #include "ntValue.hpp"
 
-namespace bluebox
+namespace vexbridge
 {
     class NTGroup
     {

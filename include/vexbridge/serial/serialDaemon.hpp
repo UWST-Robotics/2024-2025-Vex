@@ -11,7 +11,7 @@
 #include "packets/genericAckPacket.hpp"
 #include "types/serialPacket.hpp"
 
-namespace bluebox
+namespace vexbridge
 {
     /**
      * Background daemon that handles serial read and write operations.

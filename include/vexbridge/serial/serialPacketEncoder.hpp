@@ -4,8 +4,9 @@
 #include "types/serialPacket.hpp"
 #include "types/encodedSerialPacket.hpp"
 #include "../utils/checksum.hpp"
+#include "../utils/cobsEncoder.hpp"
 
-namespace bluebox
+namespace vexbridge
 {
     /**
      * Encodes serial packets for transmission over a serial port.
@@ -44,7 +45,10 @@ namespace bluebox
             uint16_t checksum = Checksum::calc(buffer, packerWriter.getOffset() - 2);
             packerWriter.writeUInt16LE(checksum);
 
-            return packerWriter.getOffset();
+            // Encode COBS
+            size_t length = COBSEncoder::encode(buffer, packerWriter.getOffset(), buffer);
+
+            return length;
         }
 
     private:

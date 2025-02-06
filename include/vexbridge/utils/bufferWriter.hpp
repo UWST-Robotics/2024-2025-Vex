@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <cstddef>
 
-namespace bluebox
+namespace vexbridge
 {
     /**
      * Writes data sequentially into a buffer.

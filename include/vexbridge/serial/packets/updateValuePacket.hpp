@@ -8,7 +8,7 @@
 #include "../../utils/bufferWriter.hpp"
 #include "../../utils/bufferReader.hpp"
 
-namespace bluebox
+namespace vexbridge
 {
     struct UpdateValuePacket : public SerialPacket
     {

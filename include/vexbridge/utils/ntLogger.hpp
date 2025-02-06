@@ -4,7 +4,7 @@
 #include <string>
 #include "pros/llemu.hpp"
 
-namespace bluebox
+namespace vexbridge
 {
     /**
      * Represents a logger that logs messages to the LCD and console.

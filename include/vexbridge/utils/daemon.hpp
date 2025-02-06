@@ -2,7 +2,7 @@
 
 #include "pros/rtos.hpp"
 
-namespace bluebox
+namespace vexbridge
 {
     /**
      * Represents a daemon that runs in the background while the user program is running.

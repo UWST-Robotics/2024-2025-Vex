@@ -5,7 +5,7 @@
 #include "packets/updateValuePacket.hpp"
 #include "packets/genericAckPacket.hpp"
 
-namespace bluebox
+namespace vexbridge
 {
     struct SerialPacketTypes
     {
@@ -40,7 +40,7 @@ namespace bluebox
 }
 
 // All Packet Types
-bluebox::SerialPacketType *bluebox::SerialPacketTypes::packetTypes[4] = {
+vexbridge::SerialPacketType *vexbridge::SerialPacketTypes::packetTypes[4] = {
     new ResetPacketType(),
     new UpdateLabelPacketType(),
     new UpdateValuePacketType(),

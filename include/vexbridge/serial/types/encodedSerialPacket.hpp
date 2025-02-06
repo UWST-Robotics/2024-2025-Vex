@@ -4,7 +4,7 @@
 #include <cstddef>
 #include "serialPacket.hpp"
 
-namespace bluebox
+namespace vexbridge
 {
     /**
      * Represents a packet that includes a serialized payload.

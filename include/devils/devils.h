@@ -67,5 +67,5 @@
 // Display
 #include "display/eyesRenderer.hpp"
 
-// BlueBox
-#include "../bluebox/blueBox.h"
+// VEXBridge
+#include "../vexbridge/vexbridge.h"

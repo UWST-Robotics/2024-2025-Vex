@@ -5,7 +5,7 @@
 #include "serial/packets/updateValuePacket.hpp"
 #include "serial/packets/updateLabelPacket.hpp"
 
-namespace bluebox
+namespace vexbridge
 {
     /**
      * Represents a serial port connection to the BlueBox.
@@ -119,4 +119,4 @@ namespace bluebox
 }
 
 // Singleton instance
-bluebox::NTSerial *bluebox::NTSerial::instance = nullptr;
+vexbridge::NTSerial *vexbridge::NTSerial::instance = nullptr;

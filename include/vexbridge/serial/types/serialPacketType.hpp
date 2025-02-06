@@ -5,7 +5,7 @@
 #include "serialPacket.hpp"
 #include "encodedSerialPacket.hpp"
 
-namespace bluebox
+namespace vexbridge
 {
     /**
      * Represents a singular packet of data to be sent over a serial port.

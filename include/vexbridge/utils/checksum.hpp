@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace bluebox
+namespace vexbridge
 {
     /**
      * Helper class for calculating checksums.

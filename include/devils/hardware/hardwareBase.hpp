@@ -1,6 +1,6 @@
 #pragma once
 
-#include "bluebox/bluebox.h"
+#include "vexbridge/vexbridge.h"
 #include "../utils/runnable.hpp"
 #include "../utils/logger.hpp"
 

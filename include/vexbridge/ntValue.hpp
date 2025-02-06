@@ -5,7 +5,7 @@
 
 uint16_t idCounter = 0;
 
-namespace bluebox
+namespace vexbridge
 {
     template <typename T>
     class NTValue

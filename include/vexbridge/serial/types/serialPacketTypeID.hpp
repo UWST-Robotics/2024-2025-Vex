@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace bluebox
+namespace vexbridge
 {
     enum class SerialPacketTypeID : uint8_t
     {

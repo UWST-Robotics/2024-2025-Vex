@@ -9,8 +9,9 @@
 #include "../utils/bufferReader.hpp"
 #include "../utils/checksum.hpp"
 #include "serialPacketTypes.hpp"
+#include "../utils/cobsEncoder.hpp"
 
-namespace bluebox
+namespace vexbridge
 {
     /**
      * Decodes serial packets received over a serial port.
@@ -26,6 +27,9 @@ namespace bluebox
          */
         static SerialPacket *decode(uint8_t *buffer, uint16_t length)
         {
+            // Decode COBS
+            COBSEncoder::decode(buffer, length, buffer);
+
             // Buffer Reader
             BufferReader reader(buffer, length);
 
