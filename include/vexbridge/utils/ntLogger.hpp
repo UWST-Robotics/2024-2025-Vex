@@ -22,6 +22,15 @@ namespace vexbridge
         }
 
         /**
+         * Logs an error message to the console.
+         * @param message The message to log.
+         */
+        static void logError(std::string message)
+        {
+            log("ERROR: " + message);
+        }
+
+        /**
          * Logs a message to the console.
          * @param message The message to log.
          */

@@ -38,16 +38,15 @@ namespace vexbridge
             // Packet
             packerWriter.writeUInt8((uint8_t)encodedPacket->type);                       // Type
             packerWriter.writeUInt8(encodedPacket->id);                                  // ID
-            packerWriter.writeUInt16LE(encodedPacket->payloadSize);                      // Payload Size
+            packerWriter.writeUInt16BE(encodedPacket->payloadSize);                      // Payload Size
             packerWriter.writeBytes(encodedPacket->payload, encodedPacket->payloadSize); // Payload
 
             // Checksum
-            uint16_t checksum = Checksum::calc(buffer, packerWriter.getOffset() - 2);
-            packerWriter.writeUInt16LE(checksum);
+            uint16_t checksum = Checksum::calc(packetBuffer, packerWriter.getOffset());
+            packerWriter.writeUInt16BE(checksum);
 
             // Encode COBS
-            size_t length = COBSEncoder::encode(buffer, packerWriter.getOffset(), buffer);
-
+            size_t length = COBSEncoder::encode(packetBuffer, packerWriter.getOffset(), buffer);
             return length;
         }
 

@@ -28,10 +28,11 @@ namespace vexbridge
         static SerialPacket *decode(uint8_t *buffer, uint16_t length)
         {
             // Decode COBS
-            COBSEncoder::decode(buffer, length, buffer);
+            static uint8_t *decodedBuffer = new uint8_t[MAX_BUFFER_SIZE];
+            COBSEncoder::decode(buffer, length, decodedBuffer);
 
             // Buffer Reader
-            BufferReader reader(buffer, length);
+            BufferReader reader(decodedBuffer, length);
 
             // Packet Data
             reader.setOffset(4);                              // Skip the header
@@ -42,7 +43,7 @@ namespace vexbridge
             uint16_t checksum = reader.readUInt16LE();
 
             // Check if the checksum is valid
-            uint16_t calculatedChecksum = Checksum::calc(buffer, payloadSize + 8);
+            uint16_t calculatedChecksum = Checksum::calc(decodedBuffer, payloadSize + 8);
             if (checksum != calculatedChecksum)
             {
                 NTLogger::logWarning("Packet " + std::to_string(id) + " has invalid checksum " +
@@ -52,13 +53,16 @@ namespace vexbridge
 
             // Create Packet
             EncodedSerialPacket *packet = new EncodedSerialPacket();
-            packet->type = (SerialPacketTypeID)type;
             packet->id = id;
+            packet->type = (SerialPacketTypeID)type;
             packet->payload = payload;
             packet->payloadSize = payloadSize;
 
             // Deserialize the packet
             return SerialPacketTypes::deserialize(packet);
         }
+
+    private:
+        static constexpr size_t MAX_BUFFER_SIZE = 256;
     };
 }

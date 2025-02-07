@@ -34,7 +34,9 @@ namespace vexbridge
          */
         void reset()
         {
-            daemon.writePacket(new ResetPacket());
+            ResetPacket *packet = new ResetPacket();
+            packet->type = SerialPacketTypeID::RESET;
+            daemon.writePacket(packet);
         }
 
         /**
@@ -44,10 +46,11 @@ namespace vexbridge
          */
         void labelID(uint16_t id, const char *name)
         {
-            UpdateLabelPacket packet;
-            packet.ntID = id;
-            packet.label = name;
-            daemon.writePacket(&packet);
+            UpdateLabelPacket *packet = new UpdateLabelPacket();
+            packet->type = SerialPacketTypeID::UPDATE_LABEL;
+            packet->ntID = id;
+            packet->label = name;
+            daemon.writePacket(packet);
         }
 
         /**
@@ -57,12 +60,13 @@ namespace vexbridge
          */
         void updateBoolean(uint16_t id, bool value)
         {
-            UpdateValuePacket packet;
-            packet.ntID = id;
-            packet.timestamp = pros::millis();
-            packet.valueType = UpdateValuePacket::ValueType::BOOLEAN;
-            packet.newValue = &value;
-            daemon.writePacket(&packet);
+            UpdateValuePacket *packet = new UpdateValuePacket();
+            packet->type = SerialPacketTypeID::UPDATE_VALUE;
+            packet->ntID = id;
+            packet->timestamp = pros::millis();
+            packet->valueType = UpdateValuePacket::ValueType::BOOLEAN;
+            packet->newValue = &value;
+            daemon.writePacket(packet);
         }
 
         /**
@@ -72,12 +76,13 @@ namespace vexbridge
          */
         void updateInt(uint16_t id, int value)
         {
-            UpdateValuePacket packet;
-            packet.ntID = id;
-            packet.timestamp = pros::millis();
-            packet.valueType = UpdateValuePacket::ValueType::INT;
-            packet.newValue = &value;
-            daemon.writePacket(&packet);
+            UpdateValuePacket *packet = new UpdateValuePacket();
+            packet->type = SerialPacketTypeID::UPDATE_VALUE;
+            packet->ntID = id;
+            packet->timestamp = pros::millis();
+            packet->valueType = UpdateValuePacket::ValueType::INT;
+            packet->newValue = &value;
+            daemon.writePacket(packet);
         }
 
         /**
@@ -87,12 +92,13 @@ namespace vexbridge
          */
         void updateDouble(uint16_t id, double value)
         {
-            UpdateValuePacket packet;
-            packet.ntID = id;
-            packet.timestamp = pros::millis();
-            packet.valueType = UpdateValuePacket::ValueType::DOUBLE;
-            packet.newValue = &value;
-            daemon.writePacket(&packet);
+            UpdateValuePacket *packet = new UpdateValuePacket();
+            packet->type = SerialPacketTypeID::UPDATE_VALUE;
+            packet->ntID = id;
+            packet->timestamp = pros::millis();
+            packet->valueType = UpdateValuePacket::ValueType::DOUBLE;
+            packet->newValue = &value;
+            daemon.writePacket(packet);
         }
 
         /**

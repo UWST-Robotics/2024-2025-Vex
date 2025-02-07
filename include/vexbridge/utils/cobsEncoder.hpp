@@ -9,7 +9,7 @@ namespace vexbridge
     {
         /**
          * Encodes a buffer using consistent overhead byte stuffing (COBS).
-         * This ensures the output buffer does not contain any zero bytes except for the last byte.
+         * This ensures the output buffer does not contain any zero bytes except for the final byte.
          * @param input The input buffer.
          * @param length The length of the input buffer.
          * @param output The output buffer.
@@ -20,7 +20,7 @@ namespace vexbridge
             // Offset of the code byte
             size_t codeOffset = 0;
 
-            // Iterate through the input buffer in reverse
+            // Iterate through the input buffer
             for (size_t i = 0; i < length; i++)
             {
                 size_t distance = i - codeOffset;
@@ -34,7 +34,7 @@ namespace vexbridge
                 }
 
                 // Check for max offset
-                else if (distance == 0xFF)
+                else if (distance == 0xFE)
                 {
                     // Write the code byte
                     output[codeOffset] = 0xFF;
@@ -52,7 +52,7 @@ namespace vexbridge
             // Write the final code byte
             output[codeOffset] = length - codeOffset + 1;
 
-            // Output ends with null byte
+            // Write the final zero byte
             output[length + 1] = 0x00;
 
             // Return the length of the output buffer

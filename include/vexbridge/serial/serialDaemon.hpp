@@ -55,7 +55,14 @@ namespace vexbridge
                 writeQueue.pop();
 
                 // Write the packet to the serial port
-                writePacketToSerial(packet);
+                try
+                {
+                    writePacketToSerial(packet);
+                }
+                catch (std::exception &e)
+                {
+                    NTLogger::logError("Exception while writing packet to serial: " + std::string(e.what()));
+                }
 
                 // Delete the packet from memory
                 delete packet;
@@ -166,6 +173,7 @@ namespace vexbridge
 
                 // Read data from the serial port
                 SerialPacket *packet = readPacket();
+
                 if (packet != nullptr)
                     return packet;
             }
@@ -198,29 +206,20 @@ namespace vexbridge
             // This allows packets to be split across multiple reads
             readQueue.insert(readQueue.end(), readBuffer, readBuffer + bytesRead);
 
-            // Find headers in the read buffer
+            // Iterate through the read queue
             for (int i = 0; i < readQueue.size(); i++)
             {
-                // Check if the header is found
-                bool isHeader = readQueue[i] == 0xC9 &&
-                                readQueue[i + 1] == 0x36 &&
-                                readQueue[i + 2] == 0xB8 &&
-                                readQueue[i + 3] == 0x47;
-                if (!isHeader)
+                // Check for the end of a packet (null byte)
+                if (readQueue[i] != 0)
                     continue;
 
-                // Remove the read queue up to the header
-                readQueue.erase(readQueue.begin(), readQueue.begin() + i);
-
-                // Decode the packet starting from the header
-                SerialPacket *packet = SerialPacketDecoder::decode(readQueue.data(), readQueue.size());
+                // Decode the packet up to the null byte
+                SerialPacket *packet = SerialPacketDecoder::decode(readQueue.data(), i);
                 if (packet == nullptr)
                     continue;
 
-                // Clear the read queue
-                // Note: If multiple packets are in the read queue, only the first packet is read
-                // This is not a problem since req/resp packets are sent one at a time
-                readQueue.clear();
+                // Remove the packet from the read queue
+                readQueue.erase(readQueue.begin(), readQueue.begin() + i + 1);
 
                 // Return the packet
                 return packet;

@@ -19,8 +19,8 @@ namespace vexbridge
         static EncodedSerialPacket *build(SerialPacket *packet, uint8_t *payload, size_t payloadSize)
         {
             EncodedSerialPacket *encodedPacket = new EncodedSerialPacket();
-            encodedPacket->type = packet->type;
             encodedPacket->id = packet->id;
+            encodedPacket->type = packet->type;
             encodedPacket->payload = payload;
             encodedPacket->payloadSize = payloadSize;
             return encodedPacket;

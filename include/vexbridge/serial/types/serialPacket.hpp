@@ -12,7 +12,7 @@ namespace vexbridge
     {
         virtual ~SerialPacket() = default;
 
-        SerialPacketTypeID type;
-        uint8_t id;
+        SerialPacketTypeID type = SerialPacketTypeID::UNKNOWN;
+        uint8_t id = 0;
     };
 }

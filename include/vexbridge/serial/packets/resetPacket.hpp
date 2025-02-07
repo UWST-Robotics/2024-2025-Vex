@@ -14,8 +14,7 @@ namespace vexbridge
 
     struct ResetPacketType : public SerialPacketType
     {
-        ResetPacketType()
-            : SerialPacketType(SerialPacketTypeID::RESET)
+        ResetPacketType() : SerialPacketType(SerialPacketTypeID::RESET)
         {
         }
 

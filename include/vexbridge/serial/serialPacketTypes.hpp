@@ -4,6 +4,7 @@
 #include "packets/updateLabelPacket.hpp"
 #include "packets/updateValuePacket.hpp"
 #include "packets/genericAckPacket.hpp"
+#include <stdexcept>
 
 namespace vexbridge
 {
@@ -13,7 +14,7 @@ namespace vexbridge
         {
             SerialPacketType *packetType = getPacketType(packet->type);
             if (packetType == nullptr)
-                return nullptr;
+                throw std::runtime_error("Invalid packet type.");
 
             return packetType->serialize(packet);
         }
@@ -22,7 +23,7 @@ namespace vexbridge
         {
             SerialPacketType *packetType = getPacketType(packet->type);
             if (packetType == nullptr)
-                return nullptr;
+                throw std::runtime_error("Invalid packet type.");
 
             return packetType->deserialize(packet);
         }

@@ -5,6 +5,7 @@ namespace vexbridge
 {
     enum class SerialPacketTypeID : uint8_t
     {
+        UNKNOWN = 0x00,
         RESET = 0x01,
         UPDATE_LABEL = 0x02,
         UPDATE_VALUE = 0x03,
