@@ -27,6 +27,9 @@ namespace vexbridge
                 return;
 
             serialInstance->labelID(id, path.c_str());
+
+            // Update the value
+            forceSet(defaultValue);
         }
 
         /**
@@ -38,6 +41,15 @@ namespace vexbridge
             // Cache the value
             if (value == this->value)
                 return;
+
+            // Update the value
+            forceSet(value);
+        }
+
+        void forceSet(T value)
+        {
+            // Set the value
+            this->value = value;
 
             // Check if BlueBox is initialized
             NTSerial *serialInstance = NTSerial::getInstance();

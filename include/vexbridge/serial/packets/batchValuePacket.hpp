@@ -31,6 +31,7 @@ namespace vexbridge
          */
         static void tryCollapseQueue(std::queue<SerialPacket *> &queue)
         {
+            // Create a new batch packet
             BatchValuePacket *batchPacket = new BatchValuePacket();
             batchPacket->type = SerialPacketTypeID::BATCH_VALUE;
             batchPacket->id = 0;

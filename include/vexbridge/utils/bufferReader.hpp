@@ -59,6 +59,9 @@ namespace vexbridge
          */
         uint8_t *readBytes(uint16_t length)
         {
+            if (offset + length > this->length)
+                return nullptr;
+
             uint8_t *bytes = new uint8_t[length];
             for (uint16_t i = 0; i < length; i++)
                 bytes[i] = readUInt8();

@@ -39,10 +39,10 @@ namespace vexbridge
             uint8_t id = reader.readUInt8();                  // Packet ID
             uint16_t payloadSize = reader.readUInt16BE();     // Payload Size
             uint8_t *payload = reader.readBytes(payloadSize); // Payload
-            uint16_t checksum = reader.readUInt16BE();        // Checksum
+            uint8_t checksum = reader.readUInt8();            // Checksum
 
             // Check if the checksum is valid
-            uint16_t calculatedChecksum = Checksum::calc(decodedBuffer, payloadSize + 4);
+            uint8_t calculatedChecksum = Checksum::calc(decodedBuffer, payloadSize + 4);
             if (checksum != calculatedChecksum)
             {
                 NTLogger::logWarning("Packet " + std::to_string(id) + " has invalid checksum " +

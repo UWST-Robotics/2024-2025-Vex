@@ -36,8 +36,8 @@ namespace vexbridge
             packerWriter.writeBytes(encodedPacket->payload, encodedPacket->payloadSize); // Payload
 
             // Checksum
-            uint16_t checksum = Checksum::calc(packetBuffer, packerWriter.getOffset());
-            packerWriter.writeUInt16BE(checksum);
+            uint8_t checksum = Checksum::calc(packetBuffer, packerWriter.getOffset());
+            packerWriter.writeUInt8(checksum);
 
             // Encode COBS
             size_t length = COBSEncoder::encode(packetBuffer, packerWriter.getOffset(), buffer);

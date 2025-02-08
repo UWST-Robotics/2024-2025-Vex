@@ -39,6 +39,7 @@ namespace vexbridge
             if (writeQueue.size() >= MAX_QUEUE_SIZE)
             {
                 NTLogger::logWarning("Serial write queue is full.");
+                delete packet;
                 return;
             }
 
@@ -59,7 +60,7 @@ namespace vexbridge
                 SerialPacket *packet = writeQueue.front();
                 writeQueue.pop();
 
-                // Time Round Trip
+                // Stats
                 uint32_t startTime = pros::millis();
 
                 // Write the packet to the serial port
@@ -69,14 +70,17 @@ namespace vexbridge
                 }
                 catch (std::exception &e)
                 {
-                    NTLogger::logError("Exception while writing packet to serial: " + std::string(e.what()));
+                    NTLogger::logError("Writing packet to serial - " + std::string(e.what()));
                 }
 
-                // Log Round Trip Time
+                // Log Stats
                 NTLogger::log("Ping: " + std::to_string(pros::millis() - startTime) + "ms");
 
                 // Delete the packet from memory
                 delete packet;
+
+                // Wait for SBC to pull RTS back down
+                pros::delay(POST_TRANSMIT_DELAY);
             }
 
             // Pause to prevent cpu overload
@@ -103,20 +107,12 @@ namespace vexbridge
             for (int i = 0; i < MAX_RETRIES; i++)
             {
                 // Flush the serial port
-                int32_t flushRes = serial.flush();
-                if (flushRes == PROS_ERR)
-                {
-                    NTLogger::logWarning("Failed to flush serial port.");
-                    return -1;
-                }
+                serial.flush();
 
                 // Write the packet to the serial port
                 int32_t writeRes = serial.write(writeBuffer, packetSize);
                 if (writeRes == PROS_ERR)
-                {
-                    NTLogger::logWarning("Failed to write packet " + std::to_string(packet->id) + " to serial port.");
-                    return -1;
-                }
+                    throw std::runtime_error("Failed to write packet to serial port.");
 
                 // Wait for an ack
                 int ackRes = waitForAck(packet->id);
@@ -126,10 +122,8 @@ namespace vexbridge
                     return 0;
             }
 
-            // Log Error
-            NTLogger::logWarning("Failed to send packet " + std::to_string(packet->id) +
-                                 " after " + std::to_string(MAX_RETRIES) + " retries.");
-            return -1;
+            // Handle Failure
+            throw std::runtime_error("Failed to write packet to serial port after " + std::to_string(MAX_RETRIES) + " retries.");
         }
 
         /**
@@ -197,6 +191,8 @@ namespace vexbridge
                 return nullptr;
             if (readBufferSize == 0)
                 return nullptr;
+            if (readBufferSize > MAX_BUFFER_SIZE)
+                readBufferSize = MAX_BUFFER_SIZE;
 
             // Read data from the serial port
             static uint8_t *readBuffer = new uint8_t[MAX_BUFFER_SIZE];
@@ -241,12 +237,13 @@ namespace vexbridge
         }
 
     private:
-        static constexpr uint32_t TIMEOUT = 100;       // ms
+        static constexpr uint32_t TIMEOUT = 50;        // ms
         static constexpr uint32_t UPDATE_INTERVAL = 2; // ms
         static constexpr uint32_t BAUDRATE = 115200;
         static constexpr uint8_t MAX_RETRIES = 3;
         static constexpr uint8_t MAX_QUEUE_SIZE = 64;
         static constexpr size_t MAX_BUFFER_SIZE = 1024;
+        static constexpr uint32_t POST_TRANSMIT_DELAY = 2; // ms
         static constexpr bool WAIT_FOR_ACK = true;
 
         pros::Serial serial;
