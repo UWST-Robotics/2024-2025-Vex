@@ -29,12 +29,6 @@ namespace vexbridge
             static uint8_t *packetBuffer = new uint8_t[MAX_BUFFER_SIZE];
             BufferWriter packerWriter(packetBuffer, MAX_BUFFER_SIZE);
 
-            // Header
-            packerWriter.writeUInt8(0xC9);
-            packerWriter.writeUInt8(0x36);
-            packerWriter.writeUInt8(0xB8);
-            packerWriter.writeUInt8(0x47);
-
             // Packet
             packerWriter.writeUInt8((uint8_t)encodedPacket->type);                       // Type
             packerWriter.writeUInt8(encodedPacket->id);                                  // ID
@@ -51,6 +45,6 @@ namespace vexbridge
         }
 
     private:
-        static constexpr size_t MAX_BUFFER_SIZE = 256;
+        static constexpr size_t MAX_BUFFER_SIZE = 1024;
     };
 }

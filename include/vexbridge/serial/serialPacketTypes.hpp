@@ -4,6 +4,7 @@
 #include "packets/updateLabelPacket.hpp"
 #include "packets/updateValuePacket.hpp"
 #include "packets/genericAckPacket.hpp"
+#include "packets/batchValuePacket.hpp"
 #include <stdexcept>
 
 namespace vexbridge
@@ -36,13 +37,14 @@ namespace vexbridge
             return nullptr;
         }
 
-        static SerialPacketType *packetTypes[4];
+        static SerialPacketType *packetTypes[5];
     };
 }
 
 // All Packet Types
-vexbridge::SerialPacketType *vexbridge::SerialPacketTypes::packetTypes[4] = {
+vexbridge::SerialPacketType *vexbridge::SerialPacketTypes::packetTypes[5] = {
     new ResetPacketType(),
     new UpdateLabelPacketType(),
     new UpdateValuePacketType(),
-    new GenericAckPacketType()};
+    new GenericAckPacketType(),
+    new BatchValuePacketType()};

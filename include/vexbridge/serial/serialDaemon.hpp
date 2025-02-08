@@ -9,6 +9,7 @@
 #include "serialPacketDecoder.hpp"
 #include "serialPacketEncoder.hpp"
 #include "packets/genericAckPacket.hpp"
+#include "packets/batchValuePacket.hpp"
 #include "types/serialPacket.hpp"
 
 namespace vexbridge
@@ -51,7 +52,10 @@ namespace vexbridge
             // Loop while there are packets to write
             while (!writeQueue.empty())
             {
-                // Get the next packet
+                // Try to collapse the queue into a batch packet
+                BatchValuePacket::tryCollapseQueue(writeQueue);
+
+                // Get the next packet in the queue
                 SerialPacket *packet = writeQueue.front();
                 writeQueue.pop();
 
@@ -69,7 +73,7 @@ namespace vexbridge
                 }
 
                 // Log Round Trip Time
-                NTLogger::log("Round Trip Time: " + std::to_string(pros::millis() - startTime) + "ms");
+                NTLogger::log("Ping: " + std::to_string(pros::millis() - startTime) + "ms");
 
                 // Delete the packet from memory
                 delete packet;
@@ -164,7 +168,11 @@ namespace vexbridge
                 // Check if the ack is for the correct packet
                 if (ackPacket->targetID != packetID)
                 {
-                    NTLogger::logWarning("Received ack for wrong packet.");
+                    NTLogger::logWarning("Received ack for wrong packet. (" +
+                                         std::to_string(packetID) +
+                                         " != " +
+                                         std::to_string(ackPacket->targetID) +
+                                         ")");
                     continue;
                 }
 
@@ -233,12 +241,12 @@ namespace vexbridge
         }
 
     private:
-        static constexpr uint32_t TIMEOUT = 10;        // ms
+        static constexpr uint32_t TIMEOUT = 100;       // ms
         static constexpr uint32_t UPDATE_INTERVAL = 2; // ms
         static constexpr uint32_t BAUDRATE = 115200;
         static constexpr uint8_t MAX_RETRIES = 3;
         static constexpr uint8_t MAX_QUEUE_SIZE = 64;
-        static constexpr size_t MAX_BUFFER_SIZE = 256;
+        static constexpr size_t MAX_BUFFER_SIZE = 1024;
         static constexpr bool WAIT_FOR_ACK = true;
 
         pros::Serial serial;
