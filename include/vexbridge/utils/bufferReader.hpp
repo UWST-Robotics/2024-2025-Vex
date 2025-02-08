@@ -88,16 +88,37 @@ namespace vexbridge
         }
 
         /**
-         * Reads an signed 64-bit double from the buffer.
+         * Reads a double from the buffer in big-endian format.
          * @return The double read from the buffer.
          */
-        double readDouble()
+        double readDoubleBE()
         {
-            double value = 0;
-            uint8_t *bytes = readBytes(8);
-            for (int i = 0; i < 8; i++)
-                value += bytes[i] << (i * 8);
-            return value;
+            uint64_t value = (uint64_t)readUInt8() << 56;
+            value |= (uint64_t)readUInt8() << 48;
+            value |= (uint64_t)readUInt8() << 40;
+            value |= (uint64_t)readUInt8() << 32;
+            value |= (uint64_t)readUInt8() << 24;
+            value |= (uint64_t)readUInt8() << 16;
+            value |= (uint64_t)readUInt8() << 8;
+            value |= (uint64_t)readUInt8();
+            return *(double *)&value;
+        }
+
+        /**
+         * Reads a double from the buffer in little-endian format.
+         * @return The double read from the buffer.
+         */
+        double readDoubleLE()
+        {
+            uint64_t value = (uint64_t)readUInt8();
+            value |= (uint64_t)readUInt8() << 8;
+            value |= (uint64_t)readUInt8() << 16;
+            value |= (uint64_t)readUInt8() << 24;
+            value |= (uint64_t)readUInt8() << 32;
+            value |= (uint64_t)readUInt8() << 40;
+            value |= (uint64_t)readUInt8() << 48;
+            value |= (uint64_t)readUInt8() << 56;
+            return *(double *)&value;
         }
 
         /**
@@ -107,7 +128,7 @@ namespace vexbridge
          */
         std::string readString()
         {
-            uint16_t stringLength = readUInt16LE();
+            uint16_t stringLength = readUInt16BE();
             if (offset + stringLength > length)
                 return "";
 

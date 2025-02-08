@@ -29,18 +29,18 @@ namespace vexbridge
         {
             // Decode COBS
             static uint8_t *decodedBuffer = new uint8_t[MAX_BUFFER_SIZE];
-            COBSEncoder::decode(buffer, length, decodedBuffer);
+            size_t newLength = COBSEncoder::decode(buffer, length, decodedBuffer);
 
             // Buffer Reader
-            BufferReader reader(decodedBuffer, length);
+            BufferReader reader(decodedBuffer, newLength);
 
             // Packet Data
             reader.setOffset(4);                              // Skip the header
             uint8_t type = reader.readUInt8();                // Packet Type
             uint8_t id = reader.readUInt8();                  // Packet ID
-            uint16_t payloadSize = reader.readUInt16LE();     // Payload Size
+            uint16_t payloadSize = reader.readUInt16BE();     // Payload Size
             uint8_t *payload = reader.readBytes(payloadSize); // Payload
-            uint16_t checksum = reader.readUInt16LE();
+            uint16_t checksum = reader.readUInt16BE();        // Checksum
 
             // Check if the checksum is valid
             uint16_t calculatedChecksum = Checksum::calc(decodedBuffer, payloadSize + 8);

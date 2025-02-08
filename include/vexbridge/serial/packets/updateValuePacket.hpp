@@ -23,6 +23,12 @@ namespace vexbridge
         uint16_t timestamp = 0;
         ValueType valueType = ValueType::BOOLEAN;
         void *newValue = nullptr;
+
+        ~UpdateValuePacket()
+        {
+            if (newValue != nullptr)
+                delete newValue;
+        }
     };
 
     struct UpdateValuePacketType : public SerialPacketType
@@ -38,8 +44,8 @@ namespace vexbridge
             UpdateValuePacket *newPacket = new UpdateValuePacket();
             newPacket->type = packet->type;
             newPacket->id = packet->id;
-            newPacket->ntID = reader.readUInt16LE();
-            newPacket->timestamp = reader.readUInt16LE();
+            newPacket->ntID = reader.readUInt16BE();
+            newPacket->timestamp = reader.readUInt16BE();
             newPacket->valueType = (UpdateValuePacket::ValueType)reader.readUInt8();
 
             switch (newPacket->valueType)
@@ -48,10 +54,10 @@ namespace vexbridge
                 newPacket->newValue = new bool(reader.readUInt8());
                 break;
             case UpdateValuePacket::ValueType::INT:
-                newPacket->newValue = new int16_t(reader.readUInt16LE());
+                newPacket->newValue = new int16_t(reader.readUInt16BE());
                 break;
             case UpdateValuePacket::ValueType::DOUBLE:
-                newPacket->newValue = new double(reader.readDouble());
+                newPacket->newValue = new double(reader.readDoubleBE());
                 break;
             }
 
@@ -64,12 +70,12 @@ namespace vexbridge
             if (updateValuePacket == nullptr)
                 return nullptr;
 
-            size_t payloadSize = 4 + 8;
+            size_t payloadSize = 5 + 8;
             uint8_t *payload = new uint8_t[payloadSize];
             BufferWriter writer(payload, payloadSize);
 
-            writer.writeUInt16LE(updateValuePacket->ntID);
-            writer.writeUInt16LE(updateValuePacket->timestamp);
+            writer.writeUInt16BE(updateValuePacket->ntID);
+            writer.writeUInt16BE(updateValuePacket->timestamp);
             writer.writeUInt8((uint8_t)updateValuePacket->valueType);
 
             switch (updateValuePacket->valueType)
@@ -78,10 +84,10 @@ namespace vexbridge
                 writer.writeUInt8(*(bool *)updateValuePacket->newValue);
                 break;
             case UpdateValuePacket::ValueType::INT:
-                writer.writeUInt16LE(*(int16_t *)updateValuePacket->newValue);
+                writer.writeUInt16BE(*(int16_t *)updateValuePacket->newValue);
                 break;
             case UpdateValuePacket::ValueType::DOUBLE:
-                writer.writeDouble(*(double *)updateValuePacket->newValue);
+                writer.writeDoubleBE(*(double *)updateValuePacket->newValue);
                 break;
             }
 

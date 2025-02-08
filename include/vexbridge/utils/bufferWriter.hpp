@@ -87,13 +87,24 @@ namespace vexbridge
         }
 
         /**
-         * Writes a double to the buffer.
+         * Writes a double to the buffer in big-endian format.
          * @param value The double to write.
          */
-        void writeDouble(double value)
+        void writeDoubleBE(double value)
         {
             uint8_t *bytes = (uint8_t *)&value;
-            for (uint16_t i = 0; i < 8; i++)
+            for (int i = 7; i >= 0; i--)
+                writeUInt8(bytes[i]);
+        }
+
+        /**
+         * Writes a double to the buffer in little-endian format.
+         * @param value The double to write.
+         */
+        void writeDoubleLE(double value)
+        {
+            uint8_t *bytes = (uint8_t *)&value;
+            for (int i = 0; i < 8; i++)
                 writeUInt8(bytes[i]);
         }
 
@@ -103,7 +114,7 @@ namespace vexbridge
          */
         void writeString(std::string str)
         {
-            writeUInt16LE(str.length());
+            writeUInt16BE(str.length());
             for (uint16_t i = 0; i < str.length(); i++)
                 writeUInt8(str[i]);
         }

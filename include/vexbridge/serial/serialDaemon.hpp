@@ -23,7 +23,8 @@ namespace vexbridge
          * Creates a new serial daemon.
          * @param port The VEX V5 port to connect to.
          */
-        SerialDaemon(uint8_t port) : serial(port, BAUDRATE)
+        SerialDaemon(uint8_t port)
+            : serial(port, BAUDRATE)
         {
         }
 
@@ -54,6 +55,9 @@ namespace vexbridge
                 SerialPacket *packet = writeQueue.front();
                 writeQueue.pop();
 
+                // Time Round Trip
+                uint32_t startTime = pros::millis();
+
                 // Write the packet to the serial port
                 try
                 {
@@ -63,6 +67,9 @@ namespace vexbridge
                 {
                     NTLogger::logError("Exception while writing packet to serial: " + std::string(e.what()));
                 }
+
+                // Log Round Trip Time
+                NTLogger::log("Round Trip Time: " + std::to_string(pros::millis() - startTime) + "ms");
 
                 // Delete the packet from memory
                 delete packet;
@@ -132,36 +139,6 @@ namespace vexbridge
             if (!WAIT_FOR_ACK)
                 return 0;
 
-            // Wait for packet
-            SerialPacket *packet = waitForPacketRead();
-            if (packet == nullptr)
-                return -1;
-
-            // Check if the packet is an ack
-            GenericAckPacket *ackPacket = dynamic_cast<GenericAckPacket *>(packet);
-            if (ackPacket == nullptr)
-            {
-                NTLogger::logWarning("Received invalid packet while waiting for ack.");
-                return -1;
-            }
-
-            // Check if the ack is for the correct packet
-            if (ackPacket->targetID != packetID)
-            {
-                NTLogger::logWarning("Received ack for wrong packet.");
-                return -1;
-            }
-
-            // Success
-            return 0;
-        }
-
-        /**
-         * Waits for a packet to be read from the serial port.
-         * @return The packet read from the serial port or nullptr if no packet is available.
-         */
-        SerialPacket *waitForPacketRead()
-        {
             // Get the start time
             uint32_t startTime = pros::millis();
 
@@ -173,14 +150,31 @@ namespace vexbridge
 
                 // Read data from the serial port
                 SerialPacket *packet = readPacket();
+                if (packet == nullptr)
+                    continue;
 
-                if (packet != nullptr)
-                    return packet;
+                // Check if the packet is an ack
+                GenericAckPacket *ackPacket = dynamic_cast<GenericAckPacket *>(packet);
+                if (ackPacket == nullptr)
+                {
+                    NTLogger::logWarning("Received invalid packet while waiting for ack.");
+                    continue;
+                }
+
+                // Check if the ack is for the correct packet
+                if (ackPacket->targetID != packetID)
+                {
+                    NTLogger::logWarning("Received ack for wrong packet.");
+                    continue;
+                }
+
+                // Success
+                return 0;
             }
 
             // Timeout
             NTLogger::logWarning("Timeout waiting for packet");
-            return nullptr;
+            return -1;
         }
 
         /**
@@ -202,26 +196,35 @@ namespace vexbridge
             if (bytesRead == PROS_ERR)
                 return nullptr;
 
+            // Flush the serial port
+            int32_t flushRes = serial.flush();
+            if (flushRes == PROS_ERR)
+                return nullptr;
+
             // Append to the read queue
             // This allows packets to be split across multiple reads
             readQueue.insert(readQueue.end(), readBuffer, readBuffer + bytesRead);
 
+            // Trim the read queue to prevent it from growing too large
+            if (readQueue.size() > MAX_BUFFER_SIZE)
+                readQueue.erase(readQueue.begin(), readQueue.begin() + readQueue.size() - MAX_BUFFER_SIZE);
+
             // Iterate through the read queue
-            for (int i = 0; i < readQueue.size(); i++)
+            for (size_t i = 0; i < readQueue.size(); i++)
             {
                 // Check for the end of a packet (null byte)
                 if (readQueue[i] != 0)
                     continue;
 
                 // Decode the packet up to the null byte
-                SerialPacket *packet = SerialPacketDecoder::decode(readQueue.data(), i);
-                if (packet == nullptr)
-                    continue;
+                SerialPacket *packet = SerialPacketDecoder::decode(&readQueue[0], i);
 
                 // Remove the packet from the read queue
                 readQueue.erase(readQueue.begin(), readQueue.begin() + i + 1);
 
-                // Return the packet
+                // Check if the packet is valid
+                if (packet == nullptr)
+                    continue;
                 return packet;
             }
 
@@ -230,7 +233,7 @@ namespace vexbridge
         }
 
     private:
-        static constexpr uint32_t TIMEOUT = 200;       // ms
+        static constexpr uint32_t TIMEOUT = 10;        // ms
         static constexpr uint32_t UPDATE_INTERVAL = 2; // ms
         static constexpr uint32_t BAUDRATE = 115200;
         static constexpr uint8_t MAX_RETRIES = 3;

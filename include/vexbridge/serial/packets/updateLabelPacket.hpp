@@ -28,7 +28,7 @@ namespace vexbridge
             UpdateLabelPacket *newPacket = new UpdateLabelPacket();
             newPacket->type = packet->type;
             newPacket->id = packet->id;
-            newPacket->ntID = reader.readUInt16LE();
+            newPacket->ntID = reader.readUInt16BE();
             newPacket->label = reader.readString();
             return newPacket;
         }
@@ -43,7 +43,7 @@ namespace vexbridge
             uint8_t *payload = new uint8_t[payloadSize];
             BufferWriter writer(payload, payloadSize);
 
-            writer.writeUInt16LE(updateLabelPacket->ntID);
+            writer.writeUInt16BE(updateLabelPacket->ntID);
             writer.writeString(updateLabelPacket->label);
 
             return EncodedSerialPacket::build(packet, payload, writer.getOffset());

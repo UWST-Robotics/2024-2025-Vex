@@ -8,7 +8,7 @@
 namespace vexbridge
 {
     /**
-     * Represents a serial port connection to the BlueBox.
+     * Represents a serial port connection to the VEXBridge.
      * This is a singleton class - only one instance should be created.
      */
     class NTSerial
@@ -23,6 +23,9 @@ namespace vexbridge
             if (instance != nullptr)
                 delete instance;
             instance = this;
+
+            // Call reset to clear NT
+            reset();
         }
         ~NTSerial()
         {
@@ -30,7 +33,7 @@ namespace vexbridge
         }
 
         /**
-         * Resets the BlueBox.
+         * Resets all values.
          */
         void reset()
         {
@@ -65,7 +68,7 @@ namespace vexbridge
             packet->ntID = id;
             packet->timestamp = pros::millis();
             packet->valueType = UpdateValuePacket::ValueType::BOOLEAN;
-            packet->newValue = &value;
+            packet->newValue = new bool(value);
             daemon.writePacket(packet);
         }
 
@@ -81,7 +84,7 @@ namespace vexbridge
             packet->ntID = id;
             packet->timestamp = pros::millis();
             packet->valueType = UpdateValuePacket::ValueType::INT;
-            packet->newValue = &value;
+            packet->newValue = new int(value);
             daemon.writePacket(packet);
         }
 
@@ -97,7 +100,7 @@ namespace vexbridge
             packet->ntID = id;
             packet->timestamp = pros::millis();
             packet->valueType = UpdateValuePacket::ValueType::DOUBLE;
-            packet->newValue = &value;
+            packet->newValue = new double(value);
             daemon.writePacket(packet);
         }
 
