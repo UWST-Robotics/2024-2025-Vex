@@ -20,12 +20,11 @@ namespace devils
             const std::string name,
             const std::string type,
             const int8_t port)
-            : ntGroup("_hardware/" + type + "_" + std::to_string(abs(port))),
+            : Runnable(100),
+              ntGroup("_hardware/" + type + "_" + std::to_string(abs(port))),
               ntName(ntGroup.makeValue("name", name)),
               ntType(ntGroup.makeValue("type", type)),
-              ntPort(ntGroup.makeValue("port", (int)port)),
-              ntFault(ntGroup.makeValue("faults", (std::string) "")),
-              ntFaultTimestamp(ntGroup.makeValue("faults_timestamp", 0))
+              ntPort(ntGroup.makeValue("port", (int)port))
         {
             // Auto run serialization task
             if (SERIALIZATION_ENABLED)
@@ -41,10 +40,6 @@ namespace devils
          */
         void reportFault(const std::string fault, const int code = 0)
         {
-            // Send to network table
-            ntFault.set(fault);
-            ntFaultTimestamp.set(pros::millis());
-
             // Log to console
             if (LOGGING_ENABLED)
                 Logger::error(ntName.get() + ": " + fault + " (" + std::to_string(code) + ")");
@@ -59,8 +54,6 @@ namespace devils
         NTGroup ntGroup;
         NTValue<std::string> ntName;
         NTValue<std::string> ntType;
-        NTValue<std::string> ntFault;
-        NTValue<int> ntFaultTimestamp;
         NTValue<int> ntPort;
 
     private:

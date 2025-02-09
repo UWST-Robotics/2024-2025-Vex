@@ -216,8 +216,15 @@ namespace vexbridge
             // Iterate through the read queue
             for (size_t i = 0; i < readQueue.size(); i++)
             {
-                // Check for the end of a packet (null byte)
-                if (readQueue[i] != 0)
+                // If the current flag is an escape flag, skip the next byte
+                if (readQueue[i] == 0x92)
+                {
+                    i++;
+                    continue;
+                }
+
+                // If the current flag is not the end flag, skip it
+                if (readQueue[i] != 0xFF)
                     continue;
 
                 // Decode the packet up to the null byte
@@ -241,7 +248,7 @@ namespace vexbridge
         static constexpr uint32_t UPDATE_INTERVAL = 2; // ms
         static constexpr uint32_t BAUDRATE = 115200;
         static constexpr uint8_t MAX_RETRIES = 3;
-        static constexpr uint8_t MAX_QUEUE_SIZE = 64;
+        static constexpr size_t MAX_QUEUE_SIZE = 512;
         static constexpr size_t MAX_BUFFER_SIZE = 1024;
         static constexpr uint32_t POST_TRANSMIT_DELAY = 2; // ms
         static constexpr bool WAIT_FOR_ACK = true;

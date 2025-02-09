@@ -4,7 +4,7 @@
 #include "types/serialPacket.hpp"
 #include "types/encodedSerialPacket.hpp"
 #include "../utils/checksum.hpp"
-#include "../utils/cobsEncoder.hpp"
+#include "../utils/byteStuffer.hpp"
 
 namespace vexbridge
 {
@@ -40,7 +40,7 @@ namespace vexbridge
             packerWriter.writeUInt8(checksum);
 
             // Encode COBS
-            size_t length = COBSEncoder::encode(packetBuffer, packerWriter.getOffset(), buffer);
+            size_t length = ByteStuffer::encode(packetBuffer, packerWriter.getOffset(), buffer);
             return length;
         }
 

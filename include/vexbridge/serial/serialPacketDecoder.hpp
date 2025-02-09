@@ -9,7 +9,7 @@
 #include "../utils/bufferReader.hpp"
 #include "../utils/checksum.hpp"
 #include "serialPacketTypes.hpp"
-#include "../utils/cobsEncoder.hpp"
+#include "../utils/byteStuffer.hpp"
 
 namespace vexbridge
 {
@@ -29,7 +29,7 @@ namespace vexbridge
         {
             // Decode COBS
             static uint8_t *decodedBuffer = new uint8_t[MAX_BUFFER_SIZE];
-            size_t newLength = COBSEncoder::decode(buffer, length, decodedBuffer);
+            size_t newLength = ByteStuffer::decode(buffer, length, decodedBuffer);
 
             // Buffer Reader
             BufferReader reader(decodedBuffer, newLength);
