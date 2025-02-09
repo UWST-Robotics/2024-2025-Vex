@@ -15,7 +15,6 @@ namespace vexbridge
 {
     struct BatchValuePacket : public SerialPacket
     {
-        uint16_t timestamp = 0;
         std::vector<UpdateValuePacket *> subPackets;
 
         ~BatchValuePacket()
@@ -32,36 +31,67 @@ namespace vexbridge
         static void tryCollapseQueue(std::queue<SerialPacket *> &queue)
         {
             // Create a new batch packet
-            BatchValuePacket *batchPacket = new BatchValuePacket();
-            batchPacket->type = SerialPacketTypeID::BATCH_VALUE;
-            batchPacket->id = 0;
+            BatchValuePacket *newPacket = new BatchValuePacket();
+            newPacket->type = SerialPacketTypeID::BATCH_VALUE;
+            newPacket->id = 0;
 
-            while (!queue.empty() && batchPacket->subPackets.size() < MAX_SUBPACKETS)
+            // Iterate through each packet in the queue
+            while (!queue.empty())
             {
+                // Check if the sub-packet limit has been reached
+                if (newPacket->subPackets.size() >= MAX_SUBPACKETS)
+                    break;
+
                 // Get the next packet
                 SerialPacket *packet = queue.front();
 
-                // Check for UpdateValuePacket
+                // Check if the packet is a batch packet
+                BatchValuePacket *batchPacket = dynamic_cast<BatchValuePacket *>(packet);
+                if (batchPacket != nullptr)
+                {
+                    // Check if the batch packet is too large
+                    if (newPacket->subPackets.size() + batchPacket->subPackets.size() > MAX_SUBPACKETS)
+                        break;
+
+                    // Remove the packet from the queue
+                    queue.pop();
+
+                    // Add each sub-packet to the batch
+                    for (UpdateValuePacket *subPacket : batchPacket->subPackets)
+                        newPacket->subPackets.push_back(new UpdateValuePacket(*subPacket));
+
+                    // Delete the packet
+                    delete batchPacket;
+                    continue;
+                }
+
+                // Check if the packet is an update value packet
                 UpdateValuePacket *valuePacket = dynamic_cast<UpdateValuePacket *>(packet);
-                if (valuePacket == nullptr)
-                    break;
+                if (valuePacket != nullptr)
+                {
+                    // Remove the packet from the queue
+                    queue.pop();
 
-                // Remove the packet from the queue
-                queue.pop();
+                    // Append the packet to the batch
+                    newPacket->subPackets.push_back(new UpdateValuePacket(*valuePacket));
 
-                // Append the packet to the batch
-                batchPacket->subPackets.push_back(valuePacket);
-                batchPacket->timestamp = valuePacket->timestamp;
+                    // Delete the packet
+                    delete valuePacket;
+                    continue;
+                }
+
+                // Otherwise, stop processing
+                break;
             }
 
             // Check if any packets were added
-            if (batchPacket->subPackets.size() > 0)
-                queue.push(batchPacket);
+            if (newPacket->subPackets.size() > 0)
+                queue.push(newPacket);
             else
-                delete batchPacket;
+                delete newPacket;
         }
 
-        static constexpr uint8_t MAX_SUBPACKETS = 30;
+        static constexpr uint8_t MAX_SUBPACKETS = 20;
     };
 
     struct BatchValuePacketType : public SerialPacketType
@@ -77,7 +107,6 @@ namespace vexbridge
             BatchValuePacket *newPacket = new BatchValuePacket();
             newPacket->type = packet->type;
             newPacket->id = packet->id;
-            newPacket->timestamp = reader.readUInt16BE();
 
             uint8_t subPacketCount = reader.readUInt8();
             newPacket->subPackets.reserve(subPacketCount);
@@ -89,7 +118,6 @@ namespace vexbridge
                 UpdateValuePacket *subPacket = new UpdateValuePacket();
                 subPacket->id = packet->id;
                 subPacket->type = SerialPacketTypeID::UPDATE_VALUE;
-                subPacket->timestamp = newPacket->timestamp;
 
                 // Read the sub-packet data
                 subPacket->ntID = reader.readUInt16BE();
@@ -101,6 +129,9 @@ namespace vexbridge
                     break;
                 case UpdateValuePacket::ValueType::INT:
                     subPacket->newValue = new int16_t(reader.readUInt16BE());
+                    break;
+                case UpdateValuePacket::ValueType::FLOAT:
+                    subPacket->newValue = new float(reader.readFloatBE());
                     break;
                 case UpdateValuePacket::ValueType::DOUBLE:
                     subPacket->newValue = new double(reader.readDoubleBE());
@@ -120,7 +151,7 @@ namespace vexbridge
                 return nullptr;
 
             // Calculate the payload size
-            size_t payloadSize = 3;
+            size_t payloadSize = 1;
             for (UpdateValuePacket *subPacket : batchValuePacket->subPackets)
             {
                 payloadSize += 3;
@@ -131,6 +162,9 @@ namespace vexbridge
                     break;
                 case UpdateValuePacket::ValueType::INT:
                     payloadSize += 2;
+                    break;
+                case UpdateValuePacket::ValueType::FLOAT:
+                    payloadSize += 8;
                     break;
                 case UpdateValuePacket::ValueType::DOUBLE:
                     payloadSize += 8;
@@ -143,7 +177,6 @@ namespace vexbridge
             BufferWriter writer(payload, payloadSize);
 
             // Write the packet data
-            writer.writeUInt16BE(batchValuePacket->timestamp);
             writer.writeUInt8(batchValuePacket->subPackets.size());
 
             // Write each sub-packet
@@ -159,6 +192,9 @@ namespace vexbridge
                     break;
                 case UpdateValuePacket::ValueType::INT:
                     writer.writeUInt16BE(*(int16_t *)subPacket->newValue);
+                    break;
+                case UpdateValuePacket::ValueType::FLOAT:
+                    writer.writeFloatBE(*(float *)subPacket->newValue);
                     break;
                 case UpdateValuePacket::ValueType::DOUBLE:
                     writer.writeDoubleBE(*(double *)subPacket->newValue);

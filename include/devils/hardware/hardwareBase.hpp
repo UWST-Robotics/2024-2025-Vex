@@ -21,10 +21,10 @@ namespace devils
             const std::string type,
             const int8_t port)
             : Runnable(100),
-              ntGroup("_hardware/" + type + "_" + std::to_string(abs(port))),
-              ntName(ntGroup.makeValue("name", name)),
-              ntType(ntGroup.makeValue("type", type)),
-              ntPort(ntGroup.makeValue("port", (int)port))
+              name(name),
+              ntGroup("_hardware/" + name),
+              ntType(ntGroup.makeValue<std::string>("type", type)),
+              ntFault(ntGroup.makeValue<std::string>("fault", ""))
         {
             // Auto run serialization task
             if (SERIALIZATION_ENABLED)
@@ -40,9 +40,12 @@ namespace devils
          */
         void reportFault(const std::string fault, const int code = 0)
         {
+            // Set fault
+            ntFault.set(fault);
+
             // Log to console
             if (LOGGING_ENABLED)
-                Logger::error(ntName.get() + ": " + fault + " (" + std::to_string(code) + ")");
+                Logger::error(name + ": " + fault + " (" + std::to_string(code) + ")");
         }
 
         /**
@@ -51,10 +54,10 @@ namespace devils
          */
         virtual void serialize() = 0;
 
+        std::string name;
         NTGroup ntGroup;
-        NTValue<std::string> ntName;
         NTValue<std::string> ntType;
-        NTValue<int> ntPort;
+        NTValue<std::string> ntFault;
 
     private:
         static constexpr bool SERIALIZATION_ENABLED = true;

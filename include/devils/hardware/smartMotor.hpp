@@ -131,12 +131,11 @@ namespace devils
         {
             // Update temp, position, and velocity
             ntTemperature.set(getTemperature());
-            ntPosition.set(getPosition());
-            ntVelocity.set(getVelocity());
+            // ntPosition.set(getPosition());
+            // ntVelocity.set(getVelocity());
 
             // Check if Motor is Connected
-            // isConnected = motor.is_installed();
-            isConnected = true; // TODO: Fix this
+            isConnected = motor.is_installed();
 
             // Get Motor Fault Bitmask
             uint32_t motorFaults = motor.get_faults();
@@ -160,9 +159,9 @@ namespace devils
 
     private:
         // NT
-        NTValue<double> ntTemperature = ntGroup.makeValue("temperature", 0.0);
-        NTValue<double> ntPosition = ntGroup.makeValue("position", 0.0);
-        NTValue<double> ntVelocity = ntGroup.makeValue("velocity", 0.0);
+        NTValue<float> ntTemperature = ntGroup.makeValue("temperature", 0.0f);
+        // NTValue<float> ntPosition = ntGroup.makeValue("position", 0.0f);
+        // NTValue<float> ntVelocity = ntGroup.makeValue("velocity", 0.0f);
 
         // Hardware
         pros::Motor motor;

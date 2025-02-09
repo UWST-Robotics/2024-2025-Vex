@@ -66,7 +66,6 @@ namespace vexbridge
             UpdateValuePacket *packet = new UpdateValuePacket();
             packet->type = SerialPacketTypeID::UPDATE_VALUE;
             packet->ntID = id;
-            packet->timestamp = pros::millis();
             packet->valueType = UpdateValuePacket::ValueType::BOOLEAN;
             packet->newValue = new bool(value);
             daemon.writePacket(packet);
@@ -82,9 +81,23 @@ namespace vexbridge
             UpdateValuePacket *packet = new UpdateValuePacket();
             packet->type = SerialPacketTypeID::UPDATE_VALUE;
             packet->ntID = id;
-            packet->timestamp = pros::millis();
             packet->valueType = UpdateValuePacket::ValueType::INT;
             packet->newValue = new int(value);
+            daemon.writePacket(packet);
+        }
+
+        /**
+         * Updates a float value.
+         * @param id The ID of the value.
+         * @param value The value to update.
+         */
+        void updateFloat(uint16_t id, float value)
+        {
+            UpdateValuePacket *packet = new UpdateValuePacket();
+            packet->type = SerialPacketTypeID::UPDATE_VALUE;
+            packet->ntID = id;
+            packet->valueType = UpdateValuePacket::ValueType::FLOAT;
+            packet->newValue = new float(value);
             daemon.writePacket(packet);
         }
 
@@ -98,7 +111,6 @@ namespace vexbridge
             UpdateValuePacket *packet = new UpdateValuePacket();
             packet->type = SerialPacketTypeID::UPDATE_VALUE;
             packet->ntID = id;
-            packet->timestamp = pros::millis();
             packet->valueType = UpdateValuePacket::ValueType::DOUBLE;
             packet->newValue = new double(value);
             daemon.writePacket(packet);

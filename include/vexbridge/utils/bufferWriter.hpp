@@ -77,6 +77,28 @@ namespace vexbridge
         }
 
         /**
+         * Writes an float to the buffer in big-endian format.
+         * @param value The float to write.
+         */
+        void writeFloatBE(float value)
+        {
+            uint8_t *bytes = (uint8_t *)&value;
+            for (int i = 3; i >= 0; i--)
+                writeUInt8(bytes[i]);
+        }
+
+        /**
+         * Writes an float to the buffer in little-endian format.
+         * @param value The float to write.
+         */
+        void writeFloatLE(float value)
+        {
+            uint8_t *bytes = (uint8_t *)&value;
+            for (int i = 0; i < 4; i++)
+                writeUInt8(bytes[i]);
+        }
+
+        /**
          * Writes a byte array to the buffer.
          * @param bytes The bytes to write.
          */

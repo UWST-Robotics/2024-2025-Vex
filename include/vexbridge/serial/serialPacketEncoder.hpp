@@ -39,8 +39,9 @@ namespace vexbridge
             uint8_t checksum = Checksum::calc(packetBuffer, packerWriter.getOffset());
             packerWriter.writeUInt8(checksum);
 
-            // Encode COBS
+            // Byte Stuff
             size_t length = ByteStuffer::encode(packetBuffer, packerWriter.getOffset(), buffer);
+
             return length;
         }
 

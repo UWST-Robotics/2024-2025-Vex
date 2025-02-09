@@ -125,6 +125,32 @@ namespace vexbridge
         }
 
         /**
+         * Reads a float from the buffer in big-endian format.
+         * @return The float read from the buffer.
+         */
+        float readFloatBE()
+        {
+            uint32_t value = (uint32_t)readUInt8() << 24;
+            value |= (uint32_t)readUInt8() << 16;
+            value |= (uint32_t)readUInt8() << 8;
+            value |= (uint32_t)readUInt8();
+            return *(float *)&value;
+        }
+
+        /**
+         * Reads a float from the buffer in little-endian format.
+         * @return The float read from the buffer.
+         */
+        float readFloatLE()
+        {
+            uint32_t value = (uint32_t)readUInt8();
+            value |= (uint32_t)readUInt8() << 8;
+            value |= (uint32_t)readUInt8() << 16;
+            value |= (uint32_t)readUInt8() << 24;
+            return *(float *)&value;
+        }
+
+        /**
          * Reads a string from the buffer.
          * Reads a uint16_t (LE) length followed by the string.
          * @return The string read from the buffer.

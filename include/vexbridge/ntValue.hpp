@@ -61,6 +61,8 @@ namespace vexbridge
                 serialInstance->updateBoolean(id, value);
             else if constexpr (std::is_same<T, int>::value)
                 serialInstance->updateInt(id, value);
+            else if constexpr (std::is_same<T, float>::value)
+                serialInstance->updateFloat(id, value);
             else if constexpr (std::is_same<T, double>::value)
                 serialInstance->updateDouble(id, value);
             else if constexpr (std::is_same<T, std::string>::value)

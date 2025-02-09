@@ -160,14 +160,14 @@ namespace devils
         void serialize() override
         {
             // Network Tables
-            auto acceleration = getAccel();
             ntHeading.set(Units::radToDeg(getHeading()));
-            ntPitch.set(Units::radToDeg(getPitch()));
-            ntRoll.set(Units::radToDeg(getRoll()));
-            ntYaw.set(Units::radToDeg(getYaw()));
-            ntAccelX.set(acceleration.x);
-            ntAccelY.set(acceleration.y);
-            ntAccelZ.set(acceleration.z);
+            // auto acceleration = getAccel();
+            // ntPitch.set(Units::radToDeg(getPitch()));
+            // ntRoll.set(Units::radToDeg(getRoll()));
+            // ntYaw.set(Units::radToDeg(getYaw()));
+            // ntAccelX.set(acceleration.x);
+            // ntAccelY.set(acceleration.y);
+            // ntAccelZ.set(acceleration.z);
 
             // Status Check
             pros::ImuStatus imuStatus = imu.get_status();
@@ -187,13 +187,13 @@ namespace devils
         }
 
     private:
-        NTValue<double> ntHeading = ntGroup.makeValue("heading", 0.0);
-        NTValue<double> ntPitch = ntGroup.makeValue("pitch", 0.0);
-        NTValue<double> ntRoll = ntGroup.makeValue("roll", 0.0);
-        NTValue<double> ntYaw = ntGroup.makeValue("yaw", 0.0);
-        NTValue<double> ntAccelX = ntGroup.makeValue("accelX", 0.0);
-        NTValue<double> ntAccelY = ntGroup.makeValue("accelY", 0.0);
-        NTValue<double> ntAccelZ = ntGroup.makeValue("accelZ", 0.0);
+        NTValue<float> ntHeading = ntGroup.makeValue("heading", 0.0f);
+        // NTValue<double> ntPitch = ntGroup.makeValue("pitch", 0.0);
+        // NTValue<double> ntRoll = ntGroup.makeValue("roll", 0.0);
+        // NTValue<double> ntYaw = ntGroup.makeValue("yaw", 0.0);
+        // NTValue<double> ntAccelX = ntGroup.makeValue("accelX", 0.0);
+        // NTValue<double> ntAccelY = ntGroup.makeValue("accelY", 0.0);
+        // NTValue<double> ntAccelZ = ntGroup.makeValue("accelZ", 0.0);
 
         double headingScale = 1;
         double headingOffset = 0;

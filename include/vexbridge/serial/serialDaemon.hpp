@@ -244,7 +244,7 @@ namespace vexbridge
         }
 
     private:
-        static constexpr uint32_t TIMEOUT = 50;        // ms
+        static constexpr uint32_t TIMEOUT = 30;        // ms
         static constexpr uint32_t UPDATE_INTERVAL = 2; // ms
         static constexpr uint32_t BAUDRATE = 115200;
         static constexpr uint8_t MAX_RETRIES = 3;
