@@ -44,8 +44,8 @@ namespace vexbridge
             if (updateValuePacket == nullptr)
                 return nullptr;
 
-            size_t payloadSize = 2 + 1;
-            uint8_t *payload = new uint8_t[payloadSize];
+            size_t payloadSize = 2 + 255;
+            static uint8_t *payload = new uint8_t[payloadSize];
             BufferWriter writer(payload, payloadSize);
 
             writer.writeUInt16BE(updateValuePacket->ntID);

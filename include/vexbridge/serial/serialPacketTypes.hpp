@@ -12,7 +12,7 @@ namespace vexbridge
         {
             SerialPacketType *packetType = get(packet->type);
             if (packetType == nullptr)
-                throw std::runtime_error("Invalid packet type.");
+                throw std::runtime_error("Invalid packet type: " + std::to_string((uint8_t)packet->type));
 
             return packetType->serialize(packet);
         }
@@ -21,7 +21,7 @@ namespace vexbridge
         {
             SerialPacketType *packetType = get(packet->type);
             if (packetType == nullptr)
-                throw std::runtime_error("Invalid packet type.");
+                throw std::runtime_error("Invalid packet type: " + std::to_string((uint8_t)packet->type));
 
             return packetType->deserialize(packet);
         }

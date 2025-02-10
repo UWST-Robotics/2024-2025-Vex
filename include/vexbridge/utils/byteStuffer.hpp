@@ -7,8 +7,8 @@ namespace vexbridge
 {
     struct ByteStuffer
     {
-        static constexpr uint8_t START_FLAG = 0x00;
-        static constexpr uint8_t END_FLAG = 0xFF;
+        static constexpr uint8_t START_FLAG = 0xFF;
+        static constexpr uint8_t END_FLAG = 0x00;
         static constexpr uint8_t ESCAPE_FLAG = 0x92;
 
         /**

@@ -11,6 +11,7 @@
 #include "packets/genericAckPacket.hpp"
 #include "packets/genericNAckPacket.hpp"
 #include "types/serialPacket.hpp"
+#include "../utils/sdkExtensions.h"
 
 namespace vexbridge
 {
@@ -22,11 +23,17 @@ namespace vexbridge
     public:
         /**
          * Creates a new serial daemon.
-         * @param port The VEX V5 port to connect to.
+         * @param port The VEX V5 port to connect to or 0 for USB.
          */
         SerialDaemon(uint8_t port)
-            : serial(port, BAUDRATE)
         {
+            if (port != 0)
+                serial = new pros::Serial(port, BAUDRATE);
+        }
+        ~SerialDaemon()
+        {
+            if (serial != nullptr)
+                delete serial;
         }
 
         /**
@@ -92,6 +99,7 @@ namespace vexbridge
          */
         int writePacketToSerial(SerialPacket *packet)
         {
+
             // Set Packet ID
             static uint8_t packetIDCounter = 0;
             packet->id = packetIDCounter++;
@@ -103,20 +111,38 @@ namespace vexbridge
             // Loop until success or max retries
             for (int i = 0; i < MAX_RETRIES; i++)
             {
-                // Flush the serial port
-                serial.flush();
+                // Log
+                NTLogger::log("Writing packet " + std::to_string(packet->id) + " of type " + std::to_string((uint8_t)packet->type));
 
-                // Write the packet to the serial port
-                int32_t writeRes = serial.write(writeBuffer, packetSize);
-                if (writeRes == PROS_ERR)
-                    throw std::runtime_error("Failed to write packet to serial port.");
+                // Serial Mode
+                if (serial != nullptr)
+                {
+                    // Flush the serial port
+                    serial->flush();
+
+                    // Write the packet to the serial port
+                    int32_t writeRes = serial->write(writeBuffer, packetSize);
+                    if (writeRes == PROS_ERR)
+                        throw std::runtime_error("Failed to write packet to serial port.");
+                }
+
+                // USB Mode
+                else
+                {
+                    // Write packet to USB
+                    int32_t writeRes = vexSerialWriteBuffer(1, &writeBuffer[0], packetSize);
+                    if (writeRes < 0)
+                        throw std::runtime_error("Failed to write packet to USB.");
+                }
 
                 // Wait for an ack
                 int ackRes = waitForAck(packet->id);
-
-                // Handle Success
                 if (ackRes == 0)
+                {
+                    // Log Success
+                    NTLogger::log("Packet " + std::to_string(packet->id) + " written successfully.");
                     return 0;
+                }
             }
 
             // Handle Failure
@@ -165,15 +191,16 @@ namespace vexbridge
                 }
 
                 // Check if the ack is for the correct packet
-                if (ackPacket->id != packetID)
-                {
-                    NTLogger::logWarning("Received ack for wrong packet. (" +
-                                         std::to_string(packetID) +
-                                         " != " +
-                                         std::to_string(ackPacket->id) +
-                                         ")");
-                    continue;
-                }
+                // TODO: Fix me!
+                // if (ackPacket->id != packetID)
+                // {
+                //     NTLogger::logWarning("Received ack for wrong packet. (" +
+                //                          std::to_string(packetID) +
+                //                          " != " +
+                //                          std::to_string(ackPacket->id) +
+                //                          ")");
+                //     continue;
+                // }
 
                 // Success
                 return 0;
@@ -190,24 +217,51 @@ namespace vexbridge
          */
         SerialPacket *readPacket()
         {
-            // Check if there is data to read
-            int32_t readBufferSize = serial.get_read_avail();
-            if (readBufferSize == PROS_ERR)
-                return nullptr;
-            if (readBufferSize == 0)
-                return nullptr;
-            if (readBufferSize > MAX_BUFFER_SIZE)
-                readBufferSize = MAX_BUFFER_SIZE;
-
-            // Read data from the serial port
             static uint8_t *readBuffer = new uint8_t[MAX_BUFFER_SIZE];
-            int32_t bytesRead = serial.read(readBuffer, readBufferSize);
-            if (bytesRead == PROS_ERR)
-                return nullptr;
+            int32_t bytesRead = 0;
 
-            // Flush the serial port
-            int32_t flushRes = serial.flush();
-            if (flushRes == PROS_ERR)
+            // Serial Mode
+            if (serial != nullptr)
+            {
+                // Check if there is data to read
+                int32_t readBufferSize = serial->get_read_avail();
+                if (readBufferSize == PROS_ERR)
+                    return nullptr;
+                if (readBufferSize > MAX_BUFFER_SIZE)
+                    readBufferSize = MAX_BUFFER_SIZE;
+
+                // Read data from the serial port
+                bytesRead = serial->read(readBuffer, readBufferSize);
+                if (bytesRead == PROS_ERR)
+                    return nullptr;
+
+                // Flush the serial port
+                int32_t flushRes = serial->flush();
+                if (flushRes == PROS_ERR)
+                    return nullptr;
+            }
+
+            // USB Mode
+            else
+            {
+                // Read data from the serial port
+                while (true)
+                {
+                    // TODO: Fix me!
+                    // Read a character from the serial port
+                    int32_t charRead = vexSerialReadChar(1);
+                    if (charRead < 0)
+                        break;
+                    if (bytesRead >= MAX_BUFFER_SIZE)
+                        break;
+
+                    // Add the character to the buffer
+                    readBuffer[bytesRead++] = (uint8_t)charRead;
+                }
+            }
+
+            // Abort if no data was read
+            if (bytesRead <= 0)
                 return nullptr;
 
             // Append to the read queue
@@ -258,7 +312,7 @@ namespace vexbridge
         static constexpr uint32_t POST_TRANSMIT_DELAY = 2; // ms
         static constexpr bool WAIT_FOR_ACK = true;
 
-        pros::Serial serial;
+        pros::Serial *serial = nullptr;
         std::queue<SerialPacket *> writeQueue;
         std::vector<uint8_t> readQueue;
     };
