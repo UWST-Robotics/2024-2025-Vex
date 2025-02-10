@@ -8,19 +8,19 @@
 
 namespace vexbridge
 {
-    struct ResetPacket : public SerialPacket
+    struct PingPacket : public SerialPacket
     {
     };
 
-    struct ResetPacketType : public SerialPacketType
+    struct PingPacketType : public SerialPacketType
     {
-        ResetPacketType() : SerialPacketType(SerialPacketTypeID::RESET)
+        PingPacketType() : SerialPacketType(SerialPacketTypeID::PING)
         {
         }
 
         SerialPacket *deserialize(EncodedSerialPacket *packet) override
         {
-            ResetPacket *newPacket = new ResetPacket();
+            PingPacket *newPacket = new PingPacket();
             newPacket->type = packet->type;
             newPacket->id = packet->id;
             return newPacket;

@@ -9,42 +9,38 @@
 
 namespace vexbridge
 {
-    struct UpdateLabelPacket : public SerialPacket
+    struct LogPacket : public SerialPacket
     {
-        uint16_t ntID = 0;
-        std::string label = "";
+        std::string message = "";
     };
 
-    struct UpdateLabelPacketType : public SerialPacketType
+    struct LogPacketType : public SerialPacketType
     {
-        UpdateLabelPacketType()
-            : SerialPacketType(SerialPacketTypeID::UPDATE_LABEL)
+        LogPacketType() : SerialPacketType(SerialPacketTypeID::LOG)
         {
         }
 
         SerialPacket *deserialize(EncodedSerialPacket *packet) override
         {
             BufferReader reader(packet->payload, packet->payloadSize);
-            UpdateLabelPacket *newPacket = new UpdateLabelPacket();
+            LogPacket *newPacket = new LogPacket();
             newPacket->type = packet->type;
             newPacket->id = packet->id;
-            newPacket->ntID = reader.readUInt16BE();
-            newPacket->label = reader.readString8();
+            newPacket->message = reader.readString16();
             return newPacket;
         }
 
         EncodedSerialPacket *serialize(SerialPacket *packet) override
         {
-            UpdateLabelPacket *updateLabelPacket = dynamic_cast<UpdateLabelPacket *>(packet);
-            if (updateLabelPacket == nullptr)
+            LogPacket *logPacket = dynamic_cast<LogPacket *>(packet);
+            if (logPacket == nullptr)
                 return nullptr;
 
-            size_t payloadSize = 4 + updateLabelPacket->label.length();
+            size_t payloadSize = 2 + logPacket->message.length();
             uint8_t *payload = new uint8_t[payloadSize];
             BufferWriter writer(payload, payloadSize);
 
-            writer.writeUInt16BE(updateLabelPacket->ntID);
-            writer.writeString8(updateLabelPacket->label);
+            writer.writeString16(logPacket->message);
 
             return EncodedSerialPacket::build(packet, payload, writer.getOffset());
         }

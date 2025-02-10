@@ -9,7 +9,7 @@
 #include "serialPacketDecoder.hpp"
 #include "serialPacketEncoder.hpp"
 #include "packets/genericAckPacket.hpp"
-#include "packets/batchValuePacket.hpp"
+#include "packets/genericNAckPacket.hpp"
 #include "types/serialPacket.hpp"
 
 namespace vexbridge
@@ -53,9 +53,6 @@ namespace vexbridge
             // Loop while there are packets to write
             while (!writeQueue.empty())
             {
-                // Try to collapse the queue into a batch packet
-                BatchValuePacket::tryCollapseQueue(writeQueue);
-
                 // Get the next packet in the queue
                 SerialPacket *packet = writeQueue.front();
                 writeQueue.pop();
@@ -151,6 +148,14 @@ namespace vexbridge
                 if (packet == nullptr)
                     continue;
 
+                // Check if the packet is a nack
+                GenericNAckPacket *nackPacket = dynamic_cast<GenericNAckPacket *>(packet);
+                if (nackPacket != nullptr)
+                {
+                    NTLogger::logWarning("Received nack while waiting for packet (" + std::to_string(packetID) + ")");
+                    return -1; // <-- Exit to re-send the packet
+                }
+
                 // Check if the packet is an ack
                 GenericAckPacket *ackPacket = dynamic_cast<GenericAckPacket *>(packet);
                 if (ackPacket == nullptr)
@@ -160,12 +165,12 @@ namespace vexbridge
                 }
 
                 // Check if the ack is for the correct packet
-                if (ackPacket->targetID != packetID)
+                if (ackPacket->id != packetID)
                 {
                     NTLogger::logWarning("Received ack for wrong packet. (" +
                                          std::to_string(packetID) +
                                          " != " +
-                                         std::to_string(ackPacket->targetID) +
+                                         std::to_string(ackPacket->id) +
                                          ")");
                     continue;
                 }

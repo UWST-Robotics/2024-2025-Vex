@@ -2,8 +2,19 @@
 
 #include <cstring>
 #include "serial/serialDaemon.hpp"
-#include "serial/packets/updateValuePacket.hpp"
+#include "serial/packets/resetPacket.hpp"
 #include "serial/packets/updateLabelPacket.hpp"
+#include "serial/packets/updateBoolPacket.hpp"
+#include "serial/packets/updateIntPacket.hpp"
+#include "serial/packets/updateFloatPacket.hpp"
+#include "serial/packets/updateDoublePacket.hpp"
+#include "serial/packets/updateStringPacket.hpp"
+#include "serial/packets/genericAckPacket.hpp"
+#include "serial/packets/genericNAckPacket.hpp"
+#include "serial/packets/logPacket.hpp"
+#include "serial/packets/batchPacket.hpp"
+#include "serial/packets/pingPacket.hpp"
+#include "serial/packets/fetchPacket.hpp"
 
 namespace vexbridge
 {
@@ -63,11 +74,10 @@ namespace vexbridge
          */
         void updateBoolean(uint16_t id, bool value)
         {
-            UpdateValuePacket *packet = new UpdateValuePacket();
-            packet->type = SerialPacketTypeID::UPDATE_VALUE;
+            UpdateBoolPacket *packet = new UpdateBoolPacket();
+            packet->type = SerialPacketTypeID::UPDATE_BOOL;
             packet->ntID = id;
-            packet->valueType = UpdateValuePacket::ValueType::BOOLEAN;
-            packet->newValue = new bool(value);
+            packet->newValue = value;
             daemon.writePacket(packet);
         }
 
@@ -78,11 +88,10 @@ namespace vexbridge
          */
         void updateInt(uint16_t id, int value)
         {
-            UpdateValuePacket *packet = new UpdateValuePacket();
-            packet->type = SerialPacketTypeID::UPDATE_VALUE;
+            UpdateIntPacket *packet = new UpdateIntPacket();
+            packet->type = SerialPacketTypeID::UPDATE_INT;
             packet->ntID = id;
-            packet->valueType = UpdateValuePacket::ValueType::INT;
-            packet->newValue = new int(value);
+            packet->newValue = value;
             daemon.writePacket(packet);
         }
 
@@ -93,11 +102,10 @@ namespace vexbridge
          */
         void updateFloat(uint16_t id, float value)
         {
-            UpdateValuePacket *packet = new UpdateValuePacket();
-            packet->type = SerialPacketTypeID::UPDATE_VALUE;
+            UpdateFloatPacket *packet = new UpdateFloatPacket();
+            packet->type = SerialPacketTypeID::UPDATE_FLOAT;
             packet->ntID = id;
-            packet->valueType = UpdateValuePacket::ValueType::FLOAT;
-            packet->newValue = new float(value);
+            packet->newValue = value;
             daemon.writePacket(packet);
         }
 
@@ -108,11 +116,10 @@ namespace vexbridge
          */
         void updateDouble(uint16_t id, double value)
         {
-            UpdateValuePacket *packet = new UpdateValuePacket();
-            packet->type = SerialPacketTypeID::UPDATE_VALUE;
+            UpdateDoublePacket *packet = new UpdateDoublePacket();
+            packet->type = SerialPacketTypeID::UPDATE_DOUBLE;
             packet->ntID = id;
-            packet->valueType = UpdateValuePacket::ValueType::DOUBLE;
-            packet->newValue = new double(value);
+            packet->newValue = value;
             daemon.writePacket(packet);
         }
 
@@ -123,7 +130,11 @@ namespace vexbridge
          */
         void updateString(uint16_t id, const char *value)
         {
-            // TODO: Implement
+            UpdateStringPacket *packet = new UpdateStringPacket();
+            packet->type = SerialPacketTypeID::UPDATE_STRING;
+            packet->ntID = id;
+            packet->newValue = value;
+            daemon.writePacket(packet);
         }
 
         static NTSerial *getInstance()
@@ -141,3 +152,21 @@ namespace vexbridge
 
 // Singleton instance
 vexbridge::NTSerial *vexbridge::NTSerial::instance = nullptr;
+
+// Assign Packet Types
+vexbridge::SerialPacketType *vexbridge::SerialPacketTypes::packetTypes[13] = {
+    new ResetPacketType(),
+    new UpdateLabelPacketType(),
+    new FetchPacketType(),
+    new LogPacketType(),
+    new PingPacketType(),
+    new GenericAckPacketType(),
+    new GenericNAckPacketType(),
+
+    new UpdateBoolPacketType(),
+    new UpdateIntPacketType(),
+    new UpdateFloatPacketType(),
+    new UpdateDoublePacketType(),
+    new UpdateStringPacketType(),
+
+    new BatchPacketType()};

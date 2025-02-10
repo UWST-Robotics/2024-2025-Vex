@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <string>
+#include <algorithm>
 
 namespace vexbridge
 {
@@ -131,13 +132,32 @@ namespace vexbridge
         }
 
         /**
-         * Writes the length of the string as a uint16_t (LE) followed by the string.
+         * Writes the length of the string as a uint16_t (BE) followed by the string.
          * @param str The string to write.
          */
-        void writeString(std::string str)
+        void writeString16(std::string str)
         {
-            writeUInt16BE(str.length());
-            for (uint16_t i = 0; i < str.length(); i++)
+            uint16_t length = str.length();
+            if (length > 0xFFFF)
+                length = 0xFFFF;
+
+            writeUInt16BE(length);
+            for (uint16_t i = 0; i < length; i++)
+                writeUInt8(str[i]);
+        }
+
+        /**
+         * Writes the length of the string as a uint8_t followed by the string.
+         * @param str The string to write.
+         */
+        void writeString8(std::string str)
+        {
+            uint8_t length = str.length();
+            if (length > 0xFF)
+                length = 0xFF;
+
+            writeUInt8(length);
+            for (uint8_t i = 0; i < length; i++)
                 writeUInt8(str[i]);
         }
 

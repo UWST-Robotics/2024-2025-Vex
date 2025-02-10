@@ -8,19 +8,19 @@
 
 namespace vexbridge
 {
-    struct ResetPacket : public SerialPacket
+    struct FetchPacket : public SerialPacket
     {
     };
 
-    struct ResetPacketType : public SerialPacketType
+    struct FetchPacketType : public SerialPacketType
     {
-        ResetPacketType() : SerialPacketType(SerialPacketTypeID::RESET)
+        FetchPacketType() : SerialPacketType(SerialPacketTypeID::FETCH_VALUES)
         {
         }
 
         SerialPacket *deserialize(EncodedSerialPacket *packet) override
         {
-            ResetPacket *newPacket = new ResetPacket();
+            FetchPacket *newPacket = new FetchPacket();
             newPacket->type = packet->type;
             newPacket->id = packet->id;
             return newPacket;

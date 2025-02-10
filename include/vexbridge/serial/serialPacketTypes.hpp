@@ -1,11 +1,8 @@
 #pragma once
 
-#include "packets/resetPacket.hpp"
-#include "packets/updateLabelPacket.hpp"
-#include "packets/updateValuePacket.hpp"
-#include "packets/genericAckPacket.hpp"
-#include "packets/batchValuePacket.hpp"
 #include <stdexcept>
+#include "types/serialPacket.hpp"
+#include "types/encodedSerialPacket.hpp"
 
 namespace vexbridge
 {
@@ -13,7 +10,7 @@ namespace vexbridge
     {
         static EncodedSerialPacket *serialize(SerialPacket *packet)
         {
-            SerialPacketType *packetType = getPacketType(packet->type);
+            SerialPacketType *packetType = get(packet->type);
             if (packetType == nullptr)
                 throw std::runtime_error("Invalid packet type.");
 
@@ -22,14 +19,14 @@ namespace vexbridge
 
         static SerialPacket *deserialize(EncodedSerialPacket *packet)
         {
-            SerialPacketType *packetType = getPacketType(packet->type);
+            SerialPacketType *packetType = get(packet->type);
             if (packetType == nullptr)
                 throw std::runtime_error("Invalid packet type.");
 
             return packetType->deserialize(packet);
         }
 
-        static SerialPacketType *getPacketType(SerialPacketTypeID type)
+        static SerialPacketType *get(SerialPacketTypeID type)
         {
             for (SerialPacketType *packetType : packetTypes)
                 if (packetType->type == type)
@@ -37,14 +34,6 @@ namespace vexbridge
             return nullptr;
         }
 
-        static SerialPacketType *packetTypes[5];
+        static SerialPacketType *packetTypes[13];
     };
 }
-
-// All Packet Types
-vexbridge::SerialPacketType *vexbridge::SerialPacketTypes::packetTypes[5] = {
-    new ResetPacketType(),
-    new UpdateLabelPacketType(),
-    new UpdateValuePacketType(),
-    new GenericAckPacketType(),
-    new BatchValuePacketType()};

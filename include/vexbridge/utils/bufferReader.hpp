@@ -60,7 +60,10 @@ namespace vexbridge
         uint8_t *readBytes(uint16_t length)
         {
             if (offset + length > this->length)
+            {
+                offset = this->length;
                 return nullptr;
+            }
 
             uint8_t *bytes = new uint8_t[length];
             for (uint16_t i = 0; i < length; i++)
@@ -152,20 +155,47 @@ namespace vexbridge
 
         /**
          * Reads a string from the buffer.
-         * Reads a uint16_t (LE) length followed by the string.
+         * Reads a uint16_t (BE) length followed by the string.
          * @return The string read from the buffer.
          */
-        std::string readString()
+        std::string readString16()
         {
             uint16_t stringLength = readUInt16BE();
-            if (offset + stringLength > length)
-                return "";
+            if (stringLength > length - offset)
+                stringLength = length - offset;
 
             std::string str = "";
             for (uint16_t i = 0; i < stringLength; i++)
                 str += (char)readUInt8();
 
             return str;
+        }
+
+        /**
+         * Reads a string from the buffer.
+         * Reads a uint8_t length followed by the string.
+         * @return The string read from the buffer.
+         */
+        std::string readString8()
+        {
+            uint8_t stringLength = readUInt8();
+            if (stringLength > length - offset)
+                stringLength = length - offset;
+
+            std::string str = "";
+            for (uint8_t i = 0; i < stringLength; i++)
+                str += (char)readUInt8();
+
+            return str;
+        }
+
+        /**
+         * Checks if there is more data to read.
+         * @return True if there is more data to read.
+         */
+        bool hasData()
+        {
+            return offset < length;
         }
 
     private:

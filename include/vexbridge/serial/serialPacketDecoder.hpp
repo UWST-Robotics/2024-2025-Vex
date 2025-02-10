@@ -50,15 +50,15 @@ namespace vexbridge
                 return nullptr;
             }
 
-            // Create Packet
-            EncodedSerialPacket *packet = new EncodedSerialPacket();
-            packet->id = id;
-            packet->type = (SerialPacketTypeID)type;
-            packet->payload = payload;
-            packet->payloadSize = payloadSize;
+            // Create Temporary Packet to store payload
+            static EncodedSerialPacket *tempPacket = new EncodedSerialPacket();
+            tempPacket->id = id;
+            tempPacket->type = (SerialPacketTypeID)type;
+            tempPacket->payload = payload;
+            tempPacket->payloadSize = payloadSize;
 
             // Deserialize the packet
-            return SerialPacketTypes::deserialize(packet);
+            return SerialPacketTypes::deserialize(tempPacket);
         }
 
     private:

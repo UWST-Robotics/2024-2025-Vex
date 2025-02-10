@@ -10,115 +10,46 @@
 
 namespace vexbridge
 {
+    template <typename T>
     struct UpdateValuePacket : public SerialPacket
     {
-        enum class ValueType : uint8_t
-        {
-            BOOLEAN = 0x01,
-            INT = 0x02,
-            FLOAT = 0x03,
-            DOUBLE = 0x04
-        };
-
         uint16_t ntID = 0;
-        ValueType valueType = ValueType::BOOLEAN;
-        void *newValue = nullptr;
-
-        UpdateValuePacket()
-        {
-        }
-        UpdateValuePacket(const UpdateValuePacket &other)
-        {
-            ntID = other.ntID;
-            valueType = other.valueType;
-
-            // Copy the value
-            switch (valueType)
-            {
-            case ValueType::BOOLEAN:
-                newValue = new bool(*(bool *)other.newValue);
-                break;
-            case ValueType::INT:
-                newValue = new int16_t(*(int16_t *)other.newValue);
-                break;
-            case ValueType::FLOAT:
-                newValue = new float(*(float *)other.newValue);
-                break;
-            case ValueType::DOUBLE:
-                newValue = new double(*(double *)other.newValue);
-                break;
-            }
-        }
-        ~UpdateValuePacket()
-        {
-            if (newValue != nullptr)
-                delete newValue;
-        }
+        T newValue = 0;
     };
 
+    template <typename T>
     struct UpdateValuePacketType : public SerialPacketType
     {
-        UpdateValuePacketType()
-            : SerialPacketType(SerialPacketTypeID::UPDATE_VALUE)
+        UpdateValuePacketType(SerialPacketTypeID typeID) : SerialPacketType(typeID)
         {
         }
+
+        virtual T deserializeValue(BufferReader &reader) = 0;
+        virtual void serializeValue(BufferWriter &writer, T value) = 0;
 
         SerialPacket *deserialize(EncodedSerialPacket *packet) override
         {
             BufferReader reader(packet->payload, packet->payloadSize);
-            UpdateValuePacket *newPacket = new UpdateValuePacket();
+            UpdateValuePacket<T> *newPacket = new UpdateValuePacket<T>();
             newPacket->type = packet->type;
             newPacket->id = packet->id;
             newPacket->ntID = reader.readUInt16BE();
-            newPacket->valueType = (UpdateValuePacket::ValueType)reader.readUInt8();
-
-            switch (newPacket->valueType)
-            {
-            case UpdateValuePacket::ValueType::BOOLEAN:
-                newPacket->newValue = new bool(reader.readUInt8());
-                break;
-            case UpdateValuePacket::ValueType::INT:
-                newPacket->newValue = new int16_t(reader.readUInt16BE());
-                break;
-            case UpdateValuePacket::ValueType::FLOAT:
-                newPacket->newValue = new float(reader.readFloatBE());
-                break;
-            case UpdateValuePacket::ValueType::DOUBLE:
-                newPacket->newValue = new double(reader.readDoubleBE());
-                break;
-            }
-
+            newPacket->newValue = deserializeValue(reader);
             return newPacket;
         }
 
         EncodedSerialPacket *serialize(SerialPacket *packet) override
         {
-            UpdateValuePacket *updateValuePacket = dynamic_cast<UpdateValuePacket *>(packet);
+            UpdateValuePacket<T> *updateValuePacket = dynamic_cast<UpdateValuePacket<T> *>(packet);
             if (updateValuePacket == nullptr)
                 return nullptr;
 
-            size_t payloadSize = 3 + 8;
+            size_t payloadSize = 2 + 1;
             uint8_t *payload = new uint8_t[payloadSize];
             BufferWriter writer(payload, payloadSize);
 
             writer.writeUInt16BE(updateValuePacket->ntID);
-            writer.writeUInt8((uint8_t)updateValuePacket->valueType);
-
-            switch (updateValuePacket->valueType)
-            {
-            case UpdateValuePacket::ValueType::BOOLEAN:
-                writer.writeUInt8(*(bool *)updateValuePacket->newValue);
-                break;
-            case UpdateValuePacket::ValueType::INT:
-                writer.writeUInt16BE(*(int16_t *)updateValuePacket->newValue);
-                break;
-            case UpdateValuePacket::ValueType::FLOAT:
-                writer.writeFloatBE(*(float *)updateValuePacket->newValue);
-                break;
-            case UpdateValuePacket::ValueType::DOUBLE:
-                writer.writeDoubleBE(*(double *)updateValuePacket->newValue);
-                break;
-            }
+            serializeValue(writer, updateValuePacket->newValue);
 
             return EncodedSerialPacket::build(packet, payload, writer.getOffset());
         }
