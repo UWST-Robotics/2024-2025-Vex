@@ -306,7 +306,7 @@ namespace vexbridge
 
     private:
         static constexpr int32_t VEX_WRITE_BUFFER_SIZE = 1024;
-        static constexpr uint32_t TIMEOUT = 50;        // ms
+        static constexpr uint32_t TIMEOUT = 20;        // ms
         static constexpr uint32_t UPDATE_INTERVAL = 2; // ms
         static constexpr uint32_t BAUDRATE = 115200;
         static constexpr uint8_t MAX_RETRIES = 3;

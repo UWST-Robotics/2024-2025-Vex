@@ -24,10 +24,12 @@ namespace vexbridge
                 return;
             }
 
-            // Remove all value packets with the same ntID
-            int32_t ntID = tryGetNTIDOfPacket(packet);
-            if (ntID >= 0)
-                removeAllValuePacketsOfID(ntID);
+            // Try to update an existing NT value in the queue
+            if (updateNTValueInQueue(packet))
+            {
+                delete packet;
+                return;
+            }
 
             // Push the packet to the queue
             queue.push_back(packet);
@@ -66,49 +68,54 @@ namespace vexbridge
 
     private:
         /**
-         * Tries to get the NT ID of a packet.
-         * @param packet The packet to get the NT ID of.
-         * @return The NT ID of the packet or -1 if not found.
+         * Tries to find an existing NT value packet in the queue of a specific type and update its value.
+         * @param packet The packet to check.
+         * @return True if the packet was updated, false otherwise.
          */
-        int32_t tryGetNTIDOfPacket(SerialPacket *packet)
-        {
-            int32_t ntID = -1;
-            tryGetNTIDOfPacketType<bool>(packet, &ntID);
-            tryGetNTIDOfPacketType<int>(packet, &ntID);
-            tryGetNTIDOfPacketType<float>(packet, &ntID);
-            tryGetNTIDOfPacketType<double>(packet, &ntID);
-            tryGetNTIDOfPacketType<std::string>(packet, &ntID);
-            return ntID;
-        }
         template <typename T>
-        void tryGetNTIDOfPacketType(SerialPacket *packet, int32_t *ntID)
+        bool updateNTValueInQueueOfType(SerialPacket *packet)
         {
-            auto *ntPacket = dynamic_cast<UpdateValuePacket<T> *>(packet);
-            if (ntPacket == nullptr)
-                return;
-            *ntID = (int32_t)ntPacket->ntID;
-        }
+            // Case the packet to an update value packet
+            auto *updatePacket = dynamic_cast<UpdateValuePacket<T> *>(packet);
+            if (updatePacket == nullptr)
+                return false;
 
-        /**
-         * Removes all value packets with the specified ntID and type from the queue.
-         * @param ntID The ntID to remove.
-         * @param type The type to remove.
-         */
-        void removeAllValuePacketsOfID(uint16_t ntID)
-        {
+            // Get the NT ID and new value
+            int32_t ntID = updatePacket->ntID;
+            T newValue = updatePacket->newValue;
+
             // Loop through the queue
             for (size_t i = 0; i < queue.size(); i++)
             {
-                // Try to get the NT ID of the packet
-                uint16_t packetNTID = tryGetNTIDOfPacket(queue[i]);
-                if (packetNTID != ntID)
+                // Case the packet to an update value packet
+                auto *queuePacket = dynamic_cast<UpdateValuePacket<T> *>(queue[i]);
+                if (queuePacket == nullptr)
                     continue;
 
-                // Delete the packet
-                delete queue[i];
-                queue.erase(queue.begin() + i);
-                i--;
+                // Check if the packet has the same NT ID
+                if (queuePacket->ntID != ntID)
+                    continue;
+
+                // Update the value
+                queuePacket->newValue = newValue;
+                return true;
             }
+
+            return false;
+        }
+
+        /**
+         * Tries to find an existing NT value packet in the queue and update its value.
+         * @param packet The packet to check.
+         * @return True if the packet was updated, false otherwise.
+         */
+        bool updateNTValueInQueue(SerialPacket *packet)
+        {
+            return updateNTValueInQueueOfType<int>(packet) ||
+                   updateNTValueInQueueOfType<float>(packet) ||
+                   updateNTValueInQueueOfType<double>(packet) ||
+                   updateNTValueInQueueOfType<bool>(packet) ||
+                   updateNTValueInQueueOfType<std::string>(packet);
         }
 
         /**
