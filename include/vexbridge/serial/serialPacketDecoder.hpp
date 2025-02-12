@@ -27,10 +27,10 @@ namespace vexbridge
          */
         static SerialPacket *decode(uint8_t *buffer, uint16_t length)
         {
-
             // Unstuff the buffer
             static uint8_t *decodedBuffer = new uint8_t[MAX_BUFFER_SIZE];
             size_t newLength = ByteStuffer::decode(buffer, length, decodedBuffer);
+
             // Buffer Reader
             BufferReader reader(decodedBuffer, newLength);
 

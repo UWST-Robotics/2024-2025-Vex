@@ -40,9 +40,7 @@ namespace vexbridge
             packerWriter.writeUInt8(checksum);
 
             // Byte Stuff
-            size_t length = ByteStuffer::encode(packetBuffer, packerWriter.getOffset(), buffer);
-
-            return length;
+            return ByteStuffer::encode(packetBuffer, packerWriter.getOffset(), buffer);
         }
 
     private:

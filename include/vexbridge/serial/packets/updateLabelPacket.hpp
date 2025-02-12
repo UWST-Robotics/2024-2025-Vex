@@ -39,7 +39,7 @@ namespace vexbridge
             if (updateLabelPacket == nullptr)
                 return nullptr;
 
-            size_t payloadSize = 4 + updateLabelPacket->label.length();
+            size_t payloadSize = 3 + updateLabelPacket->label.length();
             uint8_t *payload = new uint8_t[payloadSize];
             BufferWriter writer(payload, payloadSize);
 

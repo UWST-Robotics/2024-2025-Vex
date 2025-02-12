@@ -15,6 +15,12 @@ namespace vexbridge
     {
         SerialPacketTypeID subType = SerialPacketTypeID::UNKNOWN;
         std::vector<SerialPacket *> subPackets;
+
+        ~BatchPacket()
+        {
+            for (SerialPacket *packet : subPackets)
+                delete packet;
+        }
     };
 
     struct BatchPacketType : public SerialPacketType
@@ -91,10 +97,16 @@ namespace vexbridge
             std::vector<EncodedSerialPacket *> packetArr;
             for (SerialPacket *subPacket : batchPacket->subPackets)
             {
+                // Serialize Subpacket
                 EncodedSerialPacket *subEncodedPacket = subPacketType->serialize(subPacket);
                 if (subEncodedPacket == nullptr)
                     throw std::runtime_error("Failed to serialize subpacket.");
 
+                // Check payload size
+                if (subEncodedPacket->payloadSize > 255)
+                    throw std::runtime_error("Subpacket payload too large.");
+
+                // Add to payload list
                 subPacketsPayloadLength += 1 + subEncodedPacket->payloadSize;
                 packetArr.push_back(subEncodedPacket);
             }

@@ -12,6 +12,7 @@
 #include "packets/genericNAckPacket.hpp"
 #include "types/serialPacket.hpp"
 #include "../utils/sdkExtensions.h"
+#include "serialQueue.hpp"
 
 namespace vexbridge
 {
@@ -42,15 +43,6 @@ namespace vexbridge
          */
         void writePacket(SerialPacket *packet)
         {
-            // Check if the queue is full
-            if (writeQueue.size() >= MAX_QUEUE_SIZE)
-            {
-                NTLogger::logWarning("Serial write queue is full.");
-                delete packet;
-                return;
-            }
-
-            // Push the packet to the queue
             writeQueue.push(packet);
         }
 
@@ -61,8 +53,7 @@ namespace vexbridge
             while (!writeQueue.empty())
             {
                 // Get the next packet in the queue
-                SerialPacket *packet = writeQueue.front();
-                writeQueue.pop();
+                SerialPacket *packet = writeQueue.pop();
 
                 // Stats
                 uint32_t startTime = pros::millis();
@@ -84,7 +75,7 @@ namespace vexbridge
                 delete packet;
 
                 // Wait for SBC to pull RTS back down
-                pros::delay(POST_TRANSMIT_DELAY);
+                pros::delay(POST_RECEIVE_DELAY);
             }
 
             // Pause to prevent cpu overload
@@ -99,7 +90,6 @@ namespace vexbridge
          */
         int writePacketToSerial(SerialPacket *packet)
         {
-
             // Set Packet ID
             static uint8_t packetIDCounter = 0;
             packet->id = packetIDCounter++;
@@ -121,9 +111,21 @@ namespace vexbridge
                     serial->flush();
 
                     // Write the packet to the serial port
-                    int32_t writeRes = serial->write(writeBuffer, packetSize);
+                    int32_t writeRes = serial->write(writeBuffer, (int32_t)packetSize);
                     if (writeRes == PROS_ERR)
                         throw std::runtime_error("Failed to write packet to serial port.");
+                    if (writeRes != packetSize)
+                        throw std::runtime_error("Wrote " +
+                                                 std::to_string(writeRes) +
+                                                 " out of " +
+                                                 std::to_string(packetSize) +
+                                                 " packets");
+
+                    // Wait for transmission to complete
+                    // before listening to serial
+                    uint32_t writeDelay = ceil(WRITE_DELAY_PER_BYTE * packetSize);
+                    printf("Write Delay: %d\n", writeDelay);
+                    pros::delay(writeDelay);
                 }
 
                 // USB Mode
@@ -192,15 +194,15 @@ namespace vexbridge
 
                 // Check if the ack is for the correct packet
                 // TODO: Fix me!
-                // if (ackPacket->id != packetID)
-                // {
-                //     NTLogger::logWarning("Received ack for wrong packet. (" +
-                //                          std::to_string(packetID) +
-                //                          " != " +
-                //                          std::to_string(ackPacket->id) +
-                //                          ")");
-                //     continue;
-                // }
+                if (ackPacket->id != packetID)
+                {
+                    NTLogger::logWarning("Received ack for wrong packet. (" +
+                                         std::to_string(packetID) +
+                                         " != " +
+                                         std::to_string(ackPacket->id) +
+                                         ")");
+                    return -1; // <-- Exit to re-send the packet
+                }
 
                 // Success
                 return 0;
@@ -283,7 +285,7 @@ namespace vexbridge
                 }
 
                 // If the current flag is not the end flag, skip it
-                if (readQueue[i] != 0xFF)
+                if (readQueue[i] != 0xFA)
                     continue;
 
                 // Decode the packet up to the null byte
@@ -303,17 +305,19 @@ namespace vexbridge
         }
 
     private:
-        static constexpr uint32_t TIMEOUT = 30;        // ms
+        static constexpr int32_t VEX_WRITE_BUFFER_SIZE = 1024;
+        static constexpr uint32_t TIMEOUT = 50;        // ms
         static constexpr uint32_t UPDATE_INTERVAL = 2; // ms
         static constexpr uint32_t BAUDRATE = 115200;
         static constexpr uint8_t MAX_RETRIES = 3;
         static constexpr size_t MAX_QUEUE_SIZE = 512;
         static constexpr size_t MAX_BUFFER_SIZE = 1024;
-        static constexpr uint32_t POST_TRANSMIT_DELAY = 2; // ms
+        static constexpr double WRITE_DELAY_PER_BYTE = 0.08; // ms (estimate based off of 115200 baud)
+        static constexpr uint32_t POST_RECEIVE_DELAY = 4;    // ms
         static constexpr bool WAIT_FOR_ACK = true;
 
         pros::Serial *serial = nullptr;
-        std::queue<SerialPacket *> writeQueue;
+        SerialQueue writeQueue;
         std::vector<uint8_t> readQueue;
     };
 }
