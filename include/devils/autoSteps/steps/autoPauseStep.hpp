@@ -6,6 +6,9 @@
 
 namespace devils
 {
+    /**
+     * Pauses the autonomous routine for a given duration.
+     */
     class AutoPauseStep : public AutoStep
     {
     public:

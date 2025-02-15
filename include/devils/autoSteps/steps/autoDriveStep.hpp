@@ -10,13 +10,13 @@
 namespace devils
 {
     /**
-     * Represents a drive step in an autonomous routine.
+     * Drives the robot a specific distance w/ odometry feedback.
      */
     class AutoDriveStep : public AutoDriveToStep
     {
     public:
         /**
-         * Creates a new drive step.
+         * Drives the robot a specific distance w/ odometry feedback.
          * @param chassis The chassis to control.
          * @param odomSource The odometry source to use.
          * @param distance The distance to drive in inches.

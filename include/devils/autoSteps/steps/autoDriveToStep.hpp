@@ -11,6 +11,9 @@
 
 namespace devils
 {
+    /**
+     * Drives the robot to a specific pose.
+     */
     class AutoDriveToStep : public AutoStep
     {
     public:
@@ -23,16 +26,16 @@ namespace devils
             PIDParams rotationPID = PIDParams{0.05, 0.0, 0.0};
 
             /// @brief The maximum speed in %
-            double maxSpeed = 0.4;
+            double maxSpeed = 0.5;
 
             /// @brief The distance to the goal in inches
-            double goalDist = 1.5;
+            double goalDist = 2.0;
 
             /// @brief The maximum speed of the robot in in/s
-            double goalSpeed = 1;
+            double goalSpeed = 2.0;
 
             /// @brief The minimum distance from the target to apply rotation
-            double minDistanceToRotate = 12.0;
+            double minDistanceToRotate = 2.0;
 
             /// @brief The default options for the drive step.
             static Options defaultOptions;

@@ -194,35 +194,43 @@ namespace devils
             AutoDriveToStep::Options startingSpeed = {
                 drivePID,
                 drivingRotatePID,
-                1.0,    // maxSpeed
-                2.0,    // goalDist
-                2.0,    // goalSpeed
-                999999, // NEVER GIVE UP, NEVER SURRENDER
+                1.0, // maxSpeed
+                4.0, // goalDist
+                4.0  // goalSpeed
             };
 
             AutoBuilder pjRoutine = AutoBuilder(chassis, odometry);
 
             // Step 1
-            pjRoutine.setPose(-40, -36, M_PI * 0.9);
-            pjRoutine.drive(-36.0, 2000, startingSpeed);
+            pjRoutine.setPose(-42, -36, M_PI);
+            pjRoutine.pause(500); // For debugging
+            pjRoutine.driveSpline(
+                34.0,
+                -8.0,
+                M_PI * 0.9,
+                -18.0,
+                2000,
+                startingSpeed);
             // Swipe Mogo
-            pjRoutine.drive(20.0, 2000, startingSpeed);
+            pjRoutine.driveRelative(16.0, 10000, startingSpeed);
+            pjRoutine.driveRelative(-6.0);
             // Grab Mogo
+            pjRoutine.driveRelative(6.0);
             // Check if we got the mogo
 
             // Step 2a
-            pjRoutine.rotateTo(M_PI * -0.5);
-            pjRoutine.drive(8.0);
+            // pjRoutine.rotateTo(M_PI * -0.5);
+            // pjRoutine.drive(8.0);
             // pjRoutine.pause(5000); // Make Step 2a last the same amount of time as Step 2b
 
             // Step 2b
-            // pjRoutine.rotate(M_PI * -0.5);
-            // pjRoutine.drive(-16.0);
-            // pjRoutine.rotate(M_PI * -0.75);
-            // pjRoutine.drive(-24.0);
-            // pjRoutine.drive(24.0);
-            // pjRoutine.rotate(M_PI * -0.5);
-            // pjRoutine.drive(24.0);
+            pjRoutine.rotateTo(M_PI * -0.5);
+            pjRoutine.drive(-16.0);
+            pjRoutine.rotateTo(M_PI * -0.75);
+            pjRoutine.drive(-24.0);
+            pjRoutine.drive(24.0);
+            pjRoutine.rotateTo(M_PI * -0.5);
+            pjRoutine.drive(24.0);
 
             // Step 3
             pjRoutine.rotateTo(M_PI);
@@ -242,9 +250,9 @@ namespace devils
             // Step 5
             pjRoutine.rotateTo(M_PI * 0.5);
             pjRoutine.drive(46.0);
-            pjRoutine.rotateTo(M_PI * 0.35);
+            pjRoutine.rotateTo(M_PI * 0.4);
             pjRoutine.drive(6.0);
-            pjRoutine.rotateTo(M_PI * 0.25);
+            pjRoutine.rotateTo(M_PI * 0.3);
             pjRoutine.drive(6.0);
 
             return pjRoutine.build();
@@ -279,19 +287,18 @@ namespace devils
             AutoDriveToStep::Options startingSpeed = {
                 drivePID,
                 drivingRotatePID,
-                1.0,    // maxSpeed
-                2.0,    // goalDist
-                2.0,    // goalSpeed
-                999999, // NEVER GIVE UP, NEVER SURRENDER
+                1.0, // maxSpeed
+                2.0, // goalDist
+                2.0  // goalSpeed
             };
 
             AutoBuilder blazeRoutine = AutoBuilder(chassis, odometry);
 
             // Step 1
             blazeRoutine.setPose(-40, -36, M_PI * 0.9);
-            blazeRoutine.drive(-36.0, 2000, startingSpeed);
+            blazeRoutine.drive(-36.0, 10000, startingSpeed);
             // Swipe Mogo
-            blazeRoutine.drive(20.0, 2000, startingSpeed);
+            blazeRoutine.drive(20.0, 10000, startingSpeed);
             // Grab Mogo
             // Check if we got the mogo
 

@@ -6,11 +6,16 @@
 
 namespace devils
 {
+    /**
+     * Represents an autostep that aborts after a given duration.
+     */
     class AutoTimeoutStep : public AutoStep
     {
     public:
         /**
-         * Performs the autostep, but aborts after a given duration.
+         * Creates a new timeout step.
+         * @param autoStep The step to execute.
+         * @param duration The duration of the step in milliseconds.
          */
         AutoTimeoutStep(
             AutoStep *autoStep,

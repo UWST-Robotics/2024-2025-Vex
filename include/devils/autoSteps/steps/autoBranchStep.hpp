@@ -12,7 +12,7 @@ namespace devils
     {
     public:
         /**
-         * Creates a new branch step.
+         * Branches based on a condition.
          * @param trueStep The step to execute if the condition is true.
          * @param falseStep The step to execute if the condition is false.
          */

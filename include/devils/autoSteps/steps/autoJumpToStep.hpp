@@ -5,6 +5,9 @@
 
 namespace devils
 {
+    /**
+     * Jumps the odometry state to a given pose. Usually ran at the start of an auto routine.
+     */
     class AutoJumpToStep : public AutoStep
     {
     public:

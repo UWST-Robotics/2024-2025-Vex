@@ -45,7 +45,6 @@
 #include "path/linearPath.hpp"
 #include "path/splinePath.hpp"
 #include "path/structs/splinePose.hpp"
-#include "path/autoDevilDeserializer.hpp"
 
 // Trajectory
 #include "trajectory/trajectory.hpp"
@@ -66,6 +65,7 @@
 #include "autoSteps/steps/autoPauseStep.hpp"
 #include "autoSteps/steps/autoJumpToStep.hpp"
 #include "autoSteps/steps/autoBranchStep.hpp"
+#include "autoSteps/steps/autoPurePursuitStep.hpp"
 
 // Display
 #include "display/eyesRenderer.hpp"

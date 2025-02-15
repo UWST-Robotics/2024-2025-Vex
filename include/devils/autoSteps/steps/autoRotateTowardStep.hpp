@@ -11,6 +11,9 @@ namespace devils
     // Forward Declaration
     class AbsoluteStepConverter;
 
+    /**
+     * Rotates the robot toward a specific pose along its center of rotation.
+     */
     class AutoRotateTowardStep : public AutoRotateToStep
     {
         // Allow the absolute step converter to access private members

@@ -9,6 +9,9 @@
 
 namespace devils
 {
+    /**
+     * Rotates the robot to a specific angle along its center of rotation.
+     */
     class AutoRotateToStep : public AutoStep
     {
     public:

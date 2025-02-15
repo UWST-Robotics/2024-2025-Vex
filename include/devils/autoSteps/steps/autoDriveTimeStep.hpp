@@ -8,6 +8,9 @@
 
 namespace devils
 {
+    /**
+     * Drives the robot for a given duration in open loop.
+     */
     class AutoDriveTimeStep : public AutoStep
     {
     public:

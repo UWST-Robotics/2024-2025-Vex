@@ -4,10 +4,12 @@
 #include "../../odom/odomSource.hpp"
 #include "../../chassis/chassisBase.hpp"
 #include "../steps/autoJumpToStep.hpp"
+#include "../steps/autoDriveStep.hpp"
 #include "../steps/autoDriveToStep.hpp"
 #include "../steps/autoRotateToStep.hpp"
 #include "../steps/autoTimeoutStep.hpp"
 #include "../steps/autoPauseStep.hpp"
+#include "../steps/autoPurePursuitStep.hpp"
 
 namespace devils
 {
@@ -96,6 +98,48 @@ namespace devils
                 pose.rotation);
 
             addStep(new AutoDriveToStep(chassis, odom, pose, options), timeout);
+        }
+
+        /**
+         * Drives a given distance in inches relative to the current pose
+         * @param distance The distance to drive in inches
+         * @param timeout The timeout in milliseconds
+         */
+        void driveRelative(
+            double distance,
+            uint32_t timeout = 2000,
+            AutoDriveToStep::Options options = AutoDriveToStep::Options::defaultOptions)
+        {
+            pose = Pose(
+                pose.x + distance * std::cos(pose.rotation),
+                pose.y + distance * std::sin(pose.rotation),
+                pose.rotation);
+
+            addStep(new AutoDriveStep(chassis, odom, distance, options), timeout);
+        }
+
+        /**
+         * Drives along a spline curve to a given pose.
+         * @param x The x position to drive to in inches
+         * @param y The y position to drive to in inches
+         * @param rotation The rotation to drive to in radians
+         * @param timeout The timeout in milliseconds
+         */
+        void driveSpline(
+            double x,
+            double y,
+            double rotation,
+            double delta = 18.0,
+            uint32_t timeout = 2000,
+            AutoDriveToStep::Options options = AutoDriveToStep::Options::defaultOptions)
+        {
+            // Get start/end poses
+            Pose prevPose = Pose(pose.x, pose.y, pose.rotation);
+            pose = Pose(pose.x + x, pose.y + y, rotation);
+
+            // Create a spline path
+            SplinePath *path = SplinePath::makeArc(prevPose, pose, delta);
+            addStep(new AutoPurePursuitStep(chassis, odom, path, options), timeout);
         }
 
         /**
