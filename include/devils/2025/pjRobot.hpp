@@ -128,6 +128,7 @@ namespace devils
         static constexpr double IMU_HEADING_SCALE = 1.014;                    // %
 
         // Hardware
+        VEXBridge bridge = VEXBridge(5);
         ADIPneumatic grabberPneumatic = ADIPneumatic("GrabberPneumatic", 1);
         ADIPneumatic intakeLauncher = ADIPneumatic("IntakeLauncher", 3);
 
@@ -148,11 +149,9 @@ namespace devils
         ConveyorSystem conveyor = ConveyorSystem(conveyorMotors, grabberPneumatic);
         // TankChassisOdom chassisOdom = TankChassisOdom(chassis, WHEEL_RADIUS, WHEEL_BASE);
         PerpendicularSensorOdometry deadWheelOdom = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
-        // NTOdom networkOdom = NTOdom("DeadWheelOdom", deadWheelOdom);
 
         // Autonomous Routine
-        AutoStepList autoRoutine = AutoFactory::createPJAutoRoutine(chassis, deadWheelOdom, intake, conveyor);
-        // AutoStepList autoRoutine = AutoFactory::createCenterTestRoutine(chassis, deadWheelOdom, intake, conveyor);
+        AutoStepList autoRoutine = AutoFactory::createPJSkillsAuto(chassis, deadWheelOdom, intake, conveyor);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

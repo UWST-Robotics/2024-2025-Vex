@@ -21,22 +21,20 @@ namespace devils
 
         void opcontrol() override
         {
-            while (true)
-            {
-                testValue.set(rand() * 100);
-
-                pros::delay(1000);
-            }
+            autoRoutine.doStep();
         }
 
+        // Network Tables
+        VEXBridge bridge = VEXBridge(0);
+
         // Dummy Chassis
-        // DummyChassis chassis = DummyChassis();
+        DummyChassis chassis = DummyChassis();
+        AutoStepList autoRoutine = AutoFactory::createPJMatchAuto(chassis, chassis);
 
         // Additional Network Objects
-        NTSerial serial = NTSerial(1);
-        NTValue<double> testValue = NTValue<double>("test", 0.0);
+        NTOdom networkOdom = NTOdom("Dummy", chassis);
 
         // Renderer
-        // EyesRenderer eyes = EyesRenderer();
+        EyesRenderer eyes = EyesRenderer();
     };
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ntSerial.hpp"
+#include "vexBridge.hpp"
 #include "utils/ntLogger.hpp"
 
 uint16_t idCounter = 0;
@@ -22,7 +22,7 @@ namespace vexbridge
               value(defaultValue)
         {
             // Label ID
-            NTSerial *serialInstance = NTSerial::getInstance();
+            VEXBridge *serialInstance = VEXBridge::getInstance();
             if (serialInstance == nullptr)
                 return;
 
@@ -52,7 +52,7 @@ namespace vexbridge
             this->value = value;
 
             // Check if BlueBox is initialized
-            NTSerial *serialInstance = NTSerial::getInstance();
+            VEXBridge *serialInstance = VEXBridge::getInstance();
             if (serialInstance == nullptr)
                 return;
 

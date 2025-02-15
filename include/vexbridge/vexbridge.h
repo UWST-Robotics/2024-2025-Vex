@@ -2,6 +2,6 @@
 
 #include "ntGroup.hpp"
 #include "ntValue.hpp"
-#include "ntSerial.hpp"
+#include "vexBridge.hpp"
 
 using namespace vexbridge;

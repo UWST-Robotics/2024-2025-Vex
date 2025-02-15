@@ -193,6 +193,7 @@ namespace devils
         static constexpr double REJECT_OFFSET = 13;                           // teeth
 
         // Hardware
+        VEXBridge bridge = VEXBridge(5);
         ADIPneumatic grabberPneumatic = ADIPneumatic("GrabberPneumatic", 1);
         ADIPneumatic wackerPneumatic = ADIPneumatic("Wacker", 2);
 
@@ -218,11 +219,10 @@ namespace devils
         // TankChassisOdom chassisOdom = TankChassisOdom(chassis, WHEEL_RADIUS, WHEEL_BASE);
         // TankChassisOdom chassisOdomNoIMU = TankChassisOdom(chassis, WHEEL_RADIUS, WHEEL_BASE);
         PerpendicularSensorOdometry deadWheelOdom = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
-        // NTOdom deadWheelOdomNT = NTOdom("DeadWheelOdom", deadWheelOdom);
 
         // Autonomous
         AutoStepList startRoutine = AutoFactory::createBlazeStartRoutine(chassis, deadWheelOdom, intake, conveyor);
-        AutoStepList autoRoutine = AutoFactory::createBlazeAutoRoutine(chassis, deadWheelOdom, intake, conveyor, wacker);
+        AutoStepList autoRoutine = AutoFactory::createBlazeSkillsAuto(chassis, deadWheelOdom, intake, conveyor, wacker);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

@@ -54,6 +54,8 @@ namespace vexbridge
             {
                 // Get the next packet in the queue
                 SerialPacket *packet = writeQueue.pop();
+                if (packet == nullptr)
+                    continue;
 
                 // Stats
                 uint32_t startTime = pros::millis();
@@ -69,7 +71,7 @@ namespace vexbridge
                 }
 
                 // Log Stats
-                NTLogger::log("Ping: " + std::to_string(pros::millis() - startTime) + "ms");
+                // NTLogger::log("Ping: " + std::to_string(pros::millis() - startTime) + "ms");
 
                 // Delete the packet from memory
                 delete packet;
@@ -102,7 +104,7 @@ namespace vexbridge
             for (int i = 0; i < MAX_RETRIES; i++)
             {
                 // Log
-                NTLogger::log("Writing packet " + std::to_string(packet->id) + " of type " + std::to_string((uint8_t)packet->type));
+                // NTLogger::log("Writing packet " + std::to_string(packet->id) + " of type " + std::to_string((uint8_t)packet->type));
 
                 // Serial Mode
                 if (serial != nullptr)
@@ -124,7 +126,6 @@ namespace vexbridge
                     // Wait for transmission to complete
                     // before listening to serial
                     uint32_t writeDelay = ceil(WRITE_DELAY_PER_BYTE * packetSize);
-                    printf("Write Delay: %d\n", writeDelay);
                     pros::delay(writeDelay);
                 }
 
@@ -142,7 +143,7 @@ namespace vexbridge
                 if (ackRes == 0)
                 {
                     // Log Success
-                    NTLogger::log("Packet " + std::to_string(packet->id) + " written successfully.");
+                    // NTLogger::log("Packet " + std::to_string(packet->id) + " written successfully.");
                     return 0;
                 }
             }
@@ -204,7 +205,6 @@ namespace vexbridge
                     return -1; // <-- Exit to re-send the packet
                 }
 
-                // Success
                 return 0;
             }
 
@@ -278,14 +278,14 @@ namespace vexbridge
             for (size_t i = 0; i < readQueue.size(); i++)
             {
                 // If the current flag is an escape flag, skip the next byte
-                if (readQueue[i] == 0x92)
+                if (readQueue[i] == ByteStuffer::ESCAPE_FLAG)
                 {
                     i++;
                     continue;
                 }
 
                 // If the current flag is not the end flag, skip it
-                if (readQueue[i] != 0xFA)
+                if (readQueue[i] != ByteStuffer::END_FLAG)
                     continue;
 
                 // Decode the packet up to the null byte
@@ -306,7 +306,7 @@ namespace vexbridge
 
     private:
         static constexpr int32_t VEX_WRITE_BUFFER_SIZE = 1024;
-        static constexpr uint32_t TIMEOUT = 20;        // ms
+        static constexpr uint32_t TIMEOUT = 50;        // ms
         static constexpr uint32_t UPDATE_INTERVAL = 2; // ms
         static constexpr uint32_t BAUDRATE = 115200;
         static constexpr uint8_t MAX_RETRIES = 3;
@@ -314,7 +314,7 @@ namespace vexbridge
         static constexpr size_t MAX_BUFFER_SIZE = 1024;
         static constexpr double WRITE_DELAY_PER_BYTE = 0.08; // ms (estimate based off of 115200 baud)
         static constexpr uint32_t POST_RECEIVE_DELAY = 4;    // ms
-        static constexpr bool WAIT_FOR_ACK = true;
+        static constexpr bool WAIT_FOR_ACK = false;
 
         pros::Serial *serial = nullptr;
         SerialQueue writeQueue;

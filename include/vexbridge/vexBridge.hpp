@@ -22,14 +22,14 @@ namespace vexbridge
      * Represents a serial port connection to the VEXBridge.
      * This is a singleton class - only one instance should be created.
      */
-    class NTSerial
+    class VEXBridge
     {
     public:
         /**
-         * Creates a new NTSerial instance.
+         * Creates a new VEXBridge instance.
          * @param port The VEX V5 port to connect to.
          */
-        NTSerial(uint8_t port) : daemon(port)
+        VEXBridge(uint8_t port) : daemon(port)
         {
             if (instance != nullptr)
                 delete instance;
@@ -38,7 +38,7 @@ namespace vexbridge
             // Call reset to clear NT
             reset();
         }
-        ~NTSerial()
+        ~VEXBridge()
         {
             instance = nullptr;
         }
@@ -137,21 +137,21 @@ namespace vexbridge
             daemon.writePacket(packet);
         }
 
-        static NTSerial *getInstance()
+        static VEXBridge *getInstance()
         {
             return instance;
         }
 
     private:
         // Singleton
-        static NTSerial *instance;
+        static VEXBridge *instance;
 
         SerialDaemon daemon;
     };
 }
 
 // Singleton instance
-vexbridge::NTSerial *vexbridge::NTSerial::instance = nullptr;
+vexbridge::VEXBridge *vexbridge::VEXBridge::instance = nullptr;
 
 // Assign Packet Types
 vexbridge::SerialPacketType *vexbridge::SerialPacketTypes::packetTypes[13] = {
