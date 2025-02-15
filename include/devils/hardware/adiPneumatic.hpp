@@ -1,7 +1,7 @@
 #pragma once
 #include "pros/adi.hpp"
 #include "../utils/logger.hpp"
-#include "../nt/objects/ntHardware.hpp"
+#include "hardwareBase.hpp"
 #include <string>
 
 namespace devils
@@ -10,7 +10,7 @@ namespace devils
      * Represents a non-V5 pneumatic valve controlled by ADI ports.
      * See https://github.com/msoe-vex/pcb-design/tree/main/VEX%20Solenoid%20Driver%20V2%20Complete
      */
-    class ADIPneumatic : private NTHardware
+    class ADIPneumatic : private HardwareBase
     {
     public:
         /**
@@ -19,7 +19,7 @@ namespace devils
          * @param port The ADI port of the motor controller (from 1 to 8)
          */
         ADIPneumatic(std::string name, int8_t port)
-            : NTHardware(name, "ADIPneumatic", port),
+            : HardwareBase(name, "ADIPneumatic", port),
               controller(abs(port))
         {
             isInverted = port < 0;
@@ -72,18 +72,19 @@ namespace devils
         }
 
     protected:
-        void serializeHardware(std::string &ntPrefix) override
+        /**
+         * Serializes the pneumatic to the network table.
+         */
+        void serialize() override
         {
-            NetworkTables::updateBoolValue(ntPrefix + "/isExtended", isExtended);
-        }
-
-        void checkHealth() override
-        {
-            clearFaults();
+            ntExtended.set(isExtended);
         }
 
     private:
         const pros::adi::DigitalOut controller;
+
+        NTValue<bool> ntExtended = ntGroup.makeValue("extended", false);
+
         bool isExtended = false;
         bool isInverted = false;
     };

@@ -6,14 +6,14 @@
 #include "pros/error.h"
 #include "motor.hpp"
 #include "../utils/logger.hpp"
-#include "../nt/objects/ntHardware.hpp"
+#include "hardwareBase.hpp"
 
 namespace devils
 {
     /**
      * Represents a motor object. All events are logged.
      */
-    class SmartMotor : public IMotor, protected NTHardware
+    class SmartMotor : public IMotor, protected HardwareBase
     {
     public:
         /**
@@ -23,7 +23,7 @@ namespace devils
          * @throws std::runtime_error if the motor could not be created, likely due to an invalid port.
          */
         SmartMotor(std::string name, int8_t port)
-            : NTHardware(name, "SmartMotor", port),
+            : HardwareBase(name, "SmartMotor", port),
               motor(port)
         {
             if (errno != 0)
@@ -127,18 +127,15 @@ namespace devils
         }
 
     protected:
-        void serializeHardware(std::string &ntPrefix) override
+        void serialize() override
         {
-            NetworkTables::updateDoubleValue(ntPrefix + "/temperature", getTemperature());
-            NetworkTables::updateDoubleValue(ntPrefix + "/position", getPosition());
-            NetworkTables::updateDoubleValue(ntPrefix + "/velocity", getVelocity());
-        }
+            // Update temp, position, and velocity
+            ntTemperature.set(getTemperature());
+            // ntPosition.set(getPosition());
+            // ntVelocity.set(getVelocity());
 
-        void checkHealth() override
-        {
             // Check if Motor is Connected
-            // isConnected = motor.is_installed();
-            isConnected = true; // TODO: Fix this
+            isConnected = motor.is_installed();
 
             // Get Motor Fault Bitmask
             uint32_t motorFaults = motor.get_faults();
@@ -158,11 +155,14 @@ namespace devils
                 reportFault("Over Current");
             else if (isDriverOverCurrent)
                 reportFault("Driver Over Current");
-            else
-                clearFaults();
         }
 
     private:
+        // NT
+        NTValue<float> ntTemperature = ntGroup.makeValue("temperature", 0.0f);
+        // NTValue<float> ntPosition = ntGroup.makeValue("position", 0.0f);
+        // NTValue<float> ntVelocity = ntGroup.makeValue("velocity", 0.0f);
+
         // Hardware
         pros::Motor motor;
 

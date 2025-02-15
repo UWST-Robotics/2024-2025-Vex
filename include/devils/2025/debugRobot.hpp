@@ -19,28 +19,20 @@ namespace devils
             // networkOdom.setSize(18.0, 18.0);
         }
 
-        void autonomous() override
-        {
-            chassis.stop();
-        }
-
         void opcontrol() override
         {
-            autonomous();
+            autoRoutine.doStep();
         }
 
-        void disabled() override
-        {
-            // Stop the robot
-            chassis.stop();
-        }
+        // Network Tables
+        VEXBridge bridge = VEXBridge(0);
 
         // Dummy Chassis
         DummyChassis chassis = DummyChassis();
+        AutoStepList autoRoutine = AutoFactory::createPJMatchAuto(chassis, chassis);
 
         // Additional Network Objects
-        // NTOdom networkOdom = NTOdom("DummyOdom", chassis);
-        // NTPath networkPath = NTPath("TestPath", path);
+        NTOdom networkOdom = NTOdom("Dummy", chassis);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

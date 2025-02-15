@@ -128,6 +128,7 @@ namespace devils
         static constexpr double IMU_HEADING_SCALE = 1.014;                    // %
 
         // Hardware
+        VEXBridge bridge = VEXBridge(5);
         ADIPneumatic grabberPneumatic = ADIPneumatic("GrabberPneumatic", 1);
         ADIPneumatic intakeLauncher = ADIPneumatic("IntakeLauncher", 3);
 
@@ -139,7 +140,7 @@ namespace devils
         OpticalSensor opticalSensor = OpticalSensor("OpticalSensor", 6);
         RotationSensor verticalSensor = RotationSensor("VerticalOdom", 9);
         RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 2);
-        IMU imu = IMU("IMU", 13);
+        InertialSensor imu = InertialSensor("IMU", 13);
 
         // Subsystems
         Timer gameTimer = Timer();
@@ -148,11 +149,9 @@ namespace devils
         ConveyorSystem conveyor = ConveyorSystem(conveyorMotors, grabberPneumatic);
         // TankChassisOdom chassisOdom = TankChassisOdom(chassis, WHEEL_RADIUS, WHEEL_BASE);
         PerpendicularSensorOdometry deadWheelOdom = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
-        // NTOdom networkOdom = NTOdom("DeadWheelOdom", deadWheelOdom);
 
         // Autonomous Routine
-        AutoStepList autoRoutine = AutoFactory::createPJAutoRoutine(chassis, deadWheelOdom, intake, conveyor);
-        // AutoStepList autoRoutine = AutoFactory::createCenterTestRoutine(chassis, deadWheelOdom, intake, conveyor);
+        AutoStepList autoRoutine = AutoFactory::createPJSkillsAuto(chassis, deadWheelOdom, intake, conveyor);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

@@ -7,6 +7,9 @@
 
 namespace devils
 {
+    /**
+     * Represents a path that is interpolated using cubic splines.
+     */
     class SplinePath : public Path
     {
     public:
@@ -20,6 +23,11 @@ namespace devils
             this->poses = poses;
         }
 
+        /**
+         * Gets a pose at a specific index along the path.
+         * @param index The index to get the pose at. Interpolate between indices.
+         * @return The pose at the index
+         */
         Pose getPoseAt(double index) override
         {
             // Check OOB
@@ -50,6 +58,10 @@ namespace devils
                 dt);
         }
 
+        /**
+         * Gets the length of the path
+         * @return The length of the path in control points
+         */
         double getLength() override
         {
             return poses.size();

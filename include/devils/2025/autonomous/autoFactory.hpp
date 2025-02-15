@@ -5,13 +5,14 @@
 #include "autoMogoStep.hpp"
 #include "autoWackStep.hpp"
 #include "autoConveyorStep.hpp"
+#include "autoMogoBranchStep.hpp"
 
 namespace devils
 {
     class AutoFactory
     {
     public:
-        static AutoStepList createPJAutoRoutine(
+        static AutoStepList createPJSkillsAuto(
             ChassisBase &chassis,
             OdomSource &odometry,
             IntakeSystem &intake,
@@ -166,7 +167,260 @@ namespace devils
             return AbsoluteStepConverter::relativeToAbsolute(autoRoutine);
         }
 
-        static AutoStepList createBlazeAutoRoutine(
+        static AutoStepList createTestAuto(
+            ChassisBase &chassis,
+            OdomSource &odometry)
+        {
+            // PID Params
+            PIDParams drivePID = {0.15, 0.0, 10};
+            PIDParams rotatePID = {1.0, 0.0, 60.0};
+            PIDParams drivingRotatePID = {2.5, 0.0, 100.0};
+
+            // Default Options
+            AutoDriveToStep::Options::defaultOptions = {
+                drivePID,
+                drivingRotatePID,
+                0.5, // maxSpeed
+                2.0, // goalDist
+                2.0, // goalSpeed
+            };
+            AutoRotateToStep::Options::defaultOptions = {
+                rotatePID,
+                0.5,  // maxSpeed
+                0.15, // minSpeed
+                0.05, // goalDist
+                1.0,  // goalSpeed
+            };
+
+            // Subroutines
+            // AutoStepList autoRoutine = AutoStepList({
+            //     new AutoDriveStep(chassis, odometry, 24.0),
+            //     new AutoPauseStep(chassis, 2000),
+            //     new AutoDriveStep(chassis, odometry, -24.0),
+            //     new AutoPauseStep(chassis, 2000),
+            //     new AutoDriveStep(chassis, odometry, 24.0),
+            //     new AutoPauseStep(chassis, 2000),
+            //     new AutoDriveStep(chassis, odometry, -24.0),
+            //     new AutoPauseStep(chassis, 2000),
+            //     new AutoDriveStep(chassis, odometry, 24.0),
+            //     new AutoPauseStep(chassis, 2000),
+            //     new AutoDriveStep(chassis, odometry, -24.0),
+            //     new AutoPauseStep(chassis, 2000),
+            //     new AutoDriveStep(chassis, odometry, 24.0),
+            //     new AutoPauseStep(chassis, 2000),
+            //     new AutoDriveStep(chassis, odometry, -24.0),
+            //     new AutoPauseStep(chassis, 2000),
+            // });
+            AutoStepList autoRoutine = AutoStepList({
+                new AutoRotateStep(chassis, odometry, M_PI * 0.5),
+                new AutoPauseStep(chassis, 2000),
+                new AutoRotateStep(chassis, odometry, M_PI * 0.5),
+                new AutoPauseStep(chassis, 2000),
+                new AutoRotateStep(chassis, odometry, M_PI * 0.5),
+                new AutoPauseStep(chassis, 2000),
+                new AutoRotateStep(chassis, odometry, M_PI * 0.5),
+                new AutoPauseStep(chassis, 2000),
+                new AutoRotateStep(chassis, odometry, M_PI * 0.5),
+                new AutoPauseStep(chassis, 2000),
+                new AutoRotateStep(chassis, odometry, M_PI * 0.5),
+                new AutoPauseStep(chassis, 2000),
+                new AutoRotateStep(chassis, odometry, M_PI * 0.5),
+                new AutoPauseStep(chassis, 2000),
+                new AutoRotateStep(chassis, odometry, M_PI * 0.5),
+                new AutoPauseStep(chassis, 2000),
+                new AutoRotateStep(chassis, odometry, M_PI * 0.5),
+                new AutoPauseStep(chassis, 2000),
+                new AutoRotateStep(chassis, odometry, M_PI * 0.5),
+                new AutoPauseStep(chassis, 2000),
+                new AutoRotateStep(chassis, odometry, M_PI * 0.5),
+                new AutoPauseStep(chassis, 2000),
+                new AutoRotateStep(chassis, odometry, M_PI * 0.5),
+                new AutoPauseStep(chassis, 2000),
+            });
+
+            return AbsoluteStepConverter::relativeToAbsolute(autoRoutine);
+        }
+
+        static AutoStepList createPJMatchAuto(
+            ChassisBase &chassis,
+            OdomSource &odometry)
+        { // PID Params
+            PIDParams drivePID = {0.15, 0.0, 10};
+            PIDParams rotatePID = {1.0, 0.0, 60.0};
+            PIDParams drivingRotatePID = {2.5, 0.0, 100.0};
+
+            // Default Options
+            AutoDriveToStep::Options::defaultOptions = {
+                drivePID,
+                drivingRotatePID,
+                0.5, // maxSpeed
+                2.0, // goalDist
+                2.0, // goalSpeed
+            };
+            AutoRotateToStep::Options::defaultOptions = {
+                rotatePID,
+                0.5,  // maxSpeed
+                0.15, // minSpeed
+                0.15, // goalDist
+                1.0,  // goalSpeed
+            };
+
+            // Speed Options
+            AutoDriveToStep::Options startingSpeed = {
+                drivePID,
+                drivingRotatePID,
+                1.0,    // maxSpeed
+                2.0,    // goalDist
+                2.0,    // goalSpeed
+                999999, // NEVER GIVE UP, NEVER SURRENDER
+            };
+
+            // Subroutines
+            AutoStepList autoRoutine = AutoStepList({
+                // Step 1
+                new AutoJumpToStep(odometry, -40, -36, M_PI * 0.9),
+                new AutoDriveStep(chassis, odometry, -36.0, startingSpeed),
+                // Swipe Mogo
+                new AutoDriveStep(chassis, odometry, 20.0, startingSpeed),
+                // Grab Mogo
+                // Check if we got the mogo
+
+                // Step 2a
+                new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
+                new AutoDriveStep(chassis, odometry, 8.0),
+                // new AutoPauseStep(chassis, 5000), // Make Step 2a last the same amount of time as Step 2b
+
+                // Step 2b
+                // new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
+                // new AutoDriveStep(chassis, odometry, -16.0),
+                // new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
+                // new AutoDriveStep(chassis, odometry, -24.0),
+                // new AutoDriveStep(chassis, odometry, 24.0),
+                // new AutoRotateToStep(chassis, odometry, M_PI * -0.5),
+                // new AutoDriveStep(chassis, odometry, 24.0),
+
+                // Step 3
+                new AutoRotateToStep(chassis, odometry, M_PI),
+                new AutoDriveStep(chassis, odometry, 24.0),
+                new AutoRotateToStep(chassis, odometry, M_PI * -0.75),
+                new AutoDriveStep(chassis, odometry, 14.0),
+                new AutoDriveStep(chassis, odometry, -4.0),
+
+                // Step 4
+                new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
+                new AutoDriveStep(chassis, odometry, 56.0),
+                new AutoRotateToStep(chassis, odometry, M_PI),
+                new AutoDriveStep(chassis, odometry, 6.0),
+                // Wall Stake
+                new AutoDriveStep(chassis, odometry, -6.0),
+
+                // Step 5
+                new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
+                new AutoDriveStep(chassis, odometry, 46.0),
+                new AutoRotateToStep(chassis, odometry, M_PI * 0.35),
+                new AutoDriveStep(chassis, odometry, 6.0),
+                new AutoRotateToStep(chassis, odometry, M_PI * 0.25),
+                new AutoDriveStep(chassis, odometry, 6.0),
+            });
+
+            return AbsoluteStepConverter::relativeToAbsolute(autoRoutine);
+        }
+
+        static AutoStepList createBlazeMatchAuto(
+            ChassisBase &chassis,
+            OdomSource &odometry)
+        {
+            // PID Params
+            PIDParams drivePID = {0.15, 0.0, 10};
+            PIDParams rotatePID = {1.0, 0.0, 60.0};
+            PIDParams drivingRotatePID = {2.5, 0.0, 100.0};
+
+            // Default Options
+            AutoDriveToStep::Options::defaultOptions = {
+                drivePID,
+                drivingRotatePID,
+                0.5, // maxSpeed
+                2.0, // goalDist
+                2.0, // goalSpeed
+            };
+            AutoRotateToStep::Options::defaultOptions = {
+                rotatePID,
+                0.5,  // maxSpeed
+                0.15, // minSpeed
+                0.15, // goalDist
+                1.0,  // goalSpeed
+            };
+
+            // Speed Options
+            AutoDriveToStep::Options startingSpeed = {
+                drivePID,
+                drivingRotatePID,
+                1.0,    // maxSpeed
+                2.0,    // goalDist
+                2.0,    // goalSpeed
+                999999, // NEVER GIVE UP, NEVER SURRENDER
+            };
+
+            // Subroutines
+            AutoStepList autoRoutine = AutoStepList({
+                // Step 1
+                new AutoJumpToStep(odometry, -40, 36, M_PI * -0.9),
+                new AutoDriveStep(chassis, odometry, -36.0, startingSpeed),
+                // Swipe Mogo
+                new AutoDriveStep(chassis, odometry, 20.0, startingSpeed),
+                // Grab Mogo
+                // Check if we got the mogo
+
+                // Step 2a
+                // new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
+                // new AutoDriveStep(chassis, odometry, 8.0),
+                // new AutoRotateToStep(chassis, odometry, M_PI),
+                // new AutoDriveStep(chassis, odometry, 24.0),
+                // new AutoRotateToStep(chassis, odometry, M_PI * 0.08),
+                // new AutoDriveStep(chassis, odometry, 40.0),
+                // new AutoDriveStep(chassis, odometry, -12.0),
+                // new AutoRotateToStep(chassis, odometry, M_PI),
+                // new AutoDriveStep(chassis, odometry, 36.0),
+
+                // Step 2b
+                new AutoRotateToStep(chassis, odometry, M_PI * 0.34),
+                new AutoDriveStep(chassis, odometry, -48.0),
+                new AutoRotateToStep(chassis, odometry, M_PI * 0.5),
+                new AutoDriveStep(chassis, odometry, 50.0),
+                new AutoRotateToStep(chassis, odometry, 0),
+                new AutoDriveStep(chassis, odometry, 24.0),
+                new AutoRotateToStep(chassis, odometry, M_PI * 0.15),
+                new AutoDriveStep(chassis, odometry, 20.0),
+                new AutoDriveStep(chassis, odometry, -10.0),
+                new AutoRotateToStep(chassis, odometry, M_PI),
+                new AutoDriveStep(chassis, odometry, 38.0),
+
+                // Step 3
+                new AutoRotateToStep(chassis, odometry, M_PI * 0.75),
+                new AutoRotateStep(chassis, odometry, M_PI * 0.25),
+                new AutoRotateStep(chassis, odometry, M_PI * -0.25),
+                new AutoRotateStep(chassis, odometry, M_PI * 0.25),
+                new AutoRotateStep(chassis, odometry, M_PI * -0.25),
+                new AutoRotateStep(chassis, odometry, M_PI * 0.25),
+                new AutoRotateStep(chassis, odometry, M_PI * -0.25),
+                new AutoDriveStep(chassis, odometry, -6.0),
+                new AutoDriveStep(chassis, odometry, 6.0),
+                new AutoDriveStep(chassis, odometry, -6.0),
+                new AutoDriveStep(chassis, odometry, 6.0),
+                new AutoDriveStep(chassis, odometry, -6.0),
+                new AutoRotateStep(chassis, odometry, M_PI),
+                // (Drop Mogo)
+
+                // Step 4
+                new AutoRotateToStep(chassis, odometry, 0),
+                new AutoDriveStep(chassis, odometry, 36.0),
+                // pounce on positive corner
+            });
+
+            return AbsoluteStepConverter::relativeToAbsolute(autoRoutine);
+        }
+
+        static AutoStepList createBlazeSkillsAuto(
             ChassisBase &chassis,
             OdomSource &odometry,
             IntakeSystem &intake,
@@ -182,8 +436,8 @@ namespace devils
             AutoDriveToStep::Options::defaultOptions = {
                 drivePID,
                 drivingRotatePID,
-                0.5,   // maxSpeed
-                2.0,   // goalDist
+                0.3,   // maxSpeed
+                4.0,   // goalDist
                 0.002, // goalSpeed
             };
             AutoRotateToStep::Options::defaultOptions = {
