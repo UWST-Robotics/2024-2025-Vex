@@ -1,25 +1,16 @@
 #pragma once
 #include "pros/rtos.hpp"
-#include "common/autoStep.hpp"
-#include "devils/odom/odomSource.hpp"
-#include "devils/chassis/chassisBase.hpp"
-#include "devils/utils/math.hpp"
-#include "devils/utils/pidController.hpp"
-#include "devils/odom/poseVelocityCalculator.hpp"
+#include "../common/autoStep.hpp"
+#include "../../odom/odomSource.hpp"
+#include "../../chassis/chassisBase.hpp"
+#include "../../utils/math.hpp"
+#include "../../utils/pidController.hpp"
+#include "../../odom/poseVelocityCalculator.hpp"
 
 namespace devils
 {
-    // Forward Declaration
-    class AbsoluteStepConverter;
-
-    /**
-     * Represents a rotational step in an autonomous routine.
-     */
-    class AutoRotateToStep : public IAutoStep
+    class AutoRotateToStep : public AutoStep
     {
-        // Allow the absolute step converter to access private members
-        friend class AbsoluteStepConverter;
-
     public:
         struct Options
         {
@@ -38,9 +29,6 @@ namespace devils
             /// @brief The maximum speed of the robot in rad/s
             double goalSpeed = 0.01;
 
-            /// @brief The timeout in ms to allow for the step to complete.
-            double timeout = 1000;
-
             /// @brief Setting this to false will rotate to the absolute angle instead of the minimum distance.
             bool useMinimumDistance = true;
 
@@ -49,7 +37,7 @@ namespace devils
         };
 
         /**
-         * Creates a new rotational step.
+         * Rotates the robot to a specific angle along its center of rotation.
          * @param chassis The chassis to control.
          * @param odomSource The odometry source to use.
          * @param targetAngle The angle to rotate to in radians.
@@ -68,71 +56,65 @@ namespace devils
         {
         }
 
-        void doStep() override
-        {
-            // Reset PID
-            rotationPID.reset();
-
-            // Start Time
-            double startTime = pros::millis();
-
-            // Control Loop
-            while (true)
-            {
-                // Get Current Pose
-                Pose currentPose = odomSource.getPose();
-                double currentVelocity = odomSource.getAngularVelocity();
-
-                // Calculate distance to start and target
-                double currentAngle = currentPose.rotation;
-                double distanceToTarget = angleDiff(targetAngle, currentAngle);
-
-                // Check if we are at the target
-                bool isAtGoalPose = fabs(distanceToTarget) < options.goalDist;
-                bool isAtGoalVelocity = fabs(currentVelocity) < options.goalSpeed;
-                if (isAtGoalPose && isAtGoalVelocity)
-                    break;
-
-                // Check if we timed out
-                double currentTime = pros::millis();
-                if (currentTime - startTime > options.timeout)
-                    break;
-
-                // Calculate Speed
-                double speed = rotationPID.update(distanceToTarget);
-                speed = std::clamp(speed, -options.maxSpeed, options.maxSpeed);        // Clamp to max speed
-                speed = std::copysign(std::max(fabs(speed), options.minSpeed), speed); // Clamp to min speed
-
-                // Move Chassis
-                chassis.move(0, speed);
-
-                // Delay
-                pros::delay(10);
-            }
-
-            // Stop Chassis
-            chassis.stop();
-
-            // Delay
-            pros::delay(POST_DRIVE_DELAY);
-        }
-
         Options &getOptions()
         {
             return options;
         }
 
-    protected:
-        // Options
-        Options options;
+        void onStart() override
+        {
+            // Reset Finished
+            this->isAtGoal = false;
 
-        // Robot Base
+            // Reset PID
+            rotationPID.reset();
+        }
+
+        void onUpdate() override
+        {
+            // Get Current Pose
+            Pose currentPose = odomSource.getPose();
+            double currentVelocity = odomSource.getAngularVelocity();
+
+            // Calculate distance to start and target
+            double currentAngle = currentPose.rotation;
+            double distanceToTarget = angleDiff(targetAngle, currentAngle);
+
+            // Check if we are at the goal
+            bool isAtGoalPose = fabs(distanceToTarget) < options.goalDist;
+            bool isAtGoalVelocity = fabs(currentVelocity) < options.goalSpeed;
+            isAtGoal = isAtGoalPose && isAtGoalVelocity;
+
+            // Calculate Speed
+            double speed = rotationPID.update(distanceToTarget);
+            speed = std::clamp(speed, -options.maxSpeed, options.maxSpeed);        // Clamp to max speed
+            speed = std::copysign(std::max(fabs(speed), options.minSpeed), speed); // Clamp to min speed
+
+            // Move Chassis
+            chassis.move(0, speed);
+        }
+
+        void onStop() override
+        {
+            // Stop Chassis
+            chassis.stop();
+        }
+
+        bool checkFinished() override
+        {
+            return isAtGoal;
+        }
+
+    protected:
+        // State
+        bool isAtGoal = false;
+
+        // Params
         ChassisBase &chassis;
         OdomSource &odomSource;
         PIDController rotationPID;
-
-        // Drive Step Variables
         double targetAngle = 0;
+        Options options;
 
     private:
         static constexpr double POST_DRIVE_DELAY = 50; // ms

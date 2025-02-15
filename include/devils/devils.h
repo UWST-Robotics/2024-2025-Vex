@@ -56,13 +56,16 @@
 // AutoSteps
 #include "autoSteps/common/autoStep.hpp"
 #include "autoSteps/common/autoStepList.hpp"
-#include "autoSteps/autoDriveStep.hpp"
-#include "autoSteps/autoDriveToStep.hpp"
-#include "autoSteps/autoRotateStep.hpp"
-#include "autoSteps/autoRotateToStep.hpp"
-#include "autoSteps/autoPauseStep.hpp"
-#include "autoSteps/autoJumpToStep.hpp"
-#include "autoSteps/absoluteStepConverter.hpp"
+#include "autoSteps/common/autoBuilder.hpp"
+#include "autoSteps/steps/autoTimeoutStep.hpp"
+#include "autoSteps/steps/autoDriveTimeStep.hpp"
+#include "autoSteps/steps/autoDriveToStep.hpp"
+#include "autoSteps/steps/autoDriveStep.hpp"
+#include "autoSteps/steps/autoRotateStep.hpp"
+#include "autoSteps/steps/autoRotateToStep.hpp"
+#include "autoSteps/steps/autoPauseStep.hpp"
+#include "autoSteps/steps/autoJumpToStep.hpp"
+#include "autoSteps/steps/autoBranchStep.hpp"
 
 // Display
 #include "display/eyesRenderer.hpp"

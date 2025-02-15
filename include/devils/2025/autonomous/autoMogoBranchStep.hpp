@@ -8,7 +8,7 @@ namespace devils
     /**
      * Branches based on whether the mogo has been grabbed.
      */
-    class AutoMogoBranchStep : public IAutoStep
+    class AutoMogoBranchStep : public AutoBranchStep
     {
     public:
         /**
@@ -17,25 +17,18 @@ namespace devils
          * @param hasMogoStep The step to execute if the mogo has been grabbed.
          * @param noMogoStep The step to execute if the mogo has not been grabbed.
          */
-        AutoMogoBranchStep(ConveyorSystem &conveyor, IAutoStep *hasMogoStep, IAutoStep *noMogoStep)
-            : conveyor(conveyor),
-              hasMogoStep(hasMogoStep),
-              noMogoStep(noMogoStep)
+        AutoMogoBranchStep(ConveyorSystem &conveyor, AutoStep *hasMogoStep, AutoStep *noMogoStep)
+            : AutoBranchStep(hasMogoStep, noMogoStep),
+              conveyor(conveyor)
         {
         }
 
-        void doStep() override
+        bool getCondition() override
         {
-            // TODO: Implement mogo sensor
-            if (conveyor.goalGrabbed())
-                hasMogoStep->doStep();
-            else
-                noMogoStep->doStep();
+            return conveyor.goalGrabbed();
         }
 
     private:
         ConveyorSystem &conveyor;
-        IAutoStep *hasMogoStep;
-        IAutoStep *noMogoStep;
     };
 }

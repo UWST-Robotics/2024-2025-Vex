@@ -15,13 +15,11 @@ namespace devils
          */
         DebugRobot()
         {
-            // Reset Network Tables
-            // networkOdom.setSize(18.0, 18.0);
         }
 
         void opcontrol() override
         {
-            autoRoutine.doStep();
+            autoRoutine->run();
         }
 
         // Network Tables
@@ -29,7 +27,7 @@ namespace devils
 
         // Dummy Chassis
         DummyChassis chassis = DummyChassis();
-        AutoStepList autoRoutine = AutoFactory::createPJMatchAuto(chassis, chassis);
+        AutoStepList *autoRoutine = AutoFactory::createPJMatchAuto(chassis, chassis);
 
         // Additional Network Objects
         NTOdom networkOdom = NTOdom("Dummy", chassis);

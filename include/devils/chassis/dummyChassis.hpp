@@ -24,6 +24,11 @@ namespace devils
             runAsync();
         }
 
+        void stop() override
+        {
+            ChassisBase::stop();
+        }
+
         void move(double forward, double turn, double strafe = 0) override
         {
             forward = std::clamp(forward, -1.0, 1.0) * forwardSpeed;

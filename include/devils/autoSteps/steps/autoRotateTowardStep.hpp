@@ -1,19 +1,16 @@
 #pragma once
 #include "pros/rtos.hpp"
-#include "common/autoStep.hpp"
-#include "devils/autoSteps/autoRotateToStep.hpp"
-#include "devils/odom/odomSource.hpp"
-#include "devils/chassis/chassisBase.hpp"
-#include "devils/utils/math.hpp"
+#include "autoRotateToStep.hpp"
+#include "../common/autoStep.hpp"
+#include "../../odom/odomSource.hpp"
+#include "../../chassis/chassisBase.hpp"
+#include "../../utils/math.hpp"
 
 namespace devils
 {
     // Forward Declaration
     class AbsoluteStepConverter;
 
-    /**
-     * Represents a rotational step in an autonomous routine.
-     */
     class AutoRotateTowardStep : public AutoRotateToStep
     {
         // Allow the absolute step converter to access private members
@@ -21,7 +18,7 @@ namespace devils
 
     public:
         /**
-         * Creates a new rotational step.
+         * Rotates the robot toward a specific pose along its center of rotation.
          * @param chassis The chassis to control.
          * @param odomSource The odometry source to use.
          * @param targetPose The target pose to rotate toward.
@@ -37,9 +34,8 @@ namespace devils
         {
         }
 
-        void doStep() override
+        void onStart() override
         {
-            // TODO: Test & Fix me
             // Calculate Target Pose
             Pose startPose = odomSource.getPose();
             this->targetAngle = std::atan2(
@@ -47,7 +43,7 @@ namespace devils
                 targetPose.x - startPose.x);
 
             // Do base step
-            AutoRotateToStep::doStep();
+            AutoRotateToStep::onStart();
         }
 
     protected:

@@ -5,7 +5,7 @@
 
 namespace devils
 {
-    class AutoWackStep : public IAutoStep
+    class AutoWackStep : public AutoStep
     {
     public:
         AutoWackStep(WackerSystem &wacker, bool shouldExtend = true)
@@ -13,16 +13,22 @@ namespace devils
         {
         }
 
-        void doStep() override
+        void onStart() override
         {
             wacker.setExtended(shouldExtend);
-            pros::delay(ACTUATION_DELAY);
+            actuationTimer.start();
+        }
+
+        bool checkFinished() override
+        {
+            return actuationTimer.finished();
         }
 
     private:
         static constexpr double ACTUATION_DELAY = 500; // ms
 
         bool shouldExtend;
+        Timer actuationTimer = Timer(ACTUATION_DELAY);
         WackerSystem &wacker;
     };
 }
