@@ -288,64 +288,66 @@ namespace devils
                 drivePID,
                 drivingRotatePID,
                 1.0, // maxSpeed
-                2.0, // goalDist
-                2.0  // goalSpeed
+                4.0, // goalDist
+                4.0  // goalSpeed
             };
 
             AutoBuilder blazeRoutine = AutoBuilder(chassis, odometry);
 
             // Step 1
-            blazeRoutine.setPose(-40, -36, M_PI * 0.9);
-            blazeRoutine.drive(-36.0, 10000, startingSpeed);
-            // Swipe Mogo
-            blazeRoutine.drive(20.0, 10000, startingSpeed);
-            // Grab Mogo
+            blazeRoutine.setPose(-42, 36, M_PI);
+            blazeRoutine.pause(500); // For debugging
+            blazeRoutine.driveSpline(
+                34.0,
+                8.0,
+                M_PI * -0.9,
+                -18.0,
+                2000,
+                startingSpeed);
+            // (Swipe Mogo)
+            blazeRoutine.driveRelative(16.0, 10000, startingSpeed);
+            blazeRoutine.driveRelative(-6.0);
+            // (Pickup Mogo)
+            blazeRoutine.driveRelative(6.0);
             // Check if we got the mogo
 
             // Step 2a
-            // blazeRoutine.rotate(M_PI * 0.5);
-            // blazeRoutine.drive(8.0);
-            // blazeRoutine.rotate(M_PI);
-            // blazeRoutine.drive(24.0);
-            // blazeRoutine.rotate(M_PI * 0.08);
-            // blazeRoutine.drive(40.0);
-            // blazeRoutine.drive(-12.0);
-            // blazeRoutine.rotate(M_PI);
-            // blazeRoutine.drive(36.0);
+            blazeRoutine.rotateTo(M_PI * 0.5);
+            blazeRoutine.drive(8.0);
+            blazeRoutine.rotateTo(M_PI);
+            blazeRoutine.drive(24.0);
+            blazeRoutine.rotateTo(M_PI * 0.08);
+            blazeRoutine.drive(40.0);
+            blazeRoutine.drive(-12.0);
+            blazeRoutine.rotateTo(M_PI);
+            blazeRoutine.drive(34.0);
 
             // Step 2b
-            blazeRoutine.rotateTo(M_PI * 0.34);
-            blazeRoutine.drive(-48.0);
-            blazeRoutine.rotateTo(M_PI * 0.5);
-            blazeRoutine.drive(50.0);
-            blazeRoutine.rotateTo(0);
-            blazeRoutine.drive(24.0);
-            blazeRoutine.rotateTo(M_PI * 0.15);
-            blazeRoutine.drive(20.0);
-            blazeRoutine.drive(-10.0);
-            blazeRoutine.rotateTo(M_PI);
-            blazeRoutine.drive(38.0);
+            // blazeRoutine.rotateTo(M_PI * 0.32);
+            // blazeRoutine.drive(-48.0);
+            // blazeRoutine.rotateTo(M_PI * 0.5);
+            // blazeRoutine.drive(50.0);
+            // blazeRoutine.rotateTo(M_PI * 0.08);
+            // blazeRoutine.drive(44.0);
+            // blazeRoutine.drive(-10.0);
+            // blazeRoutine.rotateTo(M_PI);
+            // blazeRoutine.drive(40.0);
 
             // Step 3
             blazeRoutine.rotateTo(M_PI * 0.75);
-            blazeRoutine.rotate(M_PI * 0.25);
-            blazeRoutine.rotate(M_PI * -0.25);
-            blazeRoutine.rotate(M_PI * 0.25);
-            blazeRoutine.rotate(M_PI * -0.25);
-            blazeRoutine.rotate(M_PI * 0.25);
-            blazeRoutine.rotate(M_PI * -0.25);
-            blazeRoutine.drive(-6.0);
-            blazeRoutine.drive(6.0);
-            blazeRoutine.drive(-6.0);
-            blazeRoutine.drive(6.0);
-            blazeRoutine.drive(-6.0);
-            blazeRoutine.rotateTo(M_PI);
+            blazeRoutine.driveRelative(4.0);
+            blazeRoutine.driveRelative(-6.0);
+            blazeRoutine.driveRelative(6.0);
+            blazeRoutine.driveRelative(-6.0);
+            blazeRoutine.rotateTo(M_PI * -0.25);
+            blazeRoutine.driveRelative(-6.0);
             // (Drop Mogo)
+            blazeRoutine.driveRelative(6.0);
 
             // Step 4
-            blazeRoutine.rotateTo(0);
-            blazeRoutine.drive(36.0);
-            // pounce on positive corner
+            blazeRoutine.rotateTo(M_PI * 0.75);
+            blazeRoutine.drive(-54.0);
+            // (Touch Ladder)
 
             return blazeRoutine.build();
         }

@@ -27,7 +27,7 @@ namespace devils
 
         // Dummy Chassis
         DummyChassis chassis = DummyChassis();
-        AutoStepList *autoRoutine = AutoFactory::createPJMatchAuto(chassis, chassis);
+        AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, chassis);
 
         // Additional Network Objects
         NTOdom networkOdom = NTOdom("Dummy", chassis);

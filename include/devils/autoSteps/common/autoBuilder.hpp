@@ -74,6 +74,15 @@ namespace devils
         }
 
         /**
+         * Gets the current pose of the robot
+         * @return The current pose of the robot
+         */
+        Pose getPose()
+        {
+            return pose;
+        }
+
+        /**
          * Pauses the autonomous routine for a given duration
          * @param duration The duration to pause in milliseconds
          */
