@@ -19,18 +19,24 @@ namespace devils
 
         void opcontrol() override
         {
-            autoRoutine->run();
+            blazeRoutine->runAsync();
+            pjRoutine->runAsync();
         }
 
         // Network Tables
         VEXBridge bridge = VEXBridge(0);
 
         // Dummy Chassis
-        DummyChassis chassis = DummyChassis();
-        AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, chassis);
+        DummyChassis blazeChassis = DummyChassis();
+        AutoStepList *blazeRoutine = AutoFactory::createBlazeMatchAuto(blazeChassis, blazeChassis);
+        NTOdom blazeOdomNT = NTOdom("Blaze", blazeChassis);
+
+        // Autonomous
+        DummyChassis pjChassis = DummyChassis();
+        AutoStepList *pjRoutine = AutoFactory::createPJMatchAuto(pjChassis, pjChassis);
+        NTOdom pjOdomNT = NTOdom("PepperJack", pjChassis);
 
         // Additional Network Objects
-        NTOdom networkOdom = NTOdom("Dummy", chassis);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

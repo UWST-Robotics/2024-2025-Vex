@@ -98,7 +98,7 @@ namespace devils
         }
 
         // VEXBridge
-        VEXBridge bridge = VEXBridge(4);
+        VEXBridge bridge = VEXBridge(0);
 
         // Hardware
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-6, 7, -8, 9, -10});
@@ -111,7 +111,7 @@ namespace devils
 
         // Auto
         TankChassisOdom odometry = TankChassisOdom(chassis, 1.375, 11);
-        AutoStepList *autoRoutine = AutoFactory::createPJMatchAuto(chassis, odometry);
+        AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, odometry);
 
         // NT
         NTOdom ntOdom = NTOdom("TankOdom", odometry);

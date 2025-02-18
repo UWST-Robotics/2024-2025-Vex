@@ -171,8 +171,8 @@ namespace devils
         {
             // PID Params
             PIDParams drivePID = {0.15, 0.0, 10};
-            PIDParams rotatePID = {1.0, 0.0, 60.0};
-            PIDParams drivingRotatePID = {2.5, 0.0, 100.0};
+            PIDParams rotatePID = {0.7, 0.0, 50.0};
+            PIDParams drivingRotatePID = {1.5, 0.0, 100.0};
 
             // Default Options
             AutoDriveToStep::Options::defaultOptions = {
@@ -187,14 +187,15 @@ namespace devils
                 0.5,  // maxSpeed
                 0.15, // minSpeed
                 0.15, // goalDist
-                1.0,  // goalSpeed
+                0.9,  // goalSpeed
             };
 
             // Speed Options
+            PIDParams startingRotatePID = {0.7, 0.0, 50.0};
             AutoDriveToStep::Options startingSpeed = {
                 drivePID,
                 drivingRotatePID,
-                1.0, // maxSpeed
+                0.8, // maxSpeed
                 4.0, // goalDist
                 4.0  // goalSpeed
             };
@@ -205,23 +206,23 @@ namespace devils
             pjRoutine.setPose(-42, -36, M_PI);
             pjRoutine.pause(500); // For debugging
             pjRoutine.driveSpline(
-                34.0,
+                46.0,
                 -8.0,
                 M_PI * 0.9,
                 -18.0,
                 2000,
                 startingSpeed);
             // Swipe Mogo
-            pjRoutine.driveRelative(16.0, 10000, startingSpeed);
-            pjRoutine.driveRelative(-6.0);
+            pjRoutine.driveRelative(18.0, 10000, startingSpeed);
+            pjRoutine.driveRelative(-8.0);
             // Grab Mogo
-            pjRoutine.driveRelative(6.0);
+            pjRoutine.driveRelative(8.0);
             // Check if we got the mogo
 
             // Step 2a
             // pjRoutine.rotateTo(M_PI * -0.5);
-            // pjRoutine.drive(8.0);
-            // pjRoutine.pause(5000); // Make Step 2a last the same amount of time as Step 2b
+            // pjRoutine.drive(10.0);
+            // pjRoutine.pause(4000); // Wait for Blaze
 
             // Step 2b
             pjRoutine.rotateTo(M_PI * -0.5);
@@ -231,17 +232,20 @@ namespace devils
             pjRoutine.drive(24.0);
             pjRoutine.rotateTo(M_PI * -0.5);
             pjRoutine.drive(24.0);
+            // pjRoutine.pause(3000); // Wait for Blaze
 
             // Step 3
             pjRoutine.rotateTo(M_PI);
             pjRoutine.drive(24.0);
             pjRoutine.rotateTo(M_PI * -0.75);
             pjRoutine.drive(14.0);
-            pjRoutine.drive(-4.0);
+            pjRoutine.driveRelative(-6.0);
+            pjRoutine.driveRelative(6.0);
+            pjRoutine.driveRelative(-6.0);
 
             // Step 4
-            pjRoutine.rotateTo(M_PI * 0.5);
-            pjRoutine.drive(56.0);
+            pjRoutine.rotateTo(M_PI * 0.52);
+            pjRoutine.drive(54.0);
             pjRoutine.rotateTo(M_PI);
             pjRoutine.drive(6.0);
             // Wall Stake
@@ -249,11 +253,11 @@ namespace devils
 
             // Step 5
             pjRoutine.rotateTo(M_PI * 0.5);
-            pjRoutine.drive(46.0);
+            pjRoutine.drive(52.0);
             pjRoutine.rotateTo(M_PI * 0.4);
-            pjRoutine.drive(6.0);
-            pjRoutine.rotateTo(M_PI * 0.3);
-            pjRoutine.drive(6.0);
+            pjRoutine.drive(5.0);
+            pjRoutine.rotateTo(M_PI * 0.25);
+            pjRoutine.drive(5.0);
 
             return pjRoutine.build();
         }
@@ -264,8 +268,8 @@ namespace devils
         {
             // PID Params
             PIDParams drivePID = {0.15, 0.0, 10};
-            PIDParams rotatePID = {1.0, 0.0, 60.0};
-            PIDParams drivingRotatePID = {2.5, 0.0, 100.0};
+            PIDParams rotatePID = {0.7, 0.0, 50.0};
+            PIDParams drivingRotatePID = {1.5, 0.0, 100.0};
 
             // Default Options
             AutoDriveToStep::Options::defaultOptions = {
@@ -280,14 +284,15 @@ namespace devils
                 0.5,  // maxSpeed
                 0.15, // minSpeed
                 0.15, // goalDist
-                1.0,  // goalSpeed
+                0.9,  // goalSpeed
             };
 
             // Speed Options
+            PIDParams startingRotatePID = {1.0, 0.0, 60.0};
             AutoDriveToStep::Options startingSpeed = {
                 drivePID,
-                drivingRotatePID,
-                1.0, // maxSpeed
+                startingRotatePID,
+                0.8, // maxSpeed
                 4.0, // goalDist
                 4.0  // goalSpeed
             };
@@ -312,26 +317,26 @@ namespace devils
             // Check if we got the mogo
 
             // Step 2a
-            blazeRoutine.rotateTo(M_PI * 0.5);
-            blazeRoutine.drive(8.0);
-            blazeRoutine.rotateTo(M_PI);
-            blazeRoutine.drive(24.0);
-            blazeRoutine.rotateTo(M_PI * 0.08);
-            blazeRoutine.drive(40.0);
-            blazeRoutine.drive(-12.0);
-            blazeRoutine.rotateTo(M_PI);
-            blazeRoutine.drive(34.0);
+            // blazeRoutine.rotateTo(M_PI * 0.5);
+            // blazeRoutine.driveRelative(8.0);
+            // blazeRoutine.rotateTo(M_PI);
+            // blazeRoutine.drive(24.0);
+            // blazeRoutine.rotateTo(M_PI * 0.08);
+            // blazeRoutine.drive(40.0);
+            // blazeRoutine.drive(-12.0);
+            // blazeRoutine.rotateTo(M_PI);
+            // blazeRoutine.drive(34.0);
 
             // Step 2b
-            // blazeRoutine.rotateTo(M_PI * 0.32);
-            // blazeRoutine.drive(-48.0);
-            // blazeRoutine.rotateTo(M_PI * 0.5);
-            // blazeRoutine.drive(50.0);
-            // blazeRoutine.rotateTo(M_PI * 0.08);
-            // blazeRoutine.drive(44.0);
-            // blazeRoutine.drive(-10.0);
-            // blazeRoutine.rotateTo(M_PI);
-            // blazeRoutine.drive(40.0);
+            blazeRoutine.rotateTo(M_PI * 0.32);
+            blazeRoutine.drive(-48.0);
+            blazeRoutine.rotateTo(M_PI * 0.5);
+            blazeRoutine.drive(50.0);
+            blazeRoutine.rotateTo(M_PI * 0.08);
+            blazeRoutine.drive(44.0);
+            blazeRoutine.drive(-10.0);
+            blazeRoutine.rotateTo(M_PI);
+            blazeRoutine.drive(40.0);
 
             // Step 3
             blazeRoutine.rotateTo(M_PI * 0.75);
@@ -342,12 +347,10 @@ namespace devils
             blazeRoutine.rotateTo(M_PI * -0.25);
             blazeRoutine.driveRelative(-6.0);
             // (Drop Mogo)
-            blazeRoutine.driveRelative(6.0);
 
             // Step 4
-            blazeRoutine.rotateTo(M_PI * 0.75);
-            blazeRoutine.drive(-54.0);
-            // (Touch Ladder)
+            blazeRoutine.drive(60.0);
+            // (Touch Ladder, Climb?)
 
             return blazeRoutine.build();
         }
