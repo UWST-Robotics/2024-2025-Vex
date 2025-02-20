@@ -5,6 +5,9 @@
 
 namespace devils
 {
+    /**
+     * Runs the conveyor system at a given speed.
+     */
     class AutoConveyorStep : public AutoStep
     {
     public:
@@ -13,15 +16,9 @@ namespace devils
         {
         }
 
-        void onStart() override
+        void onUpdate() override
         {
-            conveyor.setAsyncSpeed(conveyorSpeed);
-            conveyor.runAsync();
-        }
-
-        bool checkFinished() override
-        {
-            return true;
+            conveyor.moveAutomatic(conveyorSpeed);
         }
 
     private:

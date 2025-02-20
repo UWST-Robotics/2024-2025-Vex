@@ -20,6 +20,7 @@
 #include "hardware/opticalSensor.hpp"
 #include "hardware/visionSensor.hpp"
 #include "hardware/adiPneumatic.hpp"
+#include "hardware/adiDigitalInput.hpp"
 #include "hardware/adiPneumaticGroup.hpp"
 
 // Odom
@@ -66,6 +67,7 @@
 #include "autoSteps/steps/autoJumpToStep.hpp"
 #include "autoSteps/steps/autoBranchStep.hpp"
 #include "autoSteps/steps/autoPurePursuitStep.hpp"
+#include "autoSteps/steps/autoAsyncStep.hpp"
 
 // Display
 #include "display/eyesRenderer.hpp"

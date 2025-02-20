@@ -50,6 +50,7 @@ namespace devils
                 bool up = mainController.get_digital_new_press(DIGITAL_UP);
                 bool down = mainController.get_digital_new_press(DIGITAL_DOWN);
                 bool switchDrive = mainController.get_digital_new_press(DIGITAL_A);
+                bool lowerSteer = mainController.get_digital(DIGITAL_R2);
 
                 if (up)
                     steeringControl += 0.05;
@@ -60,27 +61,31 @@ namespace devils
 
                 if (switchDrive)
                 {
-                    driveMode = (driveMode + 1) % 3;
+                    driveMode = (driveMode + 1) % 2;
                     if (driveMode == 0)
-                        mainController.set_text(0, 0, "Split");
+                        mainController.set_text(0, 0, "Split/Arcade   ");
                     if (driveMode == 1)
-                        mainController.set_text(0, 0, "Arcade");
-                    if (driveMode == 2)
-                        mainController.set_text(0, 0, "Tank");
+                        mainController.set_text(0, 0, "Tank           ");
                 }
 
                 // Curve Joystick Inputs
-                leftY = JoystickCurve::curve(leftY, 3.0, 0.1);
-                leftX = JoystickCurve::curve(leftX, 3.0, 0.05);
-                rightX = JoystickCurve::curve(rightX, 3.0, 0.05);
-                rightY = JoystickCurve::curve(rightY, 3.0, 0.1);
+                leftY = JoystickCurve::curve(leftY, 3.0, 0.1, 0.15);
+                leftX = JoystickCurve::curve(leftX, 4.0, 0.05, 0.2);
+                rightX = JoystickCurve::curve(rightX, 4.0, 0.05, 0.2);
+                rightY = JoystickCurve::curve(rightY, 3.0, 0.1, 0.15);
+
+                // mainController.set_text(0, 0, std::to_string(lerpedX));
 
                 // Move Chassis
+                double steering = leftX;
+                if (std::abs(rightX) > std::abs(leftX))
+                    steering = rightX;
+                if (lowerSteer)
+                    steering *= 0.5;
+
                 if (driveMode == 0)
-                    chassis.move(leftY, rightX * steeringControl);
+                    chassis.move(leftY, steering * steeringControl);
                 if (driveMode == 1)
-                    chassis.move(leftY, leftX * steeringControl);
-                if (driveMode == 2)
                     chassis.moveTank(leftY, rightY);
 
                 // Move Conveyor

@@ -3,27 +3,22 @@
 #include "../devils.h"
 #include "subsystems/ConveyorSystem.hpp"
 #include "subsystems/IntakeSystem.hpp"
+#include "subsystems/MogoGrabSystem.hpp"
 #include "autonomous/autoFactory.hpp"
 
 namespace devils
 {
-    /**
-     * Represents a PJ robot (15x15) and all of its subsystems.
-     */
     struct PJRobot : public Robot
     {
-        /**
-         * Creates a new instance of PepperJack.
-         */
         PJRobot()
         {
             // Initialize Hardware
             imu.calibrate();
-            imu.setHeadingScale(IMU_HEADING_SCALE);
 
             // Initialize Subsystems
-            conveyor.useSensor(&opticalSensor);
-            conveyor.setAutoRejectParams(CONVEYOR_LENGTH, HOOK_INTERVAL, REJECT_OFFSET);
+            // conveyor.setAutoRejectParams(CONVEYOR_LENGTH, HOOK_INTERVAL, REJECT_OFFSET);
+
+            mogoGrabber.useLimitSwitch(&mogoLimitSwitch);
 
             deadWheelOdom.useIMU(&imu);
             deadWheelOdom.runAsync();
@@ -31,70 +26,56 @@ namespace devils
 
         void autonomous() override
         {
-            conveyor.runAsync();
-
-            intakeLauncher.extend();
-            conveyor.setSortingEnabled(true);
-
-            // imu.calibrate();
-            imu.waitUntilCalibrated();
-            imu.setHeading(0);
-
-            autoRoutine->run();
         }
 
         void opcontrol() override
         {
-            // Stop Autonomous Tasks
-            conveyor.stop();
-
-            double intakeSpeed = 1.0;
-            intakeLauncher.extend();
-
-            // Game Timer
-            gameTimer.start(); // 60 seconds
-
             // Loop
             while (true)
             {
                 // Take Controller Inputs
                 double leftY = mainController.get_analog(ANALOG_LEFT_Y) / 127.0;
                 double leftX = mainController.get_analog(ANALOG_LEFT_X) / 127.0;
-                double intakeInput = mainController.get_analog(ANALOG_RIGHT_Y) / 127.0;
-                bool grabInput = mainController.get_digital_new_press(DIGITAL_A);
-                bool sortingInput = mainController.get_digital(DIGITAL_L1) || mainController.get_digital(DIGITAL_L2);
+                double rightX = mainController.get_analog(ANALOG_RIGHT_X) / 127.0;
+                double rightY = mainController.get_analog(ANALOG_RIGHT_Y) / 127.0;
+
+                bool lowArmInput = mainController.get_digital(DIGITAL_B);
+                bool midArmInput = mainController.get_digital(DIGITAL_A) || mainController.get_digital(DIGITAL_Y);
+                bool highArmInput = mainController.get_digital(DIGITAL_X);
+
+                bool clawInput = mainController.get_digital(DIGITAL_L1) || mainController.get_digital(DIGITAL_L2);
+                bool mogoInput = mainController.get_digital_new_press(DIGITAL_R2);
 
                 // Curve Joystick Inputs
-                leftY = JoystickCurve::curve(leftY, 3.0, 0.1);
-                leftX = JoystickCurve::curve(leftX, 3.0, 0.05);
-                intakeInput = JoystickCurve::curve(intakeInput, 3.0, 0.1);
+                leftY = JoystickCurve::curve(leftY, 3.0, 0.1, 0.15);
+                leftX = JoystickCurve::curve(leftX, 3.0, 0.05, 0.2);
+                rightX = JoystickCurve::curve(rightX, 3.0, 0.05, 0.2);
+                rightY = JoystickCurve::curve(rightY, 3.0, 0.1, 0.15);
 
-                // Toggle Auto Reject
-                conveyor.setSortingEnabled(sortingInput);
+                // Decrease turning speed for improved control
+                rightX *= 0.7;
 
-                // Move Conveyor/Intake
-                conveyor.moveAutomatic(intakeInput * 0.75);
-                intake.move(intakeInput);
+                // Intake Arm
+                if (lowArmInput)
+                    intakeSystem.moveArmToPosition(IntakeSystem::BOTTOM_RING);
+                else if (midArmInput)
+                    intakeSystem.moveArmToPosition(IntakeSystem::ALLIANCE_STAKE);
+                else if (highArmInput)
+                    intakeSystem.moveArmToPosition(IntakeSystem::NEUTRAL_STAKE);
 
-                // Grab Mogo
-                if (grabInput)
+                // Intake Claw
+                intakeSystem.setClawGrabbed(clawInput);
+
+                // Mogo
+                if (mogoInput)
                 {
-                    // Toggle the goal grabber
-                    bool isGoalGrabbed = !conveyor.goalGrabbed();
-                    conveyor.setGoalGrabbed(isGoalGrabbed);
-
-                    // Controller feedback
-                    mainController.rumble(isGoalGrabbed ? "-" : "..");
+                    // Toggle Mogo Grabber
+                    bool shouldGrabGoal = !mogoGrabber.isMogoGrabbed();
+                    mogoGrabber.setMogoGrabbed(shouldGrabGoal);
                 }
 
-                // Check Timer
-                bool final10 = gameTimer.timeRemaining() < 10000;
-                bool isFinished = gameTimer.finished();
-                if (final10 && !isFinished)
-                    mainController.rumble("..");
-
-                // Print Motor Temps
-                mainController.print(0, 0, "Temp: %f", conveyorMotors.getTemperature());
+                // Conveyor
+                conveyor.moveAutomatic(rightY);
 
                 // Move Chassis
                 chassis.move(leftY, leftX);
@@ -108,47 +89,40 @@ namespace devils
         {
             // Stop the robot
             chassis.stop();
-            intakeLauncher.retract();
 
-            // Game Timer
-            gameTimer.stop();
-
-            // Tasks
-            conveyor.stop();
+            // Stop all async tasks
+            AutoAsyncStep::stopAll();
         }
 
         // Constants
-        static constexpr double DEAD_WHEEL_RADIUS = 1.0;       // in
-        static constexpr double IMU_HEADING_SCALE = 1.014;     // %
-        static constexpr double CONVEYOR_LENGTH = 76.0;        // teeth
-        static constexpr double HOOK_INTERVAL = 25.3;          // teeth
-        static constexpr double REJECT_OFFSET = 12.5;          // teeth
-        static constexpr uint32_t GAME_TIMER_DURATION = 60000; // ms
+        static constexpr double DEAD_WHEEL_RADIUS = 1.0; // in
+        static constexpr double CONVEYOR_LENGTH = 84.0;  // teeth
+        static constexpr double HOOK_INTERVAL = 21.0;    // teeth
+        static constexpr double REJECT_OFFSET = 13;      // teeth
 
         // Hardware
-        VEXBridge bridge = VEXBridge(5);
-        ADIPneumatic grabberPneumatic = ADIPneumatic("GrabberPneumatic", 1);
-        ADIPneumatic intakeLauncher = ADIPneumatic("IntakeLauncher", 3);
+        VEXBridge bridge = VEXBridge(0);
 
-        SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {11, -12, 18, -20});
-        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {-19, 17, 15, -16});
-        SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {3, -4});
-        SmartMotorGroup intakeMotors = SmartMotorGroup("IntakeMotors", {10});
+        SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 2, -3, 4, -5});
+        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {6, -7, 8, -9, 10});
+        SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {19, -20});
+        SmartMotorGroup intakeArmMotors = SmartMotorGroup("IntakeArmMotors", {-17, 18});
 
-        OpticalSensor opticalSensor = OpticalSensor("OpticalSensor", 6);
-        RotationSensor verticalSensor = RotationSensor("VerticalOdom", 9);
-        RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 2);
-        InertialSensor imu = InertialSensor("IMU", 13);
+        RotationSensor verticalSensor = RotationSensor("VerticalOdom", 16);
+        RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 17);
+
+        InertialSensor imu = InertialSensor("IMU", 15);
+
+        ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 1);
+        ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 2);
+        ADIDigitalInput mogoLimitSwitch = ADIDigitalInput("MogoLimitSwitch", 3);
 
         // Subsystems
-        Timer gameTimer = Timer(GAME_TIMER_DURATION);
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
-        IntakeSystem intake = IntakeSystem(intakeMotors);
-        ConveyorSystem conveyor = ConveyorSystem(conveyorMotors, grabberPneumatic);
+        ConveyorSystem conveyor = ConveyorSystem(conveyorMotors);
+        MogoGrabSystem mogoGrabber = MogoGrabSystem(mogoPneumatic);
+        IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors);
         PerpendicularSensorOdometry deadWheelOdom = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
-
-        // Autonomous Routine
-        AutoStepList *autoRoutine = AutoFactory::createPJSkillsAuto(chassis, deadWheelOdom, intake, conveyor);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

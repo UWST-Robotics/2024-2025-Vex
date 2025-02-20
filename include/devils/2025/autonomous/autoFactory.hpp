@@ -1,9 +1,9 @@
 #pragma once
 
 #include "devils/devils.h"
-#include "autoIntakeStep.hpp"
+#include "autoIntakeArmStep.hpp"
+#include "autoIntakeClawStep.hpp"
 #include "autoMogoStep.hpp"
-#include "autoWackStep.hpp"
 #include "autoConveyorStep.hpp"
 #include "autoMogoBranchStep.hpp"
 
@@ -16,7 +16,8 @@ namespace devils
             ChassisBase &chassis,
             OdomSource &odometry,
             IntakeSystem &intake,
-            ConveyorSystem &conveyor)
+            ConveyorSystem &conveyor,
+            MogoGrabSystem &mogoGrabber)
         {
             // PID Params
             PIDParams drivePID = {0.09, 0.0, 10};
@@ -74,7 +75,7 @@ namespace devils
                 new AutoDriveStep(chassis, odometry, -5.0),
 
                 // Actuate the mogo intake
-                new AutoGrabMogoStep(conveyor, true),
+                new AutoGrabMogoStep(mogoGrabber, true),
 
                 // Return to the original position
                 new AutoDriveStep(chassis, odometry, 10.0),
@@ -82,7 +83,7 @@ namespace devils
 
             AutoBuilder pjRoutine = AutoBuilder(chassis, odometry);
             pjRoutine.setPose(-66, -48, 0);
-            pjRoutine.addStep(new AutoIntakeStep(intake, 1.0));
+            // pjRoutine.addStep(new AutoIntakeStep(intake, 1.0));
             pjRoutine.pause(500); // Wait for intake to extend
 
             // NE Mogo
@@ -107,7 +108,7 @@ namespace devils
 
             pjRoutine.drive(-12.0);
             pjRoutine.rotate(M_PI * 0.25);
-            pjRoutine.addStep(new AutoGrabMogoStep(conveyor, false));
+            pjRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
             pjRoutine.drive(4.0);
             pjRoutine.drive(-20.0);
 
@@ -138,7 +139,7 @@ namespace devils
 
             pjRoutine.rotate(M_PI * -0.25);
 
-            pjRoutine.addStep(new AutoGrabMogoStep(conveyor, false));
+            pjRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
             pjRoutine.drive(26.0);
 
             // NW Mogo
@@ -155,7 +156,7 @@ namespace devils
             pjRoutine.drive(24.0);
 
             pjRoutine.rotate(M_PI * 0.75);
-            pjRoutine.addStep(new AutoGrabMogoStep(conveyor, false));
+            pjRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
             pjRoutine.drive(6.0);
             pjRoutine.drive(-22.0, 1000, highSpeed);
 
@@ -360,7 +361,7 @@ namespace devils
             OdomSource &odometry,
             IntakeSystem &intake,
             ConveyorSystem &conveyor,
-            WackerSystem &wacker)
+            MogoGrabSystem &mogoGrabber)
         {
             // PID Params
             PIDParams drivePID = {0.09, 0.0, 10};
@@ -420,7 +421,7 @@ namespace devils
                 new AutoDriveStep(chassis, odometry, -6.0),
 
                 // Actuate the mogo intake
-                new AutoGrabMogoStep(conveyor, true),
+                new AutoGrabMogoStep(mogoGrabber, true),
 
                 // Return to the original position
                 new AutoDriveStep(chassis, odometry, 10.0),
@@ -428,15 +429,15 @@ namespace devils
 
             AutoBuilder blazeRoutine = AutoBuilder(chassis, odometry);
             blazeRoutine.setPose(-64, 0, 0);
-            blazeRoutine.addStep(new AutoIntakeStep(intake, 1.0));
+            // blazeRoutine.addStep(new AutoIntakeStep(intake, 1.0));
             blazeRoutine.addStep(new AutoConveyorStep(conveyor, 1.0));
 
             // Red Wall Stake
             blazeRoutine.drive(6.0);
             blazeRoutine.drive(-6.9);
-            blazeRoutine.addStep(new AutoGrabMogoStep(conveyor, true));
+            blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, true));
             blazeRoutine.pause(1000);
-            blazeRoutine.addStep(new AutoGrabMogoStep(conveyor, false));
+            blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
 
             // SW Mogo
             blazeRoutine.drive(17.0);
@@ -464,7 +465,7 @@ namespace devils
 
             blazeRoutine.drive(-9.0);
             blazeRoutine.rotate(M_PI * -0.25);
-            blazeRoutine.addStep(new AutoGrabMogoStep(conveyor, false));
+            blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
 
             // SE Mogo
             blazeRoutine.drive(-14.5);
@@ -486,7 +487,7 @@ namespace devils
             blazeRoutine.drive(-24.0);
 
             blazeRoutine.rotate(M_PI * -0.75);
-            blazeRoutine.addStep(new AutoGrabMogoStep(conveyor, false));
+            blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
             blazeRoutine.drive(4.0);
             blazeRoutine.drive(-16.0);
             blazeRoutine.drive(16.0);
@@ -500,9 +501,9 @@ namespace devils
             blazeRoutine.rotate(M_PI);
             blazeRoutine.drive(12.0);
             blazeRoutine.drive(-16, 2000, slowSpeed);
-            blazeRoutine.addStep(new AutoGrabMogoStep(conveyor, true));
+            blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, true));
             blazeRoutine.pause(5000);
-            blazeRoutine.addStep(new AutoGrabMogoStep(conveyor, false));
+            blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
 
             // Climb
             // blazeRoutine.drive(16.0);
@@ -518,7 +519,8 @@ namespace devils
             ChassisBase &chassis,
             OdomSource &odometry,
             IntakeSystem &intake,
-            ConveyorSystem &conveyor)
+            ConveyorSystem &conveyor,
+            MogoGrabSystem &mogoGrabber)
         {
             // PID Params
             PIDParams drivePID = {0.09, 0.0, 10};
@@ -537,14 +539,14 @@ namespace devils
             // Create the auto routine
             AutoBuilder startRoutine = AutoBuilder(chassis, odometry);
             startRoutine.setPose(-64, 0, 0);
-            startRoutine.addStep(new AutoIntakeStep(intake, 1.0));
+            // startRoutine.addStep(new AutoIntakeStep(intake, 1.0));
 
             // Red Wall Stake
             startRoutine.drive(6.0);
             startRoutine.drive(-6.9);
-            startRoutine.addStep(new AutoGrabMogoStep(conveyor, true));
+            startRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, true));
             startRoutine.pause(1000);
-            startRoutine.addStep(new AutoGrabMogoStep(conveyor, false));
+            startRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
 
             return startRoutine.build();
         }

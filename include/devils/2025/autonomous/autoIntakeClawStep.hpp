@@ -5,17 +5,17 @@
 
 namespace devils
 {
-    class AutoIntakeStep : public AutoStep
+    class AutoIntakeClawStep : public AutoStep
     {
     public:
-        AutoIntakeStep(IntakeSystem &intake, double intakeSpeed = 1.0)
-            : intake(intake), intakeSpeed(intakeSpeed)
+        AutoIntakeClawStep(IntakeSystem &intake, bool isGrabbed)
+            : intake(intake), isGrabbed(isGrabbed)
         {
         }
 
         void onStart() override
         {
-            intake.move(intakeSpeed);
+            intake.setClawGrabbed(isGrabbed);
         }
 
         bool checkFinished() override
@@ -24,7 +24,7 @@ namespace devils
         }
 
     private:
-        double intakeSpeed;
         IntakeSystem &intake;
+        bool isGrabbed;
     };
 }

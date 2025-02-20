@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../subsystems/ConveyorSystem.hpp"
+#include "../subsystems/MogoGrabSystem.hpp"
 #include "devils/devils.h"
 
 namespace devils
@@ -8,14 +8,14 @@ namespace devils
     class AutoGrabMogoStep : public AutoStep
     {
     public:
-        AutoGrabMogoStep(ConveyorSystem &conveyor, bool shouldGrab = true)
-            : conveyor(conveyor), shouldGrab(shouldGrab)
+        AutoGrabMogoStep(MogoGrabSystem &mogoGrabber, bool shouldGrab = true)
+            : mogoGrabber(mogoGrabber), shouldGrab(shouldGrab)
         {
         }
 
         void onStart() override
         {
-            conveyor.setGoalGrabbed(shouldGrab);
+            mogoGrabber.setMogoGrabbed(shouldGrab);
             actuationTimer.start();
         }
 
@@ -29,6 +29,6 @@ namespace devils
 
         bool shouldGrab;
         Timer actuationTimer = Timer(ACTUATION_DELAY);
-        ConveyorSystem &conveyor;
+        MogoGrabSystem &mogoGrabber;
     };
 }

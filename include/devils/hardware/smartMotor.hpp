@@ -131,7 +131,7 @@ namespace devils
         {
             // Update temp, position, and velocity
             ntTemperature.set(getTemperature());
-            // ntPosition.set(getPosition());
+            ntPosition.set(getPosition());
             // ntVelocity.set(getVelocity());
 
             // Check if Motor is Connected
@@ -160,7 +160,7 @@ namespace devils
     private:
         // NT
         NTValue<float> ntTemperature = ntGroup.makeValue("temperature", 0.0f);
-        // NTValue<float> ntPosition = ntGroup.makeValue("position", 0.0f);
+        NTValue<float> ntPosition = ntGroup.makeValue("position", 0.0f);
         // NTValue<float> ntVelocity = ntGroup.makeValue("velocity", 0.0f);
 
         // Hardware

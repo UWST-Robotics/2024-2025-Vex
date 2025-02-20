@@ -14,19 +14,12 @@ namespace devils
     /**
      * Represents the conveyor belt system of the robot.
      */
-    class ConveyorSystem : public Runnable
+    class ConveyorSystem
     {
     public:
-        ConveyorSystem(SmartMotorGroup &conveyorMotors,
-                       ADIPneumatic &grabberPneumatic)
-            : conveyorMotors(conveyorMotors),
-              grabberPneumatic(grabberPneumatic)
+        ConveyorSystem(SmartMotorGroup &conveyorMotors)
+            : conveyorMotors(conveyorMotors)
         {
-        }
-
-        void onUpdate() override
-        {
-            moveAutomatic(asyncSpeed);
         }
 
         /**
@@ -62,12 +55,11 @@ namespace devils
         void moveAutomatic(double targetSpeed = 1.0)
         {
             // Current State
-            bool isGrabbed = goalGrabbed();
             RingType currentRing = getCurrentRing();
             bool isRingDetected = currentRing != RingType::NONE;
 
             // Calculate the speed of the conveyor system
-            double maxSpeed = isGrabbed ? MOGO_CONVEYOR_SPEED : NO_MOGO_CONVEYOR_SPEED;
+            double maxSpeed = this->hasMogo ? MOGO_CONVEYOR_SPEED : NO_MOGO_CONVEYOR_SPEED;
             double speed = std::min(maxSpeed, targetSpeed);
             bool isForwards = targetSpeed > 0;
 
@@ -110,19 +102,6 @@ namespace devils
                 return;
             }
 
-            if (isLadyBrownUp)
-            {
-                conveyorMotors.moveVoltage(LADY_BROWN_UP_SPEED);
-                return;
-            }
-
-            // Lady Brown Down
-            if (isLadyBrownDown)
-            {
-                conveyorMotors.moveVoltage(LADY_BROWN_DOWN_SPEED);
-                return;
-            }
-
             // Blue Ring Rejection
             if (isRejectingRing)
             {
@@ -132,7 +111,7 @@ namespace devils
 
             // Prevent rings from being pushed out when we don't have a mogo
             if (isRingDetected &&
-                !isGrabbed &&
+                !this->hasMogo &&
                 isForwards &&
                 !rejectionTimer.running())
             {
@@ -176,30 +155,6 @@ namespace devils
         }
 
         /**
-         * Sets whether a mogo is currently grabbed.
-         * @param isGrabbed True if a mogo is grabbed, false otherwise.
-         */
-        void setGoalGrabbed(bool isGrabbed)
-        {
-            // Update the mogo actuation time
-            bool didChange = isGrabbed != goalGrabbed();
-            if (didChange)
-                startCooldown(MOGO_ACTUATION_DELAY);
-
-            // Actuate the grabber
-            grabberPneumatic.setExtended(isGrabbed);
-        }
-
-        /**
-         * Returns whether a mogo is currently grabbed.
-         * @return True if a mogo is grabbed, false otherwise.
-         */
-        bool goalGrabbed()
-        {
-            return grabberPneumatic.getExtended();
-        }
-
-        /**
          * Gets the position of the conveyor system in teeth.
          * @return The position of the conveyor system in teeth.
          */
@@ -234,19 +189,17 @@ namespace devils
         }
 
         /**
-         * Sets the state of the lady brown system.
-         * @param isDown True if the lady brown is down, false otherwise.
-         * @param isUp True if the lady brown is up, false otherwise.
+         * Sets whether a mogo is currently grabbed.
+         * @param hasMogo True if a mogo is grabbed, false otherwise.
          */
-        void setLadyBrownState(bool isDown, bool isUp)
+        void setMogoGrabbed(bool hasMogo)
         {
-            isLadyBrownDown = isDown;
-            isLadyBrownUp = isUp;
-        }
+            // Update the mogo actuation time
+            bool didChange = hasMogo != this->hasMogo;
+            if (didChange)
+                startCooldown(MOGO_ACTUATION_DELAY);
 
-        void setAsyncSpeed(double asyncSpeed)
-        {
-            this->asyncSpeed = asyncSpeed;
+            this->hasMogo = hasMogo;
         }
 
     private:
@@ -308,22 +261,15 @@ namespace devils
         /// @brief The amount of teeth on the sprocket.
         static constexpr int SPROCKET_TEETH = 12;
 
-        //      LADY BROWN OPTIONS
-
-        static constexpr double LADY_BROWN_DOWN_SPEED = 0.3;
-        static constexpr double LADY_BROWN_UP_SPEED = -0.5;
-
         // Conveyor Params
         double conveyorLength = 76;
         double hookInterval = 25.3;
         double rejectionOffset = 12.5;
-        double asyncSpeed = 1.0;
 
         // State
-        bool isLadyBrownUp = false;
-        bool isLadyBrownDown = false;
-        bool isRejectingRing = false;
+        bool hasMogo = false;
         bool enableSorting = false;
+        bool isRejectingRing = false;
         double cooldownSpeed = 0;
 
         // Timers
@@ -333,7 +279,6 @@ namespace devils
 
         // Hardware
         SmartMotorGroup &conveyorMotors;
-        ADIPneumatic &grabberPneumatic;
         OpticalSensor *sensor = nullptr;
     };
 }

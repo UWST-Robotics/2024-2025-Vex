@@ -3,28 +3,23 @@
 #include "../devils.h"
 #include "subsystems/ConveyorSystem.hpp"
 #include "subsystems/IntakeSystem.hpp"
-#include "subsystems/WackerSystem.hpp"
-#include "subsystems/LadyBrownSystem.hpp"
+#include "subsystems/MogoGrabSystem.hpp"
 #include "autonomous/autoFactory.hpp"
 
 namespace devils
 {
-    /**
-     * Represents a Blaze robot (24x24) and all of its subsystems.
-     */
     struct BlazeRobot : public Robot
     {
-        /**
-         * Creates a new instance of Blaze.
-         */
         BlazeRobot()
         {
             // Initialize Hardware
             imu.calibrate();
 
             // Initialize Subsystems
+            // conveyor.setAutoRejectParams(CONVEYOR_LENGTH, HOOK_INTERVAL, REJECT_OFFSET);
             conveyor.useSensor(&conveyorSensor);
-            conveyor.setAutoRejectParams(CONVEYOR_LENGTH, HOOK_INTERVAL, REJECT_OFFSET);
+
+            mogoGrabber.useLimitSwitch(&mogoLimitSwitch);
 
             deadWheelOdom.useIMU(&imu);
             deadWheelOdom.runAsync();
@@ -32,39 +27,10 @@ namespace devils
 
         void autonomous() override
         {
-            // Initialize Conveyor
-            conveyor.setSortingEnabled(true);
-
-            // Initialize IMU
-            imu.waitUntilCalibrated();
-            imu.setHeading(0);
-
-            conveyor.runAsync();
-            ladyBrown.runAsync();
-
-            autoRoutine->run();
         }
 
         void opcontrol() override
         {
-            // Initialize Conveyor
-            conveyor.setSortingEnabled(false);
-
-            // Start Tasks
-            conveyor.runAsync();
-            ladyBrown.runAsync();
-
-            startRoutine->run();
-
-            // Stop Tasks
-            conveyor.stop();
-            ladyBrown.stop();
-
-            // Teleop State
-            bool isConveyorUp = true;
-            bool isConveyorPaused = false;
-            bool isWackerDown = false;
-
             // Loop
             while (true)
             {
@@ -73,94 +39,54 @@ namespace devils
                 double leftX = mainController.get_analog(ANALOG_LEFT_X) / 127.0;
                 double rightX = mainController.get_analog(ANALOG_RIGHT_X) / 127.0;
                 double rightY = mainController.get_analog(ANALOG_RIGHT_Y) / 127.0;
-                bool intakeIn = mainController.get_digital(DIGITAL_R1);
-                bool intakeOut = mainController.get_digital(DIGITAL_R2);
-                bool brownUp = mainController.get_digital(DIGITAL_L1);
-                bool brownDown = mainController.get_digital(DIGITAL_L2);
-                bool wackerInput = mainController.get_digital_new_press(DIGITAL_B);
-                bool grabInput = mainController.get_digital_new_press(DIGITAL_A);
-                bool conveyorUp = mainController.get_digital_new_press(DIGITAL_UP);
-                bool conveyorDown = mainController.get_digital_new_press(DIGITAL_DOWN);
+
+                bool lowArmInput = mainController.get_digital(DIGITAL_B);
+                bool midArmInput = mainController.get_digital(DIGITAL_A) || mainController.get_digital(DIGITAL_Y);
+                bool highArmInput = mainController.get_digital(DIGITAL_X);
+
+                bool clawInput = mainController.get_digital(DIGITAL_L1) || mainController.get_digital(DIGITAL_L2);
+                bool mogoInput = mainController.get_digital_new_press(DIGITAL_R2);
+                bool slowInput = mainController.get_digital(DIGITAL_R1);
 
                 // Curve Joystick Inputs
-                leftY = JoystickCurve::curve(leftY, 3.0, 0.1);
-                leftX = JoystickCurve::curve(leftX, 3.0, 0.05);
-                rightX = JoystickCurve::curve(rightX, 3.0, 0.05);
-                rightY = JoystickCurve::curve(rightY, 3.0, 0.1);
+                leftY = JoystickCurve::curve(leftY, 3.0, 0.1, 0.15);
+                leftX = JoystickCurve::curve(leftX, 3.0, 0.05, 0.2);
+                rightX = JoystickCurve::curve(rightX, 3.0, 0.05, 0.2);
+                rightY = JoystickCurve::curve(rightY, 3.0, 0.1, 0.15);
 
-                rightX *= 0.5; // Decrease turning speed for improved control
+                // Decrease turning speed for improved control
+                rightX *= 0.5;
 
-                // Reverse Intake
-                if (intakeOut || !isConveyorUp)
+                // Combine Left and Right X Joystick Inputs
+                double combinedX = JoystickCurve::combine(leftX, rightX);
+
+                // Intake Arm
+                if (lowArmInput)
+                    intakeSystem.moveArmToPosition(IntakeSystem::BOTTOM_RING);
+                else if (midArmInput)
+                    intakeSystem.moveArmToPosition(IntakeSystem::ALLIANCE_STAKE);
+                else if (highArmInput)
+                    intakeSystem.moveArmToPosition(IntakeSystem::NEUTRAL_STAKE);
+
+                // Intake Claw
+                intakeSystem.setClawGrabbed(clawInput);
+
+                // Mogo
+                if (mogoInput)
                 {
-                    intake.move(-1.0);
+                    // Toggle Mogo Grabber
+                    bool shouldGrabGoal = !mogoGrabber.isMogoGrabbed();
+                    mogoGrabber.setMogoGrabbed(shouldGrabGoal);
                 }
 
-                // Intake In
-                else if (intakeIn)
-                {
-                    intake.move(1.0);
-                    isConveyorPaused = false; // Unpause the conveyor
-                }
+                // Slow Mode
+                double speedMultiplier = slowInput ? 0.5 : 1.0;
 
-                // Stop Intake
-                else
-                {
-                    intake.move(0);
-                }
-
-                // Lady Brown
-                if (brownUp)
-                    ladyBrown.raise();
-                else if (brownDown)
-                    ladyBrown.lower();
-                else
-                    ladyBrown.idle();
-
-                // Move Conveyor
-                if (conveyorUp)
-                    isConveyorUp = true;
-                else if (conveyorDown)
-                    isConveyorUp = false;
-
-                // Unpause if the goal is released
-                if (!conveyor.goalGrabbed())
-                    isConveyorPaused = false;
-
-                // Pause Conveyor
-                if (isConveyorPaused)
-                    conveyor.forceMove(0);
-
-                // Run Forward
-                else if (isConveyorUp)
-                    conveyor.moveAutomatic(1.0);
-
-                // Eject Rings
-                else
-                    conveyor.moveAutomatic(-0.5);
-
-                // Grab Mogo
-                if (grabInput)
-                {
-                    // Toggle the goal grabber
-                    bool isGoalGrabbed = !conveyor.goalGrabbed();
-                    conveyor.setGoalGrabbed(isGoalGrabbed);
-
-                    // Controller feedback
-                    mainController.rumble(isGoalGrabbed ? "-" : "..");
-
-                    // Pause the conveyor until intake is activated or mogo is released
-                    isConveyorPaused = true;
-                }
-
-                // Wacker
-                if (wackerInput)
-                    isWackerDown = !isWackerDown;
-
-                wacker.setExtended(isWackerDown);
+                // Conveyor
+                conveyor.moveAutomatic(rightY);
 
                 // Move Chassis
-                chassis.move(leftY, rightX);
+                chassis.move(leftY * speedMultiplier, combinedX * speedMultiplier);
 
                 // Delay to prevent the CPU from being overloaded
                 pros::delay(20);
@@ -171,12 +97,9 @@ namespace devils
         {
             // Stop the robot
             chassis.stop();
-            wackerPneumatic.retract();
-            conveyor.setGoalGrabbed(false);
 
-            // Tasks
-            ladyBrown.stop();
-            conveyor.stop();
+            // Stop all async steps
+            AutoAsyncStep::stopAll();
         }
 
         // Constants
@@ -186,34 +109,30 @@ namespace devils
         static constexpr double REJECT_OFFSET = 13;      // teeth
 
         // Hardware
-        VEXBridge bridge = VEXBridge(5);
-        ADIPneumatic grabberPneumatic = ADIPneumatic("GrabberPneumatic", 1);
-        ADIPneumatic wackerPneumatic = ADIPneumatic("Wacker", 2);
+        VEXBridge bridge = VEXBridge(0);
 
-        SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {20, -11, 5, -6});
-        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {-1, 2, 3, -4});
-        SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {-9, 10});
-        SmartMotorGroup intakeMotors = SmartMotorGroup("IntakeMotors", {18});
-        SmartMotorGroup ladyBrownMotors = SmartMotorGroup("LadyBrownMotors", {-13});
+        SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 2, -3, 4, -5});
+        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {6, -7, 8, -9, 10});
+        SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {19, -20});
+        SmartMotorGroup intakeArmMotors = SmartMotorGroup("IntakeArmMotors", {-17, 18});
 
         RotationSensor verticalSensor = RotationSensor("VerticalOdom", 16);
         RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 17);
-        RotationSensor ladyBrownSensor = RotationSensor("LadyBrownSensor", -12);
 
-        OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 8);
         InertialSensor imu = InertialSensor("IMU", 15);
+
+        OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 14);
+
+        ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 1);
+        ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 2);
+        ADIDigitalInput mogoLimitSwitch = ADIDigitalInput("MogoLimitSwitch", 3);
 
         // Subsystems
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
-        IntakeSystem intake = IntakeSystem(intakeMotors);
-        ConveyorSystem conveyor = ConveyorSystem(conveyorMotors, grabberPneumatic);
-        WackerSystem wacker = WackerSystem(wackerPneumatic);
-        LadyBrownSystem ladyBrown = LadyBrownSystem(ladyBrownMotors, ladyBrownSensor, conveyor);
+        ConveyorSystem conveyor = ConveyorSystem(conveyorMotors);
+        MogoGrabSystem mogoGrabber = MogoGrabSystem(mogoPneumatic);
+        IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors);
         PerpendicularSensorOdometry deadWheelOdom = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
-
-        // Autonomous
-        AutoStepList *startRoutine = AutoFactory::createBlazeStartRoutine(chassis, deadWheelOdom, intake, conveyor);
-        AutoStepList *autoRoutine = AutoFactory::createBlazeSkillsAuto(chassis, deadWheelOdom, intake, conveyor, wacker);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

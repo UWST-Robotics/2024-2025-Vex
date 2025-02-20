@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../subsystems/ConveyorSystem.hpp"
+#include "../subsystems/MogoGrabSystem.hpp"
 #include "devils/devils.h"
 
 namespace devils
@@ -13,22 +13,22 @@ namespace devils
     public:
         /**
          * Creates a new mogo branch step.
-         * @param conveyor The conveyor system to check.
+         * @param mogoGrabber The mogo grabber system.
          * @param hasMogoStep The step to execute if the mogo has been grabbed.
          * @param noMogoStep The step to execute if the mogo has not been grabbed.
          */
-        AutoMogoBranchStep(ConveyorSystem &conveyor, AutoStep *hasMogoStep, AutoStep *noMogoStep)
+        AutoMogoBranchStep(MogoGrabSystem &mogoGrabber, AutoStep *hasMogoStep, AutoStep *noMogoStep)
             : AutoBranchStep(hasMogoStep, noMogoStep),
-              conveyor(conveyor)
+              mogoGrabber(mogoGrabber)
         {
         }
 
         bool getCondition() override
         {
-            return conveyor.goalGrabbed();
+            return mogoGrabber.hasMogo();
         }
 
     private:
-        ConveyorSystem &conveyor;
+        MogoGrabSystem &mogoGrabber;
     };
 }

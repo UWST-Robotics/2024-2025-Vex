@@ -52,9 +52,9 @@ namespace devils
          * @param val The value to lerp.
          * @return The lerped value. If val is negative, the result will be negative.
          */
-        static double lerp(int min, int max, double val)
+        static double lerp(double min, double max, double val)
         {
-            double absVal = std::abs(val);
+            double absVal = std::fabs(val);
             double lerpVal = std::lerp(min, max, absVal);
             return std::copysign(lerpVal, val);
         }
@@ -86,6 +86,21 @@ namespace devils
 
             // Lerp
             return JoystickCurve::lerp(min, max, newVal);
+        }
+
+        /**
+         * Combines two joystick values. Chooses the value with the highest magnitude.
+         * @param valueA The first value.
+         * @param valueB The second value.
+         * @return The combined value.
+         */
+        static double combine(
+            double valueA,
+            double valueB)
+        {
+            if (std::fabs(valueA) > std::fabs(valueB))
+                return valueA;
+            return valueB;
         }
 
     private:
