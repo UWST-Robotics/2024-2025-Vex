@@ -168,7 +168,10 @@ namespace devils
 
         static AutoStepList *createPJMatchAuto(
             ChassisBase &chassis,
-            OdomSource &odometry)
+            OdomSource &odometry,
+            IntakeSystem &intake,
+            ConveyorSystem &conveyor,
+            MogoGrabSystem &mogoGrabber)
         {
             // PID Params
             PIDParams drivePID = {0.15, 0.0, 10};
@@ -213,26 +216,27 @@ namespace devils
                 -18.0,
                 2000,
                 startingSpeed);
-            // Swipe Mogo
+            pjRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, true));
             pjRoutine.driveRelative(18.0, 10000, startingSpeed);
+            // Regrab Mogo
+            pjRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
             pjRoutine.driveRelative(-8.0);
-            // Grab Mogo
+            pjRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, true));
             pjRoutine.driveRelative(8.0);
-            // Check if we got the mogo
 
             // Step 2a
-            // pjRoutine.rotateTo(M_PI * -0.5);
-            // pjRoutine.drive(10.0);
+            pjRoutine.rotateTo(M_PI * -0.5);
+            pjRoutine.drive(10.0);
             // pjRoutine.pause(4000); // Wait for Blaze
 
             // Step 2b
-            pjRoutine.rotateTo(M_PI * -0.5);
-            pjRoutine.drive(-16.0);
-            pjRoutine.rotateTo(M_PI * -0.75);
-            pjRoutine.drive(-24.0);
-            pjRoutine.drive(24.0);
-            pjRoutine.rotateTo(M_PI * -0.5);
-            pjRoutine.drive(24.0);
+            // pjRoutine.rotateTo(M_PI * -0.5);
+            // pjRoutine.drive(-16.0);
+            // pjRoutine.rotateTo(M_PI * -0.75);
+            // pjRoutine.drive(-24.0);
+            // pjRoutine.drive(24.0);
+            // pjRoutine.rotateTo(M_PI * -0.5);
+            // pjRoutine.drive(24.0);
             // pjRoutine.pause(3000); // Wait for Blaze
 
             // Step 3
@@ -247,9 +251,10 @@ namespace devils
             // Step 4
             pjRoutine.rotateTo(M_PI * 0.52);
             pjRoutine.drive(54.0);
+            pjRoutine.addStep(new AutoTimeoutStep(new AutoIntakeArmStep(intake, IntakeSystem::ArmPosition::ALLIANCE_STAKE), 1500));
             pjRoutine.rotateTo(M_PI);
             pjRoutine.drive(6.0);
-            // Wall Stake
+            pjRoutine.addStep(new AutoTimeoutStep(new AutoIntakeArmStep(intake, IntakeSystem::ArmPosition::THIRD_RING), 1500));
             pjRoutine.drive(-6.0);
 
             // Step 5
@@ -265,7 +270,10 @@ namespace devils
 
         static AutoStepList *createBlazeMatchAuto(
             ChassisBase &chassis,
-            OdomSource &odometry)
+            OdomSource &odometry,
+            IntakeSystem &intake,
+            ConveyorSystem &conveyor,
+            MogoGrabSystem &mogoGrabber)
         {
             // PID Params
             PIDParams drivePID = {0.15, 0.0, 10};
@@ -293,7 +301,7 @@ namespace devils
             AutoDriveToStep::Options startingSpeed = {
                 drivePID,
                 startingRotatePID,
-                0.8, // maxSpeed
+                0.5, // maxSpeed
                 4.0, // goalDist
                 4.0  // goalSpeed
             };
@@ -304,16 +312,19 @@ namespace devils
             blazeRoutine.setPose(-42, 36, M_PI);
             blazeRoutine.pause(500); // For debugging
             blazeRoutine.driveSpline(
-                34.0,
-                8.0,
-                M_PI * -0.9,
+                32.0,
+                10.0,
+                M_PI * -0.85,
                 -18.0,
-                2000,
+                3000,
                 startingSpeed);
-            // (Swipe Mogo)
+            blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, true));
+            blazeRoutine.pause(10000);
             blazeRoutine.driveRelative(16.0, 10000, startingSpeed);
+            // Regrab Mogo
+            blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
             blazeRoutine.driveRelative(-6.0);
-            // (Pickup Mogo)
+            blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, true));
             blazeRoutine.driveRelative(6.0);
             // Check if we got the mogo
 
@@ -329,15 +340,15 @@ namespace devils
             // blazeRoutine.drive(34.0);
 
             // Step 2b
-            blazeRoutine.rotateTo(M_PI * 0.32);
-            blazeRoutine.drive(-48.0);
-            blazeRoutine.rotateTo(M_PI * 0.5);
-            blazeRoutine.drive(50.0);
-            blazeRoutine.rotateTo(M_PI * 0.08);
-            blazeRoutine.drive(44.0);
-            blazeRoutine.drive(-10.0);
-            blazeRoutine.rotateTo(M_PI);
-            blazeRoutine.drive(40.0);
+            // blazeRoutine.rotateTo(M_PI * 0.32);
+            // blazeRoutine.drive(-48.0);
+            // blazeRoutine.rotateTo(M_PI * 0.5);
+            // blazeRoutine.drive(50.0);
+            // blazeRoutine.rotateTo(M_PI * 0.08);
+            // blazeRoutine.drive(44.0);
+            // blazeRoutine.drive(-10.0);
+            // blazeRoutine.rotateTo(M_PI);
+            // blazeRoutine.drive(40.0);
 
             // Step 3
             blazeRoutine.rotateTo(M_PI * 0.75);

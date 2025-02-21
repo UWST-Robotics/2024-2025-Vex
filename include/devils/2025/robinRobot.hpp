@@ -30,7 +30,7 @@ namespace devils
             imu.waitUntilCalibrated();
             imu.setHeading(M_PI);
 
-            autoRoutine->run();
+            // autoRoutine->run();
         }
 
         void opcontrol() override
@@ -116,7 +116,7 @@ namespace devils
 
         // Auto
         TankChassisOdom odometry = TankChassisOdom(chassis, 1.375, 11);
-        AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, odometry);
+        // AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, odometry);
 
         // NT
         NTOdom ntOdom = NTOdom("TankOdom", odometry);

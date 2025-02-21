@@ -28,16 +28,24 @@ namespace devils
             : grabberPneumatic(grabberPneumatic),
               armMotors(armMotors)
         {
+            armMotors.setPosition(0);
         }
 
         /**
          * Sets the position of the intake arm.
          * @param position The position to set the arm to.
          */
-        void moveArmToPosition(ArmPosition position)
+        void setArmPosition(ArmPosition position)
         {
             this->targetPosition = position;
-            double targetEncoderTicks = convertPositionToEncoderTicks(position);
+        }
+
+        /**
+         * Moves the arm to the target position.
+         */
+        void moveArmToPosition()
+        {
+            double targetEncoderTicks = convertPositionToEncoderTicks(this->targetPosition);
             moveArmToEncoderTicks(targetEncoderTicks);
         }
 
@@ -135,7 +143,7 @@ namespace devils
         static constexpr double MAX_SPEED = 0.8;     // %
 
         // State
-        ArmPosition targetPosition;
+        ArmPosition targetPosition = BOTTOM_RING;
 
         // Hardware
         ADIPneumatic &grabberPneumatic;

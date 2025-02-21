@@ -13,9 +13,14 @@ namespace devils
         {
         }
 
+        void onStart() override
+        {
+            intake.setArmPosition(position);
+        }
+
         void onUpdate() override
         {
-            intake.moveArmToPosition(position);
+            intake.moveArmToPosition();
         }
 
         bool checkFinished() override

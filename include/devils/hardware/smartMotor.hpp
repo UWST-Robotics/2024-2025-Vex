@@ -74,6 +74,15 @@ namespace devils
         }
 
         /**
+         * Sets the position of the motor in encoder ticks.
+         * @param position The position to set the motor to in encoder ticks.
+         */
+        void setPosition(double position)
+        {
+            motor.set_zero_position(position);
+        }
+
+        /**
          * Returns the current speed of the motor in RPM.
          * @return The current speed of the motor in RPM or `PROS_ERR_F` if the speed could not be retrieved.
          */

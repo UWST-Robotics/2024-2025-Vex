@@ -57,11 +57,12 @@ namespace devils
 
                 // Intake Arm
                 if (lowArmInput)
-                    intakeSystem.moveArmToPosition(IntakeSystem::BOTTOM_RING);
+                    intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
                 else if (midArmInput)
-                    intakeSystem.moveArmToPosition(IntakeSystem::ALLIANCE_STAKE);
+                    intakeSystem.setArmPosition(IntakeSystem::ALLIANCE_STAKE);
                 else if (highArmInput)
-                    intakeSystem.moveArmToPosition(IntakeSystem::NEUTRAL_STAKE);
+                    intakeSystem.setArmPosition(IntakeSystem::NEUTRAL_STAKE);
+                intakeSystem.moveArmToPosition();
 
                 // Intake Claw
                 intakeSystem.setClawGrabbed(clawInput);

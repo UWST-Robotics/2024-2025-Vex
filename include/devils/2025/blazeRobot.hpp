@@ -21,16 +21,30 @@ namespace devils
 
             mogoGrabber.useLimitSwitch(&mogoLimitSwitch);
 
-            deadWheelOdom.useIMU(&imu);
-            deadWheelOdom.runAsync();
+            // odometry.useIMU(&imu);
+            odometry.runAsync();
         }
 
         void autonomous() override
         {
+            // Default State
+            intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
+            mogoGrabber.setMogoGrabbed(false);
+
+            // Calibrate IMU
+            imu.calibrate();
+            imu.waitUntilCalibrated();
+            imu.setHeading(M_PI);
+
+            autoRoutine->run();
         }
 
         void opcontrol() override
         {
+            // Default State
+            intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
+            mogoGrabber.setMogoGrabbed(false);
+
             // Loop
             while (true)
             {
@@ -62,11 +76,12 @@ namespace devils
 
                 // Intake Arm
                 if (lowArmInput)
-                    intakeSystem.moveArmToPosition(IntakeSystem::BOTTOM_RING);
+                    intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
                 else if (midArmInput)
-                    intakeSystem.moveArmToPosition(IntakeSystem::ALLIANCE_STAKE);
+                    intakeSystem.setArmPosition(IntakeSystem::ALLIANCE_STAKE);
                 else if (highArmInput)
-                    intakeSystem.moveArmToPosition(IntakeSystem::NEUTRAL_STAKE);
+                    intakeSystem.setArmPosition(IntakeSystem::NEUTRAL_STAKE);
+                intakeSystem.moveArmToPosition();
 
                 // Intake Claw
                 intakeSystem.setClawGrabbed(clawInput);
@@ -83,6 +98,7 @@ namespace devils
                 double speedMultiplier = slowInput ? 0.5 : 1.0;
 
                 // Conveyor
+                conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
                 conveyor.moveAutomatic(rightY);
 
                 // Move Chassis
@@ -95,11 +111,14 @@ namespace devils
 
         void disabled() override
         {
+            // Stop autonomous
+            AutoAsyncStep::stopAll();
+            autoRoutine->stop();
+
             // Stop the robot
             chassis.stop();
 
-            // Stop all async steps
-            AutoAsyncStep::stopAll();
+            mogoGrabber.setMogoGrabbed(false);
         }
 
         // Constants
@@ -132,7 +151,12 @@ namespace devils
         ConveyorSystem conveyor = ConveyorSystem(conveyorMotors);
         MogoGrabSystem mogoGrabber = MogoGrabSystem(mogoPneumatic);
         IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors);
-        PerpendicularSensorOdometry deadWheelOdom = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
+        TankChassisOdom odometry = TankChassisOdom(chassis, 1.375, 11);
+        // PerpendicularSensorOdometry deadWheelOdom = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
+
+        // Auto
+        NTOdom ntOdom = NTOdom("Blaze", odometry);
+        AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

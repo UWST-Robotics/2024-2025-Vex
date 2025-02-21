@@ -19,8 +19,8 @@ namespace devils
 
         void opcontrol() override
         {
-            blazeRoutine->runAsync();
-            pjRoutine->runAsync();
+            // blazeRoutine->runAsync();
+            // pjRoutine->runAsync();
         }
 
         // Network Tables
@@ -28,12 +28,12 @@ namespace devils
 
         // Dummy Chassis
         DummyChassis blazeChassis = DummyChassis();
-        AutoStepList *blazeRoutine = AutoFactory::createBlazeMatchAuto(blazeChassis, blazeChassis);
+        // AutoStepList *blazeRoutine = AutoFactory::createBlazeMatchAuto(blazeChassis, blazeChassis);
         NTOdom blazeOdomNT = NTOdom("Blaze", blazeChassis);
 
         // Autonomous
         DummyChassis pjChassis = DummyChassis();
-        AutoStepList *pjRoutine = AutoFactory::createPJMatchAuto(pjChassis, pjChassis);
+        // AutoStepList *pjRoutine = AutoFactory::createPJMatchAuto(pjChassis, pjChassis);
         NTOdom pjOdomNT = NTOdom("PepperJack", pjChassis);
 
         // Additional Network Objects
