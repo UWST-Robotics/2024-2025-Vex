@@ -5,10 +5,10 @@
 
 namespace devils
 {
-    class AutoIntakeArmStep : public AutoStep
+    class AutoIntakeSetArmPositionStep : public AutoStep
     {
     public:
-        AutoIntakeArmStep(IntakeSystem &intake, IntakeSystem::ArmPosition position)
+        AutoIntakeSetArmPositionStep(IntakeSystem &intake, IntakeSystem::ArmPosition position)
             : intake(intake), position(position)
         {
         }
@@ -18,14 +18,9 @@ namespace devils
             intake.setArmPosition(position);
         }
 
-        void onUpdate() override
-        {
-            intake.moveArmToPosition();
-        }
-
         bool checkFinished() override
         {
-            return intake.checkArmAtPosition();
+            return true;
         }
 
     private:

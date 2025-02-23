@@ -10,6 +10,7 @@
 #include "../steps/autoTimeoutStep.hpp"
 #include "../steps/autoPauseStep.hpp"
 #include "../steps/autoPurePursuitStep.hpp"
+#include "../steps/autoAsyncStep.hpp"
 
 namespace devils
 {
@@ -31,6 +32,17 @@ namespace devils
         void addStep(AutoStep *step)
         {
             steps.push_back(step);
+        }
+
+        /**
+         * Adds a custom async step to the auto routine
+         * @param step The step to add
+         */
+        AutoAsyncStep *addAsyncStep(AutoStep *step)
+        {
+            AutoAsyncStep *asyncStep = new AutoAsyncStep(step);
+            addStep(asyncStep);
+            return asyncStep;
         }
 
         /**

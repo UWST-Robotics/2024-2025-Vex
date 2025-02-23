@@ -5,7 +5,7 @@
 namespace devils
 {
     /**
-     * Represents the intake arm assembly of the robot.
+     * Represents the intake arm and claw system of the robot.
      */
     class IntakeSystem
     {
@@ -13,26 +13,29 @@ namespace devils
         /// @brief Represents the possible positions of the intake arm.
         enum ArmPosition
         {
-            BOTTOM_RING,
-            THIRD_RING,
-            ALLIANCE_STAKE,
-            NEUTRAL_STAKE,
+            BOTTOM_RING,    // Grabs rings off the ground
+            INTAKE,         // Slightly elevated to allow for intake
+            THIRD_RING,     // Grabs the 3rd ring off a stack, used for autonomous
+            FOURTH_RING,    // Grabs the 4th ring off a stack, used for autonomous
+            ALLIANCE_STAKE, // Raises the arm to the shorter alliance (red/blue) stakes
+            NEUTRAL_STAKE,  // Raises the arm to the taller neutral stakes
         };
 
         /**
          * Creates a new instance of the intake system.
          * @param grabberPneumatic The pneumatic system controlling the grabbing claws.
          * @param armMotors The motors controlling the arm.
+         * @param rotationSensor The sensor measuring the rotation of the arm.
          */
-        IntakeSystem(ADIPneumatic &grabberPneumatic, SmartMotorGroup &armMotors)
+        IntakeSystem(ADIPneumatic &grabberPneumatic, SmartMotorGroup &armMotors, RotationSensor &rotationSensor)
             : grabberPneumatic(grabberPneumatic),
-              armMotors(armMotors)
+              armMotors(armMotors),
+              rotationSensor(rotationSensor)
         {
-            armMotors.setPosition(0);
         }
 
         /**
-         * Sets the position of the intake arm.
+         * Sets the target position of the intake arm.
          * @param position The position to set the arm to.
          */
         void setArmPosition(ArmPosition position)
@@ -42,22 +45,12 @@ namespace devils
 
         /**
          * Moves the arm to the target position.
+         * Should be called every interval to update the state of the arm.
          */
         void moveArmToPosition()
         {
-            double targetEncoderTicks = convertPositionToEncoderTicks(this->targetPosition);
-            moveArmToEncoderTicks(targetEncoderTicks);
-        }
-
-        /**
-         * Checks if the arm is at the target position.
-         * @return True if the arm is at the target position, false otherwise.
-         */
-        bool checkArmAtPosition()
-        {
-            double currentPosition = armMotors.getPosition();
-            double targetPosition = convertPositionToEncoderTicks(this->targetPosition);
-            return std::abs(currentPosition - targetPosition) < ARM_POSITION_THRESHOLD;
+            double targetAngle = convertPositionToAngle(this->targetPosition);
+            moveArmToAngle(targetAngle);
         }
 
         /**
@@ -78,20 +71,33 @@ namespace devils
             return grabberPneumatic.getExtended();
         }
 
+        /**
+         * Stops all motors in the arm.
+         */
+        void stop()
+        {
+            for (auto motor : armMotors.getMotors())
+                motor->moveVoltage(0);
+        }
+
     protected:
         /**
-         * Converts the arm position to encoder ticks.
+         * Converts the arm position to target angle.
          * @param position The position to convert.
-         * @return The position in encoder ticks.
+         * @return The cooresponding angle in radians.
          */
-        double convertPositionToEncoderTicks(ArmPosition position)
+        double convertPositionToAngle(ArmPosition position)
         {
             switch (position)
             {
             case BOTTOM_RING:
                 return BOTTOM_RING_POSITION;
+            case INTAKE:
+                return INTAKE_POSITION;
             case THIRD_RING:
                 return THIRD_RING_POSITION;
+            case FOURTH_RING:
+                return FOURTH_RING_POSITION;
             case ALLIANCE_STAKE:
                 return ALLIANCE_STAKE_POSITION;
             case NEUTRAL_STAKE:
@@ -100,53 +106,60 @@ namespace devils
         }
 
         /**
-         * Moves the arm to the specified position.
-         * @param targetPosition The target position of the arm in encoder ticks.
+         * Moves the arm to the specified angle.
+         * Should be called every interval to update the state of the arm.
+         * @param angle The target angle of the arm in radians.
          */
-        void moveArmToEncoderTicks(double encoderTicks)
+        void moveArmToAngle(double angle)
         {
             for (auto motor : armMotors.getMotors())
-                moveMotorToPosition(motor.get(), encoderTicks);
+                moveMotorToAngle(motor.get(), angle);
         }
 
         /**
-         * Moves the motor to the specified position.
+         * Moves the motor to the specified angle.
+         * Should be called every interval to update the state of the motor.
          * @param motor The motor to move.
-         * @param encoderTicks The target position of the motor in encoder ticks.
+         * @param angle The target angle of the motor in radians.
          */
-        void moveMotorToPosition(SmartMotor *motor, double encoderTicks)
+        void moveMotorToAngle(SmartMotor *motor, double angle)
         {
-            double currentPosition = motor->getPosition();
-            double error = encoderTicks - currentPosition;
+            double currentPosition = rotationSensor.getAngle();
+            double error = Units::diffRad(angle, currentPosition);
 
-            double speed = Math::trapezoidProfile(
-                1,
-                error,
-                1,
-                DECEL_DISTANCE,
-                0,
-                0,
-                MAX_SPEED);
+            double speed = armPID.update(error);
+            speed = std::clamp(speed, MIN_SPEED, MAX_SPEED);
+            // double speed = Math::trapezoidProfile(
+            //     1,
+            //     error,
+            //     1,
+            //     DECEL_DISTANCE,
+            //     0,
+            //     0,
+            //     MAX_SPEED);
 
             motor->moveVoltage(speed);
         }
 
     private:
-        static constexpr double BOTTOM_RING_POSITION = 0;      // ticks
-        static constexpr double THIRD_RING_POSITION = 200;     // ticks
-        static constexpr double ALLIANCE_STAKE_POSITION = 500; // ticks
-        static constexpr double NEUTRAL_STAKE_POSITION = 600;  // ticks
+        static constexpr double BOTTOM_RING_POSITION = 0;        // rad
+        static constexpr double INTAKE_POSITION = -0.25;         // rad
+        static constexpr double THIRD_RING_POSITION = -0.33;     // rad
+        static constexpr double FOURTH_RING_POSITION = -0.52;    // rad
+        static constexpr double ALLIANCE_STAKE_POSITION = -1.05; // rad
+        static constexpr double NEUTRAL_STAKE_POSITION = -1.6;   // rad
 
-        static constexpr double ARM_POSITION_THRESHOLD = 10; // ticks
-
-        static constexpr double DECEL_DISTANCE = 90; // ticks
-        static constexpr double MAX_SPEED = 0.8;     // %
+        static constexpr double DECEL_DISTANCE = M_PI * 0.2; // rad
+        static constexpr double MAX_SPEED = 0.3;             // %
+        static constexpr double MIN_SPEED = -0.6;            // %
 
         // State
         ArmPosition targetPosition = BOTTOM_RING;
+        PIDController armPID = PIDController(1.0, 0.0, 40);
 
         // Hardware
         ADIPneumatic &grabberPneumatic;
         SmartMotorGroup &armMotors;
+        RotationSensor &rotationSensor;
     };
 }

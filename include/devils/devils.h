@@ -68,6 +68,7 @@
 #include "autoSteps/steps/autoBranchStep.hpp"
 #include "autoSteps/steps/autoPurePursuitStep.hpp"
 #include "autoSteps/steps/autoAsyncStep.hpp"
+#include "autoSteps/steps/autoStopAsyncStep.hpp"
 
 // Display
 #include "display/eyesRenderer.hpp"

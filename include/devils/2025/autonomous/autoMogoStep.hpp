@@ -25,7 +25,7 @@ namespace devils
         }
 
     private:
-        static constexpr double ACTUATION_DELAY = 500; // ms
+        static constexpr double ACTUATION_DELAY = 200; // ms
 
         bool shouldGrab;
         Timer actuationTimer = Timer(ACTUATION_DELAY);

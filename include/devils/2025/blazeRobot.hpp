@@ -12,16 +12,13 @@ namespace devils
     {
         BlazeRobot()
         {
-            // Initialize Hardware
             imu.calibrate();
 
-            // Initialize Subsystems
-            // conveyor.setAutoRejectParams(CONVEYOR_LENGTH, HOOK_INTERVAL, REJECT_OFFSET);
             conveyor.useSensor(&conveyorSensor);
 
-            mogoGrabber.useLimitSwitch(&mogoLimitSwitch);
+            // mogoGrabber.useLimitSwitch(&mogoLimitSwitch);
 
-            // odometry.useIMU(&imu);
+            odometry.useIMU(&imu);
             odometry.runAsync();
         }
 
@@ -45,6 +42,8 @@ namespace devils
             intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
             mogoGrabber.setMogoGrabbed(false);
 
+            double conveyorSpeed = 0.5;
+
             // Loop
             while (true)
             {
@@ -58,9 +57,12 @@ namespace devils
                 bool midArmInput = mainController.get_digital(DIGITAL_A) || mainController.get_digital(DIGITAL_Y);
                 bool highArmInput = mainController.get_digital(DIGITAL_X);
 
-                bool clawInput = mainController.get_digital(DIGITAL_L1) || mainController.get_digital(DIGITAL_L2);
+                bool clawInput = mainController.get_digital_new_press(DIGITAL_L1) || mainController.get_digital_new_press(DIGITAL_L2);
                 bool mogoInput = mainController.get_digital_new_press(DIGITAL_R2);
                 bool slowInput = mainController.get_digital(DIGITAL_R1);
+
+                bool increaseConveyorSpeed = mainController.get_digital_new_press(DIGITAL_UP);
+                bool decreaseConveyorSpeed = mainController.get_digital_new_press(DIGITAL_DOWN);
 
                 // Curve Joystick Inputs
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1, 0.15);
@@ -81,10 +83,17 @@ namespace devils
                     intakeSystem.setArmPosition(IntakeSystem::ALLIANCE_STAKE);
                 else if (highArmInput)
                     intakeSystem.setArmPosition(IntakeSystem::NEUTRAL_STAKE);
+                else
+                    intakeSystem.setArmPosition(IntakeSystem::INTAKE);
                 intakeSystem.moveArmToPosition();
 
                 // Intake Claw
-                intakeSystem.setClawGrabbed(clawInput);
+                if (clawInput)
+                {
+                    // Toggle Claw Grabber
+                    bool shouldGrab = !intakeSystem.getClawGrabbed();
+                    intakeSystem.setClawGrabbed(shouldGrab);
+                }
 
                 // Mogo
                 if (mogoInput)
@@ -98,8 +107,15 @@ namespace devils
                 double speedMultiplier = slowInput ? 0.5 : 1.0;
 
                 // Conveyor
+                if (increaseConveyorSpeed)
+                    conveyorSpeed = std::min(conveyorSpeed + 0.1, 1.0);
+                if (decreaseConveyorSpeed)
+                    conveyorSpeed = std::max(conveyorSpeed - 0.1, 0.0);
+                if (increaseConveyorSpeed || decreaseConveyorSpeed)
+                    mainController.set_text(0, 0, std::to_string(conveyorSpeed));
+
                 conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
-                conveyor.moveAutomatic(rightY);
+                conveyor.forceMove(conveyorSpeed);
 
                 // Move Chassis
                 chassis.move(leftY * speedMultiplier, combinedX * speedMultiplier);
@@ -132,31 +148,31 @@ namespace devils
 
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 2, -3, 4, -5});
         SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {6, -7, 8, -9, 10});
-        SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {19, -20});
-        SmartMotorGroup intakeArmMotors = SmartMotorGroup("IntakeArmMotors", {-17, 18});
+        SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {-19, 20});
+        SmartMotorGroup intakeArmMotors = SmartMotorGroup("IntakeArmMotors", {17, -18});
 
-        RotationSensor verticalSensor = RotationSensor("VerticalOdom", 16);
-        RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 17);
+        RotationSensor verticalSensor = RotationSensor("VerticalOdom", 14);
+        RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 13);
 
-        InertialSensor imu = InertialSensor("IMU", 15);
+        InertialSensor imu = InertialSensor("IMU", 16);
 
-        OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 14);
+        OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 11);
+        RotationSensor intakeArmSensor = RotationSensor("IntakeArmSensor", 12);
 
-        ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 1);
-        ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 2);
+        ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 2);
+        ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 1);
         ADIDigitalInput mogoLimitSwitch = ADIDigitalInput("MogoLimitSwitch", 3);
 
         // Subsystems
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
         ConveyorSystem conveyor = ConveyorSystem(conveyorMotors);
         MogoGrabSystem mogoGrabber = MogoGrabSystem(mogoPneumatic);
-        IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors);
-        TankChassisOdom odometry = TankChassisOdom(chassis, 1.375, 11);
-        // PerpendicularSensorOdometry deadWheelOdom = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
+        IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors, intakeArmSensor);
+        PerpendicularSensorOdometry odometry = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
 
         // Auto
         NTOdom ntOdom = NTOdom("Blaze", odometry);
-        AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
+        AutoStepList *autoRoutine = AutoFactory::createPJMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

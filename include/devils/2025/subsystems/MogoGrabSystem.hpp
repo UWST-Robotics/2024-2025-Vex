@@ -4,6 +4,9 @@
 
 namespace devils
 {
+    /**
+     * Represents the mogo clamp on the back of the robot.
+     */
     class MogoGrabSystem
     {
     public:

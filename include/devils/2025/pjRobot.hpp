@@ -12,24 +12,36 @@ namespace devils
     {
         PJRobot()
         {
-            // Initialize Hardware
             imu.calibrate();
 
-            // Initialize Subsystems
-            // conveyor.setAutoRejectParams(CONVEYOR_LENGTH, HOOK_INTERVAL, REJECT_OFFSET);
+            // conveyor.useSensor(&conveyorSensor);
 
-            mogoGrabber.useLimitSwitch(&mogoLimitSwitch);
+            // mogoGrabber.useLimitSwitch(&mogoLimitSwitch);
 
-            deadWheelOdom.useIMU(&imu);
-            deadWheelOdom.runAsync();
+            odometry.useIMU(&imu);
+            odometry.runAsync();
         }
 
         void autonomous() override
         {
+            // Default State
+            intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
+            mogoGrabber.setMogoGrabbed(false);
+
+            // Calibrate IMU
+            imu.calibrate();
+            imu.waitUntilCalibrated();
+            imu.setHeading(M_PI);
+
+            autoRoutine->run();
         }
 
         void opcontrol() override
         {
+            // Default State
+            intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
+            mogoGrabber.setMogoGrabbed(false);
+
             // Loop
             while (true)
             {
@@ -43,10 +55,10 @@ namespace devils
                 bool midArmInput = mainController.get_digital(DIGITAL_A) || mainController.get_digital(DIGITAL_Y);
                 bool highArmInput = mainController.get_digital(DIGITAL_X);
 
-                bool clawInput = mainController.get_digital(DIGITAL_L1) || mainController.get_digital(DIGITAL_L2);
-                bool mogoInput = mainController.get_digital_new_press(DIGITAL_R2);
+                bool clawInput = mainController.get_digital_new_press(DIGITAL_L1) || mainController.get_digital_new_press(DIGITAL_L2);
+                bool mogoInput = mainController.get_digital_new_press(DIGITAL_R2) || mainController.get_digital_new_press(DIGITAL_R1);
 
-                // Curve Joystick Inputs
+                // Curve Joystick Inputs for improved control
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1, 0.15);
                 leftX = JoystickCurve::curve(leftX, 3.0, 0.05, 0.2);
                 rightX = JoystickCurve::curve(rightX, 3.0, 0.05, 0.2);
@@ -62,10 +74,17 @@ namespace devils
                     intakeSystem.setArmPosition(IntakeSystem::ALLIANCE_STAKE);
                 else if (highArmInput)
                     intakeSystem.setArmPosition(IntakeSystem::NEUTRAL_STAKE);
+                else
+                    intakeSystem.setArmPosition(IntakeSystem::INTAKE);
                 intakeSystem.moveArmToPosition();
 
                 // Intake Claw
-                intakeSystem.setClawGrabbed(clawInput);
+                if (clawInput)
+                {
+                    // Toggle Claw Grabber
+                    bool shouldGrab = !intakeSystem.getClawGrabbed();
+                    intakeSystem.setClawGrabbed(shouldGrab);
+                }
 
                 // Mogo
                 if (mogoInput)
@@ -76,6 +95,7 @@ namespace devils
                 }
 
                 // Conveyor
+                conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
                 conveyor.moveAutomatic(rightY);
 
                 // Move Chassis
@@ -107,12 +127,13 @@ namespace devils
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 2, -3, 4, -5});
         SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {6, -7, 8, -9, 10});
         SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {19, -20});
-        SmartMotorGroup intakeArmMotors = SmartMotorGroup("IntakeArmMotors", {-17, 18});
+        SmartMotorGroup intakeArmMotors = SmartMotorGroup("IntakeArmMotors", {17, -18});
 
-        RotationSensor verticalSensor = RotationSensor("VerticalOdom", 16);
-        RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 17);
+        RotationSensor verticalSensor = RotationSensor("VerticalOdom", 13);
+        RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 14);
 
-        InertialSensor imu = InertialSensor("IMU", 15);
+        InertialSensor imu = InertialSensor("IMU", 16);
+        RotationSensor intakeArmSensor = RotationSensor("IntakeArmSensor", 11);
 
         ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 1);
         ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 2);
@@ -122,8 +143,12 @@ namespace devils
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
         ConveyorSystem conveyor = ConveyorSystem(conveyorMotors);
         MogoGrabSystem mogoGrabber = MogoGrabSystem(mogoPneumatic);
-        IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors);
-        PerpendicularSensorOdometry deadWheelOdom = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
+        IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors, intakeArmSensor);
+        PerpendicularSensorOdometry odometry = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
+
+        // Auto
+        NTOdom ntOdom = NTOdom("PJ", odometry);
+        AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

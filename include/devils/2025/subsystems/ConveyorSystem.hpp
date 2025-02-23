@@ -4,15 +4,16 @@
 
 namespace devils
 {
+    /// @brief All possible ring types that can be detected by the optical sensor.
     enum class RingType
     {
         RED,
         BLUE,
-        NONE
+        NONE // No ring detected or sensor is disabled
     };
 
     /**
-     * Represents the conveyor belt system of the robot.
+     * Represents the conveyor belt system in the center of the robot.
      */
     class ConveyorSystem
     {
@@ -24,6 +25,7 @@ namespace devils
 
         /**
          * Gets the current ring type detected by the optical sensor.
+         * @return The current ring type detected.
          */
         RingType getCurrentRing()
         {
@@ -50,7 +52,8 @@ namespace devils
 
         /**
          * Runs the conveyor system at a given voltage. Automatically stops the conveyor system if a ring is detected.
-         * @param voltage The voltage to run the conveyor system at, from -1 to 1.
+         * Should be called every interval to update the state of the conveyor system.
+         * @param targetSpeed The target speed to run the conveyor system at, from -1 to 1.
          */
         void moveAutomatic(double targetSpeed = 1.0)
         {
@@ -58,8 +61,10 @@ namespace devils
             RingType currentRing = getCurrentRing();
             bool isRingDetected = currentRing != RingType::NONE;
 
-            // Calculate the speed of the conveyor system
+            // Check if the conveyor system has a mogo
             double maxSpeed = this->hasMogo ? MOGO_CONVEYOR_SPEED : NO_MOGO_CONVEYOR_SPEED;
+
+            // Calculate the speed of the conveyor system
             double speed = std::min(maxSpeed, targetSpeed);
             bool isForwards = targetSpeed > 0;
 
@@ -87,8 +92,8 @@ namespace devils
                 isRejectingRing = true;
 
             // Blue Ring Delay
-            double position = std::fmod(getConveyorPosition(), hookInterval);
-            bool isInRejectionPosition = std::abs(position - rejectionOffset) < HOOK_REJECTION_RANGE;
+            double position = std::fmod(getConveyorPosition(), HOOK_INTERVAL);
+            bool isInRejectionPosition = std::abs(position - REJECTION_OFFSET) < HOOK_REJECTION_RANGE;
             if (isRejectingRing && isInRejectionPosition)
             {
                 startCooldown(REJECTION_DURATION, POST_REJECTION_SPEED);
@@ -134,6 +139,7 @@ namespace devils
 
         /**
          * Enables the use of a sensor to stop the conveyor system when a ring is detected.
+         * @param sensor The sensor to use to detect rings.
          */
         void useSensor(OpticalSensor *sensor)
         {
@@ -161,7 +167,7 @@ namespace devils
         double getConveyorPosition()
         {
             double revolutions = conveyorMotors.getPosition() / ENCODER_TICKS_PER_REVOLUTION;
-            return Math::signedMod(revolutions * SPROCKET_TEETH, conveyorLength);
+            return Math::signedMod(revolutions * SPROCKET_TEETH, CONVEYOR_LENGTH);
         }
 
         /**
@@ -173,19 +179,6 @@ namespace devils
         void setSortingEnabled(bool enableSorting)
         {
             this->enableSorting = enableSorting;
-        }
-
-        /**
-         * Sets the parameters of the automated rejection system.
-         * @param conveyorLength The length of the conveyor system in teeth.
-         * @param hookInterval The distance between each hook in teeth.
-         * @param rejectionOffset The offset to reject a blue ring in teeth.
-         */
-        void setAutoRejectParams(double conveyorLength, double hookInterval, double rejectionOffset)
-        {
-            this->conveyorLength = conveyorLength;
-            this->hookInterval = hookInterval;
-            this->rejectionOffset = rejectionOffset;
         }
 
         /**
@@ -210,13 +203,13 @@ namespace devils
 
         //      MOGO ACTUATION OPTIONS
 
-        /// @brief The speed of the conveyor system when a mogo is not grabbed.
+        /// @brief The speed of the conveyor system when a mogo is not grabbed. Slower to prevent rings from overshooting the optical sensor.
         static constexpr double NO_MOGO_CONVEYOR_SPEED = 0.5;
 
-        /// @brief The speed of the conveyor system when a mogo is grabbed.
+        /// @brief The speed of the conveyor system when a mogo is grabbed. Faster to push rings into the mogo.
         static constexpr double MOGO_CONVEYOR_SPEED = 0.8;
 
-        /// @brief The delay to delay the conveyor system after pneumatic actuation.
+        /// @brief The duration to stop the conveyor system after pneumatic actuation. Prevents rings from pushing onto the mogo before its ready.
         static constexpr double MOGO_ACTUATION_DELAY = 600;
 
         //      ANTI-STALL OPTIONS
@@ -230,7 +223,7 @@ namespace devils
         /// @brief The duration to reverse the conveyor system when stalled.
         static constexpr double STALL_REVERSE_DURATION = 700;
 
-        /// @brief The speed to reverse the conveyor system when on cooldown.
+        /// @brief The speed to reverse the conveyor system while stalled.
         static constexpr double STALL_SPEED = -0.4;
 
         //      RING DETECTION OPTIONS
@@ -261,10 +254,14 @@ namespace devils
         /// @brief The amount of teeth on the sprocket.
         static constexpr int SPROCKET_TEETH = 12;
 
-        // Conveyor Params
-        double conveyorLength = 76;
-        double hookInterval = 25.3;
-        double rejectionOffset = 12.5;
+        /// @brief The length of the conveyor chain in teeth.
+        static constexpr double CONVEYOR_LENGTH = 82;
+
+        /// @brief The distance between each hook in teeth.
+        static constexpr double HOOK_INTERVAL = 82;
+
+        /// @brief The offset of the conveyor chain to reject a blue ring in teeth.
+        static constexpr double REJECTION_OFFSET = 12.5;
 
         // State
         bool hasMogo = false;

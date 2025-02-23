@@ -28,7 +28,15 @@ namespace devils
         static void stopAll()
         {
             for (auto asyncStep : allAsyncSteps)
-                asyncStep->stop();
+                asyncStep->forceStop();
+        }
+
+        /**
+         * Immediately stops the async step mid-execution.
+         */
+        void forceStop()
+        {
+            asyncStep->stop();
         }
 
     protected:
@@ -39,16 +47,16 @@ namespace devils
 
         bool checkFinished() override
         {
-            return false;
+            return true;
         }
 
     private:
         // Store a list of all async steps
-        static std::vector<AutoStep *> allAsyncSteps;
+        static std::vector<AutoAsyncStep *> allAsyncSteps;
 
         AutoStep *asyncStep;
     };
 }
 
 // Initialize the static tasks vector
-std::vector<devils::AutoStep *> devils::AutoAsyncStep::allAsyncSteps;
+std::vector<devils::AutoAsyncStep *> devils::AutoAsyncStep::allAsyncSteps;

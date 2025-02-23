@@ -11,18 +11,22 @@ namespace devils
     class AutoConveyorStep : public AutoStep
     {
     public:
-        AutoConveyorStep(ConveyorSystem &conveyor, double conveyorSpeed = 1.0)
-            : conveyor(conveyor), conveyorSpeed(conveyorSpeed)
+        AutoConveyorStep(ConveyorSystem &conveyor, MogoGrabSystem &mogoGrabber, double conveyorSpeed = 1.0)
+            : conveyor(conveyor),
+              mogoGrabber(mogoGrabber),
+              conveyorSpeed(conveyorSpeed)
         {
         }
 
         void onUpdate() override
         {
             conveyor.moveAutomatic(conveyorSpeed);
+            conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
         }
 
     private:
-        double conveyorSpeed;
         ConveyorSystem &conveyor;
+        MogoGrabSystem &mogoGrabber;
+        double conveyorSpeed;
     };
 }
