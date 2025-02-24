@@ -30,9 +30,9 @@ namespace devils
          */
         bool hasMogo()
         {
-            if (mogoLimitSwitch == nullptr)
+            if (mogoSensor == nullptr)
                 return true;
-            return mogoLimitSwitch->getValue();
+            return mogoSensor->getValue();
         }
 
         /**
@@ -45,16 +45,16 @@ namespace devils
         }
 
         /**
-         * Uses a limit switch to determine if the mogo is in the robot.
-         * @param limitSwitch The limit switch to use.
+         * Uses an ir/limit switch to determine if the mogo is in the robot.
+         * @param sensor The limit switch to use.
          */
-        void useLimitSwitch(ADIDigitalInput *limitSwitch)
+        void useSensor(ADIDigitalInput *sensor)
         {
-            mogoLimitSwitch = limitSwitch;
+            mogoSensor = sensor;
         }
 
     private:
         ADIPneumatic &mogoPneumatic;
-        ADIDigitalInput *mogoLimitSwitch = nullptr;
+        ADIDigitalInput *mogoSensor = nullptr;
     };
 }

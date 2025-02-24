@@ -60,6 +60,15 @@ namespace devils
             return Units::centidegToRad(velocity);
         }
 
+        /**
+         * Checks if the sensor is still connected.
+         * @return True if the sensor is still connected, false otherwise.
+         */
+        bool isConnected()
+        {
+            return rotationSensor.is_installed();
+        }
+
     protected:
         void serialize() override
         {

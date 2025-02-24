@@ -55,8 +55,8 @@ namespace devils
                 bool midArmInput = mainController.get_digital(DIGITAL_A) || mainController.get_digital(DIGITAL_Y);
                 bool highArmInput = mainController.get_digital(DIGITAL_X);
 
-                bool clawInput = mainController.get_digital_new_press(DIGITAL_L1) || mainController.get_digital_new_press(DIGITAL_L2);
-                bool mogoInput = mainController.get_digital_new_press(DIGITAL_R2) || mainController.get_digital_new_press(DIGITAL_R1);
+                bool clawInput = mainController.get_digital_new_press(DIGITAL_R1) || mainController.get_digital_new_press(DIGITAL_R2);
+                bool mogoInput = mainController.get_digital_new_press(DIGITAL_L2) || mainController.get_digital_new_press(DIGITAL_L1);
 
                 // Curve Joystick Inputs for improved control
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1, 0.15);
@@ -84,6 +84,9 @@ namespace devils
                     // Toggle Claw Grabber
                     bool shouldGrab = !intakeSystem.getClawGrabbed();
                     intakeSystem.setClawGrabbed(shouldGrab);
+
+                    if (!shouldGrab)
+                        mainController.rumble("..");
                 }
 
                 // Mogo
@@ -92,10 +95,16 @@ namespace devils
                     // Toggle Mogo Grabber
                     bool shouldGrabGoal = !mogoGrabber.isMogoGrabbed();
                     mogoGrabber.setMogoGrabbed(shouldGrabGoal);
+
+                    if (!shouldGrabGoal)
+                        mainController.rumble(".");
                 }
 
                 // Conveyor
                 conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
+                conveyor.setPickupRing(true);
+                conveyor.setArmLowered(false);
+                conveyor.setRingSorting(RingType::NONE);
                 conveyor.moveAutomatic(rightY);
 
                 // Move Chassis
@@ -122,7 +131,7 @@ namespace devils
         static constexpr double REJECT_OFFSET = 13;      // teeth
 
         // Hardware
-        VEXBridge bridge = VEXBridge(0);
+        VEXBridge bridge = VEXBridge(21);
 
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 2, -3, 4, -5});
         SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {6, -7, 8, -9, 10});

@@ -11,6 +11,7 @@
 #include "../steps/autoPauseStep.hpp"
 #include "../steps/autoPurePursuitStep.hpp"
 #include "../steps/autoAsyncStep.hpp"
+#include "../steps/autoStopAsyncStep.hpp"
 
 namespace devils
 {
@@ -43,6 +44,15 @@ namespace devils
             AutoAsyncStep *asyncStep = new AutoAsyncStep(step);
             addStep(asyncStep);
             return asyncStep;
+        }
+
+        /**
+         * Stops the given async step when the current step is finished
+         * @param step The step to stop
+         */
+        void addStopAsyncStep(AutoAsyncStep *step)
+        {
+            addStep(new AutoStopAsyncStep(step));
         }
 
         /**

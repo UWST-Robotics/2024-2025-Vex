@@ -44,6 +44,15 @@ namespace devils
         }
 
         /**
+         * Gets the target position of the intake arm.
+         * @return The target position of the arm.
+         */
+        ArmPosition getArmPosition()
+        {
+            return targetPosition;
+        }
+
+        /**
          * Moves the arm to the target position.
          * Should be called every interval to update the state of the arm.
          */
@@ -124,6 +133,13 @@ namespace devils
          */
         void moveMotorToAngle(SmartMotor *motor, double angle)
         {
+            // Fail if the sensor is not connected
+            if (!rotationSensor.isConnected())
+            {
+                motor->moveVoltage(0);
+                return;
+            }
+
             double currentPosition = rotationSensor.getAngle();
             double error = Units::diffRad(angle, currentPosition);
 
@@ -143,9 +159,9 @@ namespace devils
 
     private:
         static constexpr double BOTTOM_RING_POSITION = 0;        // rad
-        static constexpr double INTAKE_POSITION = -0.25;         // rad
+        static constexpr double INTAKE_POSITION = -0.22;         // rad
         static constexpr double THIRD_RING_POSITION = -0.33;     // rad
-        static constexpr double FOURTH_RING_POSITION = -0.52;    // rad
+        static constexpr double FOURTH_RING_POSITION = -0.35;    // rad
         static constexpr double ALLIANCE_STAKE_POSITION = -1.05; // rad
         static constexpr double NEUTRAL_STAKE_POSITION = -1.6;   // rad
 
@@ -155,7 +171,7 @@ namespace devils
 
         // State
         ArmPosition targetPosition = BOTTOM_RING;
-        PIDController armPID = PIDController(1.0, 0.0, 40);
+        PIDController armPID = PIDController(1.5, 0.0, 40);
 
         // Hardware
         ADIPneumatic &grabberPneumatic;

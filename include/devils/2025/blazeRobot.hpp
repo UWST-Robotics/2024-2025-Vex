@@ -14,9 +14,10 @@ namespace devils
         {
             imu.calibrate();
 
+            conveyorSensor.setLEDBrightness(100);
             conveyor.useSensor(&conveyorSensor);
 
-            // mogoGrabber.useLimitSwitch(&mogoLimitSwitch);
+            mogoGrabber.useSensor(&mogoSensor);
 
             odometry.useIMU(&imu);
             odometry.runAsync();
@@ -27,6 +28,7 @@ namespace devils
             // Default State
             intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
             mogoGrabber.setMogoGrabbed(false);
+            conveyor.setRingSorting(RingType::BLUE); // TODO: Add Alliance Color Picker
 
             // Calibrate IMU
             imu.calibrate();
@@ -42,8 +44,6 @@ namespace devils
             intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
             mogoGrabber.setMogoGrabbed(false);
 
-            double conveyorSpeed = 0.5;
-
             // Loop
             while (true)
             {
@@ -57,6 +57,8 @@ namespace devils
                 bool midArmInput = mainController.get_digital(DIGITAL_A) || mainController.get_digital(DIGITAL_Y);
                 bool highArmInput = mainController.get_digital(DIGITAL_X);
 
+                bool pickupInput = mainController.get_digital(DIGITAL_UP);
+
                 bool clawInput = mainController.get_digital_new_press(DIGITAL_L1) || mainController.get_digital_new_press(DIGITAL_L2);
                 bool mogoInput = mainController.get_digital_new_press(DIGITAL_R2);
                 bool slowInput = mainController.get_digital(DIGITAL_R1);
@@ -68,7 +70,7 @@ namespace devils
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1, 0.15);
                 leftX = JoystickCurve::curve(leftX, 3.0, 0.05, 0.2);
                 rightX = JoystickCurve::curve(rightX, 3.0, 0.05, 0.2);
-                rightY = JoystickCurve::curve(rightY, 3.0, 0.1, 0.15);
+                rightY = JoystickCurve::curve(rightY, 3.0, 0.1, 0.15, 0.8);
 
                 // Decrease turning speed for improved control
                 rightX *= 0.5;
@@ -107,15 +109,11 @@ namespace devils
                 double speedMultiplier = slowInput ? 0.5 : 1.0;
 
                 // Conveyor
-                if (increaseConveyorSpeed)
-                    conveyorSpeed = std::min(conveyorSpeed + 0.1, 1.0);
-                if (decreaseConveyorSpeed)
-                    conveyorSpeed = std::max(conveyorSpeed - 0.1, 0.0);
-                if (increaseConveyorSpeed || decreaseConveyorSpeed)
-                    mainController.set_text(0, 0, std::to_string(conveyorSpeed));
-
                 conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
-                conveyor.forceMove(conveyorSpeed);
+                conveyor.setArmLowered(false); // Always allow the conveyor to move
+                conveyor.setPickupRing(true);  // Always allow the conveyor to pick up rings
+                conveyor.moveAutomatic(rightY);
+                conveyor.setRingSorting(RingType::NONE);
 
                 // Move Chassis
                 chassis.move(leftY * speedMultiplier, combinedX * speedMultiplier);
@@ -151,17 +149,17 @@ namespace devils
         SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {-19, 20});
         SmartMotorGroup intakeArmMotors = SmartMotorGroup("IntakeArmMotors", {17, -18});
 
-        RotationSensor verticalSensor = RotationSensor("VerticalOdom", 14);
-        RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 13);
+        RotationSensor verticalSensor = RotationSensor("VerticalOdom", 13);
+        RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 14);
 
         InertialSensor imu = InertialSensor("IMU", 16);
 
         OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 11);
         RotationSensor intakeArmSensor = RotationSensor("IntakeArmSensor", 12);
 
-        ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 2);
         ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 1);
-        ADIDigitalInput mogoLimitSwitch = ADIDigitalInput("MogoLimitSwitch", 3);
+        ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 2);
+        ADIDigitalInput mogoSensor = ADIDigitalInput("MogoSensor", -3);
 
         // Subsystems
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
@@ -172,7 +170,7 @@ namespace devils
 
         // Auto
         NTOdom ntOdom = NTOdom("Blaze", odometry);
-        AutoStepList *autoRoutine = AutoFactory::createPJMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
+        AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

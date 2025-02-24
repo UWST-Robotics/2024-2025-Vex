@@ -64,6 +64,20 @@ namespace devils
             // Check if the conveyor system has a mogo
             double maxSpeed = this->hasMogo ? MOGO_CONVEYOR_SPEED : NO_MOGO_CONVEYOR_SPEED;
 
+            // Check if the arm is lowered
+            if (isArmLowered)
+                maxSpeed = 0;
+
+            // Check if can't pickup a ring
+            double stopPosition = std::fmod(getConveyorPosition() + HOOK_STOP_OFFSET, HOOK_INTERVAL);
+            bool isInBottomPosition = std::abs(stopPosition) < HOOK_STOP_RANGE;
+            bool shouldStop = (!canPickupRing && isInBottomPosition) || isStopped;
+            if (shouldStop)
+            {
+                maxSpeed = 0;
+                this->isStopped = true;
+            }
+
             // Calculate the speed of the conveyor system
             double speed = std::min(maxSpeed, targetSpeed);
             bool isForwards = targetSpeed > 0;
@@ -86,14 +100,15 @@ namespace devils
                 stallTimer.stop();
 
             // Blue Ring Detection
-            bool isBlueRing = currentRing == RingType::BLUE;
-            bool shouldReject = isBlueRing && isForwards && enableSorting;
+            bool isBlueRing = currentRing == this->sortRingColor;
+            bool isSortingEnabled = this->sortRingColor != RingType::NONE;
+            bool shouldReject = isBlueRing && isForwards && isSortingEnabled;
             if (shouldReject)
                 isRejectingRing = true;
 
             // Blue Ring Delay
-            double position = std::fmod(getConveyorPosition(), HOOK_INTERVAL);
-            bool isInRejectionPosition = std::abs(position - REJECTION_OFFSET) < HOOK_REJECTION_RANGE;
+            double rejectPosition = std::fmod(getConveyorPosition() + REJECTION_OFFSET, HOOK_INTERVAL);
+            bool isInRejectionPosition = std::abs(rejectPosition) < HOOK_REJECTION_RANGE;
             if (isRejectingRing && isInRejectionPosition)
             {
                 startCooldown(REJECTION_DURATION, POST_REJECTION_SPEED);
@@ -171,14 +186,12 @@ namespace devils
         }
 
         /**
-         * Enables or disables the sorting of blue rings.
-         * If enabled, `runAutomatic` will reject blue rings.
-         * @param enableSorting True to enable sorting, false to disable.
-         * @note This is disabled by default.
+         * Sets whether the conveyor system should sort rings by color.
+         * @param ringColor Color of rings to sort out or NONE to disable sorting.
          */
-        void setSortingEnabled(bool enableSorting)
+        void setRingSorting(RingType ringColor)
         {
-            this->enableSorting = enableSorting;
+            this->sortRingColor = ringColor;
         }
 
         /**
@@ -193,6 +206,26 @@ namespace devils
                 startCooldown(MOGO_ACTUATION_DELAY);
 
             this->hasMogo = hasMogo;
+        }
+
+        /**
+         * Sets whether the arm is lowered.
+         * @param isArmLowered True if the arm is lowered, false otherwise.
+         */
+        void setArmLowered(bool isArmLowered)
+        {
+            this->isArmLowered = isArmLowered;
+        }
+
+        /**
+         * Enables the conveyor system to pick up rings.
+         * @param canPickupRing True if the conveyor system can pick up a ring, false otherwise.
+         */
+        void setPickupRing(bool canPickupRing)
+        {
+            this->canPickupRing = canPickupRing;
+            if (canPickupRing)
+                this->isStopped = false;
         }
 
     private:
@@ -218,7 +251,7 @@ namespace devils
         static constexpr double STALL_MIN_DURATION = 300;
 
         /// @brief The current threshold to detect a stall (in mA).
-        static constexpr double STALL_CURRENT = 2000;
+        static constexpr double STALL_CURRENT = 1800;
 
         /// @brief The duration to reverse the conveyor system when stalled.
         static constexpr double STALL_REVERSE_DURATION = 700;
@@ -244,7 +277,18 @@ namespace devils
         static constexpr double POST_REJECTION_SPEED = -0.5;
 
         /// @brief The max range of the hook to reject a blue ring.
-        static constexpr double HOOK_REJECTION_RANGE = 1;
+        static constexpr double HOOK_REJECTION_RANGE = 3;
+
+        /// @brief The offset of the conveyor chain to reject a blue ring in teeth.
+        static constexpr double REJECTION_OFFSET = -42;
+
+        //     STOP OPTIONS
+
+        /// @brief The offset of the conveyor chain to reject a blue ring.
+        static constexpr double HOOK_STOP_OFFSET = 20;
+
+        /// @brief The max range of the hook to stop if can't pick up a ring.
+        static constexpr double HOOK_STOP_RANGE = 2;
 
         //      ENCODER OPTIONS
 
@@ -260,14 +304,14 @@ namespace devils
         /// @brief The distance between each hook in teeth.
         static constexpr double HOOK_INTERVAL = 82;
 
-        /// @brief The offset of the conveyor chain to reject a blue ring in teeth.
-        static constexpr double REJECTION_OFFSET = 12.5;
-
         // State
         bool hasMogo = false;
-        bool enableSorting = false;
+        bool isArmLowered = false;
         bool isRejectingRing = false;
+        bool canPickupRing = false;
+        bool isStopped = false;
         double cooldownSpeed = 0;
+        RingType sortRingColor = RingType::NONE;
 
         // Timers
         Timer cooldownTimer = Timer(0);
