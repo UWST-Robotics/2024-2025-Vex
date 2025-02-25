@@ -121,7 +121,7 @@ namespace devils
          * Sets the current heading of the IMU in radians.
          * @param heading The heading to set the IMU to in radians.
          */
-        void setHeading(double heading)
+        void setHeading(double heading) override
         {
             headingOffset = heading - getHeading();
         }

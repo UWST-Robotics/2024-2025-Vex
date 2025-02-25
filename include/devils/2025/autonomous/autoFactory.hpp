@@ -340,8 +340,8 @@ namespace devils
                 rotatePID,
                 0.5,  // maxSpeed
                 0.15, // minSpeed
-                0.15, // goalDist
-                0.9,  // goalSpeed
+                0.05, // goalDist
+                0.5,  // goalSpeed
             };
 
             // Speed Options
@@ -377,74 +377,57 @@ namespace devils
             AutoBuilder blazeRoutine = AutoBuilder(chassis, odometry);
 
             // Initial State
-            blazeRoutine.setPose(-52, 36, M_PI);
+            blazeRoutine.setPose(-52, 36, M_PI * 0.68888);
             blazeRoutine.addAsyncStep(new AutoIntakeMoveArmStep(intake));
             AutoAsyncStep *asyncConveyor = blazeRoutine.addAsyncStep(new AutoConveyorStep(conveyor, intake, mogoGrabber));
             blazeRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::INTAKE));
             blazeRoutine.addStep(new AutoIntakeClawStep(intake, false));
 
-            // Step 1
-            blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
-            blazeRoutine.drive(-28.0);
-            blazeRoutine.rotateTo(M_PI * -0.85);
-            blazeRoutine.drive(-19.5, 2000, mogoGrabSpeed);
-            blazeRoutine.addStopAsyncStep(asyncConveyor);
+            // New Step 1
+            // blazeRoutine.drive(-24.0);
+            blazeRoutine.driveRelative(-14.0, 1000, mogoGrabSpeed);
             blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, true));
-            blazeRoutine.driveRelative(30.0, 10000); // Long timeout in case of tug-a-war
-
-            // Step 2a
-            // // blazeRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::BOTTOM_RING));
-            // blazeRoutine.rotateTo(M_PI * 0.5);
-            // blazeRoutine.driveRelative(16.0);
-            // // blazeRoutine.addStep(new AutoIntakeClawStep(intake, true));
-            // // blazeRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::ALLIANCE_STAKE));
-            // blazeRoutine.driveRelative(6.0, 2000, intakeSpeed);
-            // blazeRoutine.pause(1000);
-            // blazeRoutine.driveRelative(-10.0);
-            // // blazeRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::INTAKE));
-            // // blazeRoutine.addStep(new AutoIntakeClawStep(intake, false));
-            // blazeRoutine.rotateTo(M_PI * 0.15);
-            // blazeRoutine.drive(14.0);
-            // blazeRoutine.driveRelative(6.0, 2000, intakeSpeed);
-            // blazeRoutine.pause(1000);
-            // blazeRoutine.drive(-20.0);
-
-            // Step 2b
-            blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
-            blazeRoutine.addStep(asyncConveyor);
-            blazeRoutine.rotateTo(M_PI * 0.35);
-            blazeRoutine.drive(-24.0);
-            blazeRoutine.driveRelative(-4.0, 1000, mogoGrabSpeed);
-            blazeRoutine.rotate(M_PI * 0.1);
-            blazeRoutine.driveRelative(-4.0, 1000, mogoGrabSpeed);
-            blazeRoutine.rotate(M_PI * -0.15);
-            blazeRoutine.driveRelative(-4.0, 1000, mogoGrabSpeed);
-            blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, true));
-            blazeRoutine.rotateTo(M_PI * 0.365);
+            blazeRoutine.rotateTo(M_PI * 0.375);
             blazeRoutine.drive(40.0);
             blazeRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::BOTTOM_RING));
             blazeRoutine.driveRelative(12.0, 2000, intakeSpeed);
             blazeRoutine.addStep(new AutoIntakeClawStep(intake, true));
             blazeRoutine.driveRelative(-10);
             blazeRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::FOURTH_RING));
-            blazeRoutine.driveRelative(21.0, 2000, intakeSpeed);
+            blazeRoutine.driveRelative(20.0, 2000, intakeSpeed);
             blazeRoutine.addStep(new AutoConveyorPickupStep(conveyor, true, 1000));
-            blazeRoutine.driveRelative(-9.0);
-            blazeRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::INTAKE));
+            blazeRoutine.rotateTo(M_PI * 0.9);
+            blazeRoutine.driveRelative(4);
             blazeRoutine.addStep(new AutoIntakeClawStep(intake, false));
+            blazeRoutine.driveRelative(-4);
+            blazeRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::ALLIANCE_STAKE));
+            blazeRoutine.pause(100);
+            blazeRoutine.rotateTo(M_PI * 0.25);
+            blazeRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::BOTTOM_RING)); // CHANGES DEPENDING ON ALLIANCE
+            blazeRoutine.driveRelative(4.5, 2000, intakeSpeed);
+            blazeRoutine.rotateTo(0);
+            blazeRoutine.driveRelative(10, 1000, intakeSpeed);
+            blazeRoutine.addStep(new AutoIntakeClawStep(intake, true));
+            blazeRoutine.driveRelative(-10);
+            blazeRoutine.addStep(new AutoIntakeClawStep(intake, false));
+            blazeRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::INTAKE));
+            blazeRoutine.addStep(new AutoConveyorPickupStep(conveyor, true, 1000));
+            blazeRoutine.rotateTo(M_PI * 0.25);
+            blazeRoutine.drive(-17.0);
 
             // Step 3
             blazeRoutine.rotateTo(M_PI);
-            blazeRoutine.driveRelative(10.0);
-            blazeRoutine.drive(19.0, 2000, intakeSpeed);
+            // blazeRoutine.driveRelative(8.0);
+            blazeRoutine.drive(17, 2000, intakeSpeed);
             blazeRoutine.addStep(new AutoConveyorPickupStep(conveyor, true, 1000));
-            blazeRoutine.driveRelative(-8);
+            blazeRoutine.driveRelative(-3);
+            // blazeRoutine.driveRelative(-8);
 
             // Step 4
             blazeRoutine.rotateTo(M_PI * 0.75);
             blazeRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::NEUTRAL_STAKE));
-            blazeRoutine.drive(21.0, 2000, cornerSpeed);
-            blazeRoutine.addStep(new AutoConveyorPickupStep(conveyor, true, 6000));
+            blazeRoutine.drive(21.0, 2500, cornerSpeed);
+            blazeRoutine.addStep(new AutoConveyorPickupStep(conveyor, true, 5000));
             blazeRoutine.drive(-20);
 
             // Step 5

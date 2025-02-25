@@ -33,7 +33,6 @@ namespace devils
             // Calibrate IMU
             imu.calibrate();
             imu.waitUntilCalibrated();
-            imu.setHeading(M_PI);
 
             autoRoutine->run();
         }
@@ -59,17 +58,14 @@ namespace devils
 
                 bool pickupInput = mainController.get_digital(DIGITAL_UP);
 
-                bool clawInput = mainController.get_digital_new_press(DIGITAL_L1) || mainController.get_digital_new_press(DIGITAL_L2);
-                bool mogoInput = mainController.get_digital_new_press(DIGITAL_R2);
-                bool slowInput = mainController.get_digital(DIGITAL_R1);
-
-                bool increaseConveyorSpeed = mainController.get_digital_new_press(DIGITAL_UP);
-                bool decreaseConveyorSpeed = mainController.get_digital_new_press(DIGITAL_DOWN);
+                bool clawInput = mainController.get_digital_new_press(DIGITAL_R1) || mainController.get_digital_new_press(DIGITAL_R2);
+                bool mogoInput = mainController.get_digital_new_press(DIGITAL_L2);
+                bool slowInput = mainController.get_digital(DIGITAL_L1);
 
                 // Curve Joystick Inputs
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1, 0.15);
                 leftX = JoystickCurve::curve(leftX, 3.0, 0.05, 0.2);
-                rightX = JoystickCurve::curve(rightX, 3.0, 0.05, 0.2);
+                rightX = JoystickCurve::curve(rightX, 3.0, 0.2, 0.2);
                 rightY = JoystickCurve::curve(rightY, 3.0, 0.1, 0.15, 0.8);
 
                 // Decrease turning speed for improved control
@@ -95,6 +91,9 @@ namespace devils
                     // Toggle Claw Grabber
                     bool shouldGrab = !intakeSystem.getClawGrabbed();
                     intakeSystem.setClawGrabbed(shouldGrab);
+
+                    if (!shouldGrab)
+                        mainController.rumble("..");
                 }
 
                 // Mogo
@@ -103,6 +102,9 @@ namespace devils
                     // Toggle Mogo Grabber
                     bool shouldGrabGoal = !mogoGrabber.isMogoGrabbed();
                     mogoGrabber.setMogoGrabbed(shouldGrabGoal);
+
+                    if (!shouldGrabGoal)
+                        mainController.rumble(".");
                 }
 
                 // Slow Mode
@@ -152,9 +154,8 @@ namespace devils
         RotationSensor verticalSensor = RotationSensor("VerticalOdom", 13);
         RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 14);
 
-        InertialSensor imu = InertialSensor("IMU", 16);
-
         OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 11);
+        InertialSensor imu = InertialSensor("IMU", 16);
         RotationSensor intakeArmSensor = RotationSensor("IntakeArmSensor", 12);
 
         ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 1);

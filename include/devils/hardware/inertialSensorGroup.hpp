@@ -60,6 +60,16 @@ namespace devils
         }
 
         /**
+         * Sets the current heading of all IMUs in the group.
+         * @param heading The heading to set the IMUs to in radians.
+         */
+        void setHeading(double heading) override
+        {
+            for (auto sensor : sensors)
+                sensor->setHeading(heading);
+        }
+
+        /**
          * Gets the sensors in the inertial sensor group.
          * @return The sensors in the inertial sensor group.
          */

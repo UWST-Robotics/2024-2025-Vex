@@ -14,9 +14,8 @@ namespace devils
         {
             imu.calibrate();
 
-            // conveyor.useSensor(&conveyorSensor);
-
-            // mogoGrabber.useLimitSwitch(&mogoLimitSwitch);
+            conveyorSensor.setLEDBrightness(100);
+            conveyor.useSensor(&conveyorSensor);
 
             odometry.useIMU(&imu);
             odometry.runAsync();
@@ -27,11 +26,11 @@ namespace devils
             // Default State
             intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
             mogoGrabber.setMogoGrabbed(false);
+            conveyor.setRingSorting(RingType::BLUE); // TODO: Add Alliance Color Picker
 
             // Calibrate IMU
             imu.calibrate();
             imu.waitUntilCalibrated();
-            imu.setHeading(M_PI);
 
             autoRoutine->run();
         }
@@ -141,6 +140,7 @@ namespace devils
         RotationSensor verticalSensor = RotationSensor("VerticalOdom", 13);
         RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 14);
 
+        OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 12);
         InertialSensor imu = InertialSensor("IMU", 16);
         RotationSensor intakeArmSensor = RotationSensor("IntakeArmSensor", 11);
 

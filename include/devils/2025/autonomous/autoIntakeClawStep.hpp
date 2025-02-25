@@ -25,7 +25,7 @@ namespace devils
         }
 
     private:
-        static constexpr double ACTUATION_DELAY = 200; // ms
+        static constexpr double ACTUATION_DELAY = 300; // ms
 
         IntakeSystem &intake;
         Timer actuationTimer = Timer(ACTUATION_DELAY);

@@ -159,7 +159,7 @@ namespace devils
 
     private:
         static constexpr double BOTTOM_RING_POSITION = 0;        // rad
-        static constexpr double INTAKE_POSITION = -0.22;         // rad
+        static constexpr double INTAKE_POSITION = -0.15;         // rad
         static constexpr double THIRD_RING_POSITION = -0.33;     // rad
         static constexpr double FOURTH_RING_POSITION = -0.35;    // rad
         static constexpr double ALLIANCE_STAKE_POSITION = -1.05; // rad
