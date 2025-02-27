@@ -24,6 +24,11 @@ namespace devils
             runAsync();
         }
 
+        void stop() override
+        {
+            ChassisBase::stop();
+        }
+
         void move(double forward, double turn, double strafe = 0) override
         {
             forward = std::clamp(forward, -1.0, 1.0) * forwardSpeed;
@@ -74,9 +79,9 @@ namespace devils
         }
 
     private:
-        static constexpr double TRANSLATION_ACCEL = 0.4; // in/s^2
-        static constexpr double ROTATION_ACCEL = 0.04;   // rad/s^2
-        static constexpr double DRAG = 0.25;             // %
+        static constexpr double TRANSLATION_ACCEL = 0.8; // in/s^2
+        static constexpr double ROTATION_ACCEL = 0.1;    // rad/s^2
+        static constexpr double DRAG = 0.35;             // %
 
         double lastForward = 0;
         double lastTurn = 0;

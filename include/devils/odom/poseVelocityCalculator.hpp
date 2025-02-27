@@ -45,6 +45,9 @@ namespace devils
             if (dt <= 0)
                 return;
 
+            // Update Timestamp
+            lastTimestamp = timestamp;
+
             // Calculate Linear Velocity
             Vector2 positionDelta = pose - lastPose;
             linearVelocity.x = positionDelta.x / dt;

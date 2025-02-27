@@ -12,7 +12,7 @@ namespace devils
     public:
         Runnable() = default;
         Runnable(int updateInterval) : updateInterval(updateInterval) {}
-        ~Runnable() { stopAsync(); }
+        ~Runnable() { stop(); }
 
         /**
          * Function that is called when the object starts running.
@@ -30,17 +30,29 @@ namespace devils
         virtual void onStop() {};
 
         /**
+         * Function that is called to check if the object is finished running.
+         * @return True if the object is finished running.
+         */
+        virtual bool checkFinished() { return false; }
+
+        /**
          * Runs the object asynchronously.
          * @return The PROS task that runs the object.
          */
         pros::Task *runAsync()
         {
-            stopAsync();
+            // Stop any existing async tasks
+            stop();
+
+            // Start task asynchronously
             currentTask = new pros::Task(
                 [=, this]
                 {
+                    // Start Event
                     onStart();
-                    while (true)
+
+                    // Loop
+                    while (!checkFinished())
                     {
                         try
                         {
@@ -48,10 +60,13 @@ namespace devils
                         }
                         catch (const std::exception &e)
                         {
-                            Logger::error("An error occurred in a Runnable task: " + std::string(e.what()));
+                            Logger::error("An error occurred in Runnable: " + std::string(e.what()));
                         }
                         pros::delay(updateInterval);
                     }
+
+                    // Stop Event
+                    onStop();
                 });
             return currentTask;
         }
@@ -60,7 +75,7 @@ namespace devils
          * Stops the object from running.
          * Deletes the task and calls onStop.
          */
-        void stopAsync()
+        void stop()
         {
             if (currentTask != nullptr)
             {
@@ -69,6 +84,15 @@ namespace devils
                 delete currentTask;
                 currentTask = nullptr;
             }
+        }
+
+        /**
+         * Runs the object synchronously.
+         */
+        void run()
+        {
+            runAsync();
+            currentTask->join();
         }
 
     private:

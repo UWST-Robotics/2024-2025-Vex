@@ -78,6 +78,16 @@ namespace devils
         }
 
         /**
+         * Sets the position of all the motors in encoder ticks.
+         * @param position The position to set all the motors to in encoder ticks.
+         */
+        void setPosition(double position)
+        {
+            for (auto motor : motors)
+                motor->setPosition(position);
+        }
+
+        /**
          * Returns the average speed of all the motors in RPM.
          * If 1 or more motors fail to return velocity, they are ignored.
          * @return The average speed of all the motors in RPM.

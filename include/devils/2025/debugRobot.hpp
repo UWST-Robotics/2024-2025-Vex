@@ -15,32 +15,28 @@ namespace devils
          */
         DebugRobot()
         {
-            // Reset Network Tables
-            // networkOdom.setSize(18.0, 18.0);
-        }
-
-        void autonomous() override
-        {
-            chassis.stop();
         }
 
         void opcontrol() override
         {
-            autonomous();
+            blazeRoutine->runAsync();
+            // pjRoutine->runAsync();
         }
 
-        void disabled() override
-        {
-            // Stop the robot
-            chassis.stop();
-        }
+        // Network Tables
+        VEXBridge bridge = VEXBridge(0);
 
         // Dummy Chassis
-        DummyChassis chassis = DummyChassis();
+        DummyChassis blazeChassis = DummyChassis();
+        AutoStepList *blazeRoutine = AutoFactory::createTestAuto(blazeChassis);
+        NTOdom blazeOdomNT = NTOdom("Blaze", blazeChassis);
+
+        // Autonomous
+        // DummyChassis pjChassis = DummyChassis();
+        // AutoStepList *pjRoutine = AutoFactory::createPJMatchAuto(pjChassis, pjChassis);
+        // NTOdom pjOdomNT = NTOdom("PepperJack", pjChassis);
 
         // Additional Network Objects
-        // NTOdom networkOdom = NTOdom("DummyOdom", chassis);
-        // NTPath networkPath = NTPath("TestPath", path);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

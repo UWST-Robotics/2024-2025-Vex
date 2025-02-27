@@ -1,26 +1,45 @@
 #pragma once
 
 #include "../subsystems/ConveyorSystem.hpp"
+#include "../subsystems/IntakeSystem.hpp"
+#include "../subsystems/MogoGrabSystem.hpp"
 #include "devils/devils.h"
 
 namespace devils
 {
-    class AutoConveyorStep : public IAutoStep
+    /**
+     * Runs the conveyor system at a given speed.
+     */
+    class AutoConveyorStep : public AutoStep
     {
     public:
-        AutoConveyorStep(ConveyorSystem &conveyor, double conveyorSpeed = 1.0)
-            : conveyor(conveyor), conveyorSpeed(conveyorSpeed)
+        AutoConveyorStep(ConveyorSystem &conveyor,
+                         IntakeSystem &intake,
+                         MogoGrabSystem &mogoGrabber,
+                         double conveyorSpeed = 1.0)
+            : conveyor(conveyor),
+              intake(intake),
+              mogoGrabber(mogoGrabber),
+              conveyorSpeed(conveyorSpeed)
         {
         }
 
-        void doStep() override
+        void onUpdate() override
         {
-            conveyor.setAsyncSpeed(conveyorSpeed);
-            conveyor.runAsync();
+            conveyor.moveAutomatic(conveyorSpeed);
+            conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
+            conveyor.setArmLowered(intake.getArmPosition() == IntakeSystem::ArmPosition::BOTTOM_RING);
+        }
+
+        void onStop() override
+        {
+            conveyor.forceMove(0);
         }
 
     private:
-        double conveyorSpeed;
         ConveyorSystem &conveyor;
+        IntakeSystem &intake;
+        MogoGrabSystem &mogoGrabber;
+        double conveyorSpeed;
     };
 }

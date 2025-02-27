@@ -9,13 +9,29 @@ namespace devils
     {
     public:
         /**
-         * Creates a new timer with a given duration.
+         * Creates a new instance of Timer with a given duration.
+         * @param duration The duration of the timer in milliseconds.
+         * @return The new instance of Timer.
+         */
+        Timer(uint32_t duration) : duration(duration)
+        {
+        }
+
+        /**
+         * Sets the duration of the timer.
          * @param duration The duration of the timer in milliseconds.
          */
-        void start(uint32_t duration)
+        void setDuration(uint32_t duration)
+        {
+            this->duration = duration;
+        }
+
+        /**
+         * Starts the timer.
+         */
+        void start()
         {
             this->startTime = pros::millis();
-            this->duration = duration;
             this->isStarted = true;
         }
 

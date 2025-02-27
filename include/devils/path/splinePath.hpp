@@ -7,6 +7,9 @@
 
 namespace devils
 {
+    /**
+     * Represents a path that is interpolated using cubic splines.
+     */
     class SplinePath : public Path
     {
     public:
@@ -20,6 +23,26 @@ namespace devils
             this->poses = poses;
         }
 
+        /**
+         * Makes a simple 2 point arc path.
+         * @param from The starting pose
+         * @param to The ending pose
+         * @param delta Distance of the entry and exit anchor points in inches
+         * @return The spline path
+         */
+        static SplinePath *makeArc(Pose from, Pose to, double delta = 18.0)
+        {
+            std::vector<SplinePose> poses;
+            poses.push_back(SplinePose(from.x, from.y, from.rotation, delta, delta));
+            poses.push_back(SplinePose(to.x, to.y, to.rotation, delta, delta));
+            return new SplinePath(poses);
+        }
+
+        /**
+         * Gets a pose at a specific index along the path.
+         * @param index The index to get the pose at. Interpolate between indices.
+         * @return The pose at the index
+         */
         Pose getPoseAt(double index) override
         {
             // Check OOB
@@ -50,6 +73,10 @@ namespace devils
                 dt);
         }
 
+        /**
+         * Gets the length of the path
+         * @return The length of the path in control points
+         */
         double getLength() override
         {
             return poses.size();

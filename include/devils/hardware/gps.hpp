@@ -5,14 +5,14 @@
 #include "../geometry/units.hpp"
 #include "../geometry/polygon.hpp"
 #include "../odom/odomSource.hpp"
-#include "../nt/objects/ntHardware.hpp"
+#include "hardwareBase.hpp"
 
 namespace devils
 {
     /**
      * Represents a Vex V5 GPS
      */
-    class GPS : public OdomSource, public Runnable, private NTHardware
+    class GPS : public OdomSource, public Runnable, private HardwareBase
     {
     public:
         /**
@@ -22,7 +22,7 @@ namespace devils
          * @param gpsPort The port of the GPS
          */
         GPS(std::string name, uint8_t gpsPort)
-            : NTHardware(name, "GPS", gpsPort),
+            : HardwareBase(name, "GPS", gpsPort),
               gps(gpsPort, 0, 0, 0, 0, 0)
         {
             if (errno != 0)
@@ -136,19 +136,14 @@ namespace devils
         }
 
     protected:
-        void serializeHardware(std::string &ntPrefix) override
+        void serialize() override
         {
-            NetworkTables::updateDoubleValue(ntPrefix + "/x", currentPose.x);
-            NetworkTables::updateDoubleValue(ntPrefix + "/y", currentPose.y);
-            NetworkTables::updateDoubleValue(ntPrefix + "/rotation", currentPose.rotation);
-        }
+            ntX.set(currentPose.x);
+            ntY.set(currentPose.y);
+            ntRotation.set(currentPose.rotation);
 
-        void checkHealth() override
-        {
             if (!gps.is_installed())
                 reportFault("Disconnected");
-            else
-                clearFaults();
         }
 
     private:
@@ -156,6 +151,10 @@ namespace devils
         static constexpr double GPS_ROTATION_OFFSET = M_PI * 0.5; // PROS defaults to north as 0 degrees
         static constexpr double MAX_GPS_X = 72;
         static constexpr double MAX_GPS_Y = 72;
+
+        NTValue<double> ntX = ntGroup.makeValue("x", 0.0);
+        NTValue<double> ntY = ntGroup.makeValue("y", 0.0);
+        NTValue<double> ntRotation = ntGroup.makeValue("rotation", 0.0);
 
         pros::Gps gps;
         Pose currentPose = Pose(0, 0, 0);

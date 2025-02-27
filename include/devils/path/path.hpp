@@ -5,9 +5,8 @@
 
 namespace devils
 {
-    class Path
+    struct Path
     {
-    public:
         /**
          * Gets an interpolated pose at a given index
          * @param index The index of the pose

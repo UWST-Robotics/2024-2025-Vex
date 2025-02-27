@@ -4,6 +4,10 @@
 
 namespace devils
 {
+    /**
+     * Represents a pose with additional spline data.
+     * Used in `SplinePath` to define control points.
+     */
     struct SplinePose : public Pose
     {
         SplinePose() : Pose() {}

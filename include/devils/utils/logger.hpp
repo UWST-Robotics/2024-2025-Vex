@@ -3,7 +3,6 @@
 #include "pros/misc.hpp"
 #include "pros/llemu.hpp"
 #include <string>
-#include <unistd.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -152,7 +151,6 @@ namespace devils
         static void logToSerial(std::string message)
         {
             std::cout << message << std::endl;
-            // printf("%s\n", message.c_str());
         }
 
     private:

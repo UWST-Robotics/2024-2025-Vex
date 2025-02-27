@@ -4,7 +4,7 @@
 #include "pros/error.h"
 #include "../utils/logger.hpp"
 #include "../geometry/units.hpp"
-#include "../nt/objects/ntHardware.hpp"
+#include "hardwareBase.hpp"
 #include <string>
 
 namespace devils
@@ -12,7 +12,7 @@ namespace devils
     /**
      * Represents a V5 optical sensor unit.
      */
-    class OpticalSensor : private NTHardware
+    class OpticalSensor : private HardwareBase
     {
     public:
         /**
@@ -21,7 +21,7 @@ namespace devils
          * @param port The port of the Optical Sensor (from 1 to 21)
          */
         OpticalSensor(const std::string name, const uint8_t port)
-            : NTHardware(name, "OpticalSensor", port),
+            : HardwareBase(name, "OpticalSensor", port),
               sensor(port)
         {
             if (errno != 0)
@@ -100,23 +100,25 @@ namespace devils
         }
 
     protected:
-        void serializeHardware(std::string &ntPrefix) override
+        void serialize() override
         {
-            NetworkTables::updateDoubleValue(ntPrefix + "/proximity", getProximity() * 100);
-            NetworkTables::updateDoubleValue(ntPrefix + "/colorHue", getHue());
-            NetworkTables::updateDoubleValue(ntPrefix + "/colorSaturation", getSaturation() * 100);
-            NetworkTables::updateDoubleValue(ntPrefix + "/colorBrightness", getBrightness() * 100);
-        }
+            // Network Tables
+            ntProximity.set(getProximity() * 100);
+            ntHue.set(getHue());
+            ntSaturation.set(getSaturation() * 100);
+            ntBrightness.set(getBrightness() * 100);
 
-        void checkHealth() override
-        {
+            // Fault Check
             if (!sensor.is_installed())
                 reportFault("Disconnected");
-            else
-                clearFaults();
         }
 
     private:
+        NTValue<double> ntProximity = ntGroup.makeValue("proximity", 0.0);
+        NTValue<double> ntHue = ntGroup.makeValue("hue", 0.0);
+        NTValue<double> ntSaturation = ntGroup.makeValue("saturation", 0.0);
+        NTValue<double> ntBrightness = ntGroup.makeValue("brightness", 0.0);
+
         pros::Optical sensor;
     };
 }

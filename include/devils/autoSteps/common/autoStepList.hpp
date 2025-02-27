@@ -1,6 +1,6 @@
 #pragma once
 
-#include "devils/autoSteps/common/autoStep.hpp"
+#include "autoStep.hpp"
 
 namespace devils
 {
@@ -9,57 +9,89 @@ namespace devils
     /**
      * Represents a list of AutoSteps.
      */
-    class AutoStepList : public IAutoStep
+    class AutoStepList : public AutoStep
     {
         friend class AbsoluteStepConverter;
 
     public:
         /**
-         * Creates a new instance of AutoStepList.
+         * Creates a new list of AutoSteps.
          * @param steps The steps to execute.
-         * @param loopCount The number of times to loop through the steps.
          */
-        AutoStepList(std::initializer_list<IAutoStep *> steps, int loopCount = 1)
-            : steps(steps), loopCount(loopCount)
+        AutoStepList(std::initializer_list<AutoStep *> steps)
+            : steps(steps)
         {
         }
 
         /**
-         * Creates a new instance of AutoStepList.
+         * Creates a new list of AutoSteps.
          * @param steps The steps to execute.
-         * @param loopCount The number of times to loop through the steps.
          */
-        AutoStepList(std::vector<IAutoStep *> steps, int loopCount = 1)
-            : steps(steps), loopCount(loopCount)
+        AutoStepList(std::vector<AutoStep *> steps)
+            : steps(steps)
         {
         }
 
-        /**
-         * Executes all steps in the list as a pros task.
-         * This function will block until all steps are complete.
-         */
-        void doStep() override
+        void onStart()
         {
-            for (int i = 0; i < loopCount; i++)
+            index = 0;
+            steps[index]->onStart();
+        }
+
+        void onUpdate()
+        {
+            // If we reached the end, stop
+            if (checkFinished())
+                return;
+
+            // Update the Current Step
+            steps[index]->onUpdate();
+
+            // Check if the current step is finished
+            if (steps[index]->checkFinished())
             {
-                for (int o = 0; o < steps.size(); o++)
-                {
-                    steps[o]->doStep();
-                }
+                // Stop the Current Step
+                steps[index]->onStop();
+
+                // Abort if we reached the end
+                index++;
+                if (checkFinished())
+                    return;
+
+                // Start the Next Step
+                steps[index]->onStart();
+
+                // Update the Next Step
+                onUpdate();
             }
+        }
+
+        void onStop()
+        {
+            // Stop the Current Step
+            if (index < steps.size())
+                steps[index]->onStop();
+        }
+
+        bool checkFinished() override
+        {
+            return index >= steps.size();
         }
 
         /**
          * Gets all the steps in the list.
          * @return The steps in the list.
          */
-        std::vector<IAutoStep *> &getAllSteps()
+        std::vector<AutoStep *> &getAllSteps()
         {
             return steps;
         }
 
     private:
-        std::vector<IAutoStep *> steps;
-        int loopCount = 1;
+        // State
+        int index = 0;
+
+        // Params
+        std::vector<AutoStep *> steps;
     };
 }

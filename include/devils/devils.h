@@ -14,10 +14,13 @@
 
 // Hardware
 #include "hardware/gps.hpp"
-#include "hardware/imu.hpp"
+#include "hardware/gyro.hpp"
+#include "hardware/inertialSensor.hpp"
+#include "hardware/inertialSensorGroup.hpp"
 #include "hardware/opticalSensor.hpp"
 #include "hardware/visionSensor.hpp"
 #include "hardware/adiPneumatic.hpp"
+#include "hardware/adiDigitalInput.hpp"
 #include "hardware/adiPneumaticGroup.hpp"
 
 // Odom
@@ -27,9 +30,6 @@
 #include "odom/tankChassisOdom.hpp"
 #include "odom/perpendicularSensorOdom.hpp"
 #include "odom/parallelSensorOdom.hpp"
-
-// Geometry
-#include "geometry/perspectiveFactory.hpp"
 
 // Pros
 #include "api.h"
@@ -46,7 +46,6 @@
 #include "path/linearPath.hpp"
 #include "path/splinePath.hpp"
 #include "path/structs/splinePose.hpp"
-#include "path/autoDevilDeserializer.hpp"
 
 // Trajectory
 #include "trajectory/trajectory.hpp"
@@ -54,24 +53,28 @@
 #include "trajectory/structs/trajectoryConstraints.hpp"
 #include "trajectory/structs/trajectoryState.hpp"
 
-// Network
-#include "nt/networkTables.hpp"
-#include "nt/ntService.hpp"
-#include "nt/ntObjectBase.hpp"
-#include "nt/objects/ntOdom.hpp"
-#include "nt/objects/ntPath.hpp"
-#include "nt/objects/ntHardware.hpp"
-
 // AutoSteps
 #include "autoSteps/common/autoStep.hpp"
 #include "autoSteps/common/autoStepList.hpp"
-#include "autoSteps/autoDriveStep.hpp"
-#include "autoSteps/autoDriveToStep.hpp"
-#include "autoSteps/autoRotateStep.hpp"
-#include "autoSteps/autoRotateToStep.hpp"
-#include "autoSteps/autoPauseStep.hpp"
-#include "autoSteps/autoJumpToStep.hpp"
-#include "autoSteps/absoluteStepConverter.hpp"
+#include "autoSteps/common/autoBuilder.hpp"
+#include "autoSteps/steps/autoTimeoutStep.hpp"
+#include "autoSteps/steps/autoDriveTimeStep.hpp"
+#include "autoSteps/steps/autoDriveToStep.hpp"
+#include "autoSteps/steps/autoDriveStep.hpp"
+#include "autoSteps/steps/autoRotateStep.hpp"
+#include "autoSteps/steps/autoRotateToStep.hpp"
+#include "autoSteps/steps/autoPauseStep.hpp"
+#include "autoSteps/steps/autoJumpToStep.hpp"
+#include "autoSteps/steps/autoBranchStep.hpp"
+#include "autoSteps/steps/autoPurePursuitStep.hpp"
+#include "autoSteps/steps/autoAsyncStep.hpp"
+#include "autoSteps/steps/autoStopAsyncStep.hpp"
 
 // Display
 #include "display/eyesRenderer.hpp"
+
+// Utils
+#include "utils/ntOdom.hpp"
+
+// VEXBridge
+#include "../vexbridge/vexbridge.h"

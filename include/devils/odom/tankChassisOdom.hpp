@@ -1,6 +1,7 @@
 #pragma once
 #include "differentialWheelOdom.hpp"
 #include "../utils/runnable.hpp"
+#include "../hardware/gyro.hpp"
 
 #define M_PI 3.14159265358979323846
 
@@ -55,7 +56,7 @@ namespace devils
          * Sets the IMU to use for odometry.
          * @param imu The IMU to use.
          */
-        void useIMU(IMU *imu)
+        void useIMU(IGyro *imu)
         {
             this->imu = imu;
         }
@@ -73,6 +74,6 @@ namespace devils
     private:
         double ticksPerRevolution = 300.0 * (48.0 / 36.0); // ticks
         TankChassis &chassis;
-        IMU *imu = nullptr;
+        IGyro *imu = nullptr;
     };
 }

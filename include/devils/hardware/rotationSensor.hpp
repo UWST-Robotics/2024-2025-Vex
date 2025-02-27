@@ -2,7 +2,7 @@
 #include "pros/rotation.hpp"
 #include "../utils/logger.hpp"
 #include "../geometry/units.hpp"
-#include "../nt/objects/ntHardware.hpp"
+#include "hardwareBase.hpp"
 #include <string>
 
 namespace devils
@@ -10,7 +10,7 @@ namespace devils
     /**
      * Represents a V5 rotational sensor.
      */
-    class RotationSensor : private NTHardware
+    class RotationSensor : private HardwareBase
     {
     public:
         /**
@@ -21,7 +21,7 @@ namespace devils
         RotationSensor(
             const std::string name,
             const int8_t port)
-            : NTHardware(name, "RotationSensor", port),
+            : HardwareBase(name, "RotationSensor", port),
               rotationSensor(port)
         {
             rotationSensor.set_position(0);
@@ -60,22 +60,40 @@ namespace devils
             return Units::centidegToRad(velocity);
         }
 
-    protected:
-        void serializeHardware(std::string &ntPrefix) override
+        /**
+         * Checks if the sensor is still connected.
+         * @return True if the sensor is still connected, false otherwise.
+         */
+        bool isConnected()
         {
-            NetworkTables::updateDoubleValue(ntPrefix + "/position", getAngle());
-            NetworkTables::updateDoubleValue(ntPrefix + "/velocity", getVelocity());
+            return rotationSensor.is_installed();
         }
 
-        void checkHealth() override
+        /**
+         * Sets the position of the sensor in centidegrees.
+         * @param position The position to set the sensor to.
+         */
+        void setPosition(uint32_t position)
         {
+            rotationSensor.set_position(position);
+        }
+
+    protected:
+        void serialize() override
+        {
+            // Update network table values
+            ntAngle.set(getAngle());
+            ntVelocity.set(getVelocity());
+
+            // Check if the sensor is still connected
             if (!rotationSensor.is_installed())
                 reportFault("Disconnected");
-            else
-                clearFaults();
         }
 
     private:
+        NTValue<double> ntAngle = ntGroup.makeValue("angle", 0.0);
+        NTValue<double> ntVelocity = ntGroup.makeValue("velocity", 0.0);
+
         pros::Rotation rotationSensor;
     };
 }

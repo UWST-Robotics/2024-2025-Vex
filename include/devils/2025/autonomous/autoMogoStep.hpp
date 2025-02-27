@@ -1,28 +1,34 @@
 #pragma once
 
-#include "../subsystems/ConveyorSystem.hpp"
+#include "../subsystems/MogoGrabSystem.hpp"
 #include "devils/devils.h"
 
 namespace devils
 {
-    class AutoGrabMogoStep : public IAutoStep
+    class AutoGrabMogoStep : public AutoStep
     {
     public:
-        AutoGrabMogoStep(ConveyorSystem &conveyor, bool shouldGrab = true)
-            : conveyor(conveyor), shouldGrab(shouldGrab)
+        AutoGrabMogoStep(MogoGrabSystem &mogoGrabber, bool shouldGrab = true)
+            : mogoGrabber(mogoGrabber), shouldGrab(shouldGrab)
         {
         }
 
-        void doStep() override
+        void onStart() override
         {
-            conveyor.setGoalGrabbed(shouldGrab);
-            pros::delay(ACTUATION_DELAY);
+            mogoGrabber.setMogoGrabbed(shouldGrab);
+            actuationTimer.start();
+        }
+
+        bool checkFinished() override
+        {
+            return actuationTimer.finished();
         }
 
     private:
-        static constexpr double ACTUATION_DELAY = 500; // ms
+        static constexpr double ACTUATION_DELAY = 200; // ms
 
         bool shouldGrab;
-        ConveyorSystem &conveyor;
+        Timer actuationTimer = Timer(ACTUATION_DELAY);
+        MogoGrabSystem &mogoGrabber;
     };
 }
