@@ -103,7 +103,6 @@ namespace devils
                 conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
                 conveyor.setPickupRing(true);
                 conveyor.setArmLowered(false);
-                conveyor.setRingSorting(RingType::NONE);
                 conveyor.moveAutomatic(rightY);
 
                 // Move Chassis

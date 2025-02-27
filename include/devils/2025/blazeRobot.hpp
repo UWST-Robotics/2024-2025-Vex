@@ -54,18 +54,18 @@ namespace devils
 
                 bool lowArmInput = mainController.get_digital(DIGITAL_B);
                 bool midArmInput = mainController.get_digital(DIGITAL_A) || mainController.get_digital(DIGITAL_Y);
-                bool highArmInput = mainController.get_digital(DIGITAL_X);
+                bool highArmInput = mainController.get_digital(DIGITAL_X) || mainController.get_digital(DIGITAL_L1);
 
-                bool pickupInput = mainController.get_digital(DIGITAL_UP);
+                bool pickupInput = mainController.get_digital(DIGITAL_R2);
 
-                bool clawInput = mainController.get_digital_new_press(DIGITAL_R1) || mainController.get_digital_new_press(DIGITAL_R2);
+                bool clawInput = mainController.get_digital_new_press(DIGITAL_R1);
                 bool mogoInput = mainController.get_digital_new_press(DIGITAL_L2);
-                bool slowInput = mainController.get_digital(DIGITAL_L1);
+                bool slowInput = false; // mainController.get_digital(DIGITAL_L1);
 
                 // Curve Joystick Inputs
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1, 0.15);
                 leftX = JoystickCurve::curve(leftX, 3.0, 0.05, 0.2);
-                rightX = JoystickCurve::curve(rightX, 3.0, 0.2, 0.2);
+                rightX = JoystickCurve::curve(rightX, 3.0, 0.1, 0.2);
                 rightY = JoystickCurve::curve(rightY, 3.0, 0.1, 0.15, 0.8);
 
                 // Decrease turning speed for improved control
@@ -84,6 +84,7 @@ namespace devils
                 else
                     intakeSystem.setArmPosition(IntakeSystem::INTAKE);
                 intakeSystem.moveArmToPosition();
+                intakeSystem.disableSpeedClamp(lowArmInput);
 
                 // Intake Claw
                 if (clawInput)
@@ -112,9 +113,9 @@ namespace devils
 
                 // Conveyor
                 conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
-                conveyor.setArmLowered(false); // Always allow the conveyor to move
-                conveyor.setPickupRing(true);  // Always allow the conveyor to pick up rings
-                conveyor.moveAutomatic(rightY);
+                conveyor.setArmLowered(intakeSystem.getArmPosition() == IntakeSystem::ArmPosition::BOTTOM_RING); // Always allow the conveyor to move
+                conveyor.setPickupRing(true);                                                                    // Always allow the conveyor to pick up rings
+                conveyor.moveAutomatic(pickupInput ? 1.0 : rightY);
                 conveyor.setRingSorting(RingType::NONE);
 
                 // Move Chassis
@@ -171,7 +172,7 @@ namespace devils
 
         // Auto
         NTOdom ntOdom = NTOdom("Blaze", odometry);
-        AutoStepList *autoRoutine = AutoFactory::createPJMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
+        AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

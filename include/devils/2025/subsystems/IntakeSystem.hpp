@@ -32,6 +32,7 @@ namespace devils
               armMotors(armMotors),
               rotationSensor(rotationSensor)
         {
+            rotationSensor.setPosition(0);
         }
 
         /**
@@ -89,6 +90,15 @@ namespace devils
                 motor->moveVoltage(0);
         }
 
+        /**
+         * Disables the speed clamp for the arm.
+         * @param isDisabled True to disable the speed clamp, false to enable it.
+         */
+        void disableSpeedClamp(bool isDisabled = true)
+        {
+            isSpeedClampDisabled = isDisabled;
+        }
+
     protected:
         /**
          * Converts the arm position to target angle.
@@ -143,27 +153,23 @@ namespace devils
             double currentPosition = rotationSensor.getAngle();
             double error = Units::diffRad(angle, currentPosition);
 
+            // PID Control
             double speed = armPID.update(error);
-            speed = std::clamp(speed, MIN_SPEED, MAX_SPEED);
-            // double speed = Math::trapezoidProfile(
-            //     1,
-            //     error,
-            //     1,
-            //     DECEL_DISTANCE,
-            //     0,
-            //     0,
-            //     MAX_SPEED);
+
+            // Clamp speed to avoid slamming
+            if (!isSpeedClampDisabled)
+                speed = std::clamp(speed, MIN_SPEED, MAX_SPEED);
 
             motor->moveVoltage(speed);
         }
 
     private:
-        static constexpr double BOTTOM_RING_POSITION = 0;        // rad
-        static constexpr double INTAKE_POSITION = -0.15;         // rad
-        static constexpr double THIRD_RING_POSITION = -0.33;     // rad
-        static constexpr double FOURTH_RING_POSITION = -0.35;    // rad
-        static constexpr double ALLIANCE_STAKE_POSITION = -1.05; // rad
-        static constexpr double NEUTRAL_STAKE_POSITION = -1.6;   // rad
+        static constexpr double BOTTOM_RING_POSITION = 0;       // rad
+        static constexpr double INTAKE_POSITION = -0.16;        // rad
+        static constexpr double THIRD_RING_POSITION = -0.33;    // rad
+        static constexpr double FOURTH_RING_POSITION = -0.38;   // rad
+        static constexpr double ALLIANCE_STAKE_POSITION = -1.1; // rad
+        static constexpr double NEUTRAL_STAKE_POSITION = -1.6;  // rad
 
         static constexpr double DECEL_DISTANCE = M_PI * 0.2; // rad
         static constexpr double MAX_SPEED = 0.3;             // %
@@ -171,7 +177,8 @@ namespace devils
 
         // State
         ArmPosition targetPosition = BOTTOM_RING;
-        PIDController armPID = PIDController(1.5, 0.0, 40);
+        PIDController armPID = PIDController(1.4, 0, 80);
+        bool isSpeedClampDisabled = false;
 
         // Hardware
         ADIPneumatic &grabberPneumatic;

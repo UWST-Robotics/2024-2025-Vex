@@ -69,6 +69,15 @@ namespace devils
             return rotationSensor.is_installed();
         }
 
+        /**
+         * Sets the position of the sensor in centidegrees.
+         * @param position The position to set the sensor to.
+         */
+        void setPosition(uint32_t position)
+        {
+            rotationSensor.set_position(position);
+        }
+
     protected:
         void serialize() override
         {

@@ -232,7 +232,7 @@ namespace devils
         //      SENSOR OPTIONS
 
         /// @brief The optical sensor threshold to detect a ring.
-        static constexpr double PROXIMITY_THRESHOLD = 0.2;
+        static constexpr double PROXIMITY_THRESHOLD = 0.4;
 
         //      MOGO ACTUATION OPTIONS
 
@@ -251,13 +251,13 @@ namespace devils
         static constexpr double STALL_MIN_DURATION = 300;
 
         /// @brief The current threshold to detect a stall (in mA).
-        static constexpr double STALL_CURRENT = 1600;
+        static constexpr double STALL_CURRENT = 1800;
 
         /// @brief The duration to reverse the conveyor system when stalled.
-        static constexpr double STALL_REVERSE_DURATION = 400;
+        static constexpr double STALL_REVERSE_DURATION = 200;
 
         /// @brief The speed to reverse the conveyor system while stalled.
-        static constexpr double STALL_SPEED = -0.4;
+        static constexpr double STALL_SPEED = -0.8;
 
         //      RING DETECTION OPTIONS
 
