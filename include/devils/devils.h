@@ -14,7 +14,6 @@
 
 // Hardware
 #include "hardware/gps.hpp"
-#include "hardware/gyro.hpp"
 #include "hardware/inertialSensor.hpp"
 #include "hardware/inertialSensorGroup.hpp"
 #include "hardware/opticalSensor.hpp"
@@ -22,6 +21,7 @@
 #include "hardware/adiPneumatic.hpp"
 #include "hardware/adiDigitalInput.hpp"
 #include "hardware/adiPneumaticGroup.hpp"
+#include "hardware/aiVisionSensor.hpp"
 
 // Odom
 #include "odom/odomSource.hpp"

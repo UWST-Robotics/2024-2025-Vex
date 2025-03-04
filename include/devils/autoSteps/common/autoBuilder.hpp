@@ -183,7 +183,7 @@ namespace devils
             uint32_t timeout = 2000,
             AutoRotateToStep::Options options = AutoRotateToStep::Options::defaultOptions)
         {
-            pose.rotation += distance;
+            pose.rotation += this->isBlue ? -distance : distance;
             addStep(new AutoRotateToStep(chassis, odom, pose.rotation, options), timeout);
         }
 
@@ -197,8 +197,14 @@ namespace devils
             uint32_t timeout = 2000,
             AutoRotateToStep::Options options = AutoRotateToStep::Options::defaultOptions)
         {
-            pose.rotation = heading;
+            // pose.rotation = heading;
+            pose.rotation = isBlue ? M_PI - heading : heading;
             addStep(new AutoRotateToStep(chassis, odom, pose.rotation, options), timeout);
+        }
+
+        void setBlue(bool isBlue)
+        {
+            this->isBlue = isBlue;
         }
 
     private:
@@ -207,6 +213,7 @@ namespace devils
         std::vector<AutoStep *> steps;
 
         // Params
+        bool isBlue = false;
         ChassisBase &chassis;
         OdomSource &odom;
     };

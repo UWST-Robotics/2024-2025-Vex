@@ -5,7 +5,7 @@
 #include "../geometry/units.hpp"
 #include "../geometry/polygon.hpp"
 #include "../odom/odomSource.hpp"
-#include "hardwareBase.hpp"
+#include "structs/hardwareBase.hpp"
 
 namespace devils
 {

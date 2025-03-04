@@ -4,9 +4,9 @@
 #include <cmath>
 #include "pros/motors.hpp"
 #include "pros/error.h"
-#include "motor.hpp"
 #include "../utils/logger.hpp"
-#include "hardwareBase.hpp"
+#include "structs/motor.h"
+#include "structs/hardwareBase.hpp"
 
 namespace devils
 {

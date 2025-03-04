@@ -3,7 +3,7 @@
 #include "../utils/runnable.hpp"
 #include "../odom/odomSource.hpp"
 #include "../hardware/rotationSensor.hpp"
-#include "../hardware/gyro.hpp"
+#include "../hardware/structs/gyro.h"
 #include "poseVelocityCalculator.hpp"
 
 namespace devils

@@ -1,10 +1,9 @@
 #pragma once
 #include "pros/motors.hpp"
 #include "pros/vision.hpp"
-#include "motor.hpp"
 #include "../utils/logger.hpp"
-#include "structs/visionObject.hpp"
-#include "hardwareBase.hpp"
+#include "structs/hardwareBase.hpp"
+#include "structs/camera.h"
 #include <string>
 
 namespace devils
@@ -12,7 +11,7 @@ namespace devils
     /**
      * Represents a vision sensor object. All events are logged.
      */
-    class VisionSensor : private HardwareBase
+    class VisionSensor : private HardwareBase, public ICamera
     {
     public:
         // Thank you James Pearman for these measurements
@@ -36,16 +35,6 @@ namespace devils
         }
 
         /**
-         * Gets the angle of an object relative to the center of the vision sensor.
-         * @param object The object to get the angle of
-         * @return The angle of the object in radians
-         */
-        static double getAngle(VisionObject object)
-        {
-            return Units::degToRad((object.x * VISION_WIDTH_FOV) / VISION_WIDTH_PX);
-        }
-
-        /**
          * Sets the vision sensor's LED color.
          * Overrides the default LED behavior.
          * @param color The color to set the LED to
@@ -65,6 +54,31 @@ namespace devils
             auto status = sensor.clear_led();
             if (status == PROS_ERR)
                 reportFault("Failed to reset LED color");
+        }
+
+        const ICamera::Parameters getParameters() override
+        {
+            return ICamera::Parameters{
+                VISION_WIDTH_PX,
+                VISION_HEIGHT_PX,
+                Units::degToRad(VISION_WIDTH_FOV),
+                Units::degToRad(VISION_HEIGHT_FOV)};
+        }
+
+        std::vector<ICamera::VisionObject> getObjectsInView() override
+        {
+            std::vector<ICamera::VisionObject> objects;
+            int32_t objectCount = sensor.get_object_count();
+            for (int32_t i = 0; i < objectCount; i++)
+            {
+                auto object = sensor.get_by_size(i);
+                objects.push_back(ICamera::VisionObject{
+                    object.x_middle_coord,
+                    object.y_middle_coord,
+                    object.width,
+                    object.height});
+            }
+            return objects;
         }
 
     protected:

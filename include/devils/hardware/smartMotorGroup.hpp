@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "motor.hpp"
+#include "structs/motor.h"
 #include "smartMotor.hpp"
 #include "pros/error.h"
 

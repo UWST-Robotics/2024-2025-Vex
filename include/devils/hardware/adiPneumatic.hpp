@@ -1,7 +1,7 @@
 #pragma once
 #include "pros/adi.hpp"
 #include "../utils/logger.hpp"
-#include "hardwareBase.hpp"
+#include "structs/hardwareBase.hpp"
 #include <string>
 
 namespace devils

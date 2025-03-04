@@ -1,6 +1,5 @@
 #pragma once
 #include "pros/adi.hpp"
-#include "motor.hpp"
 #include "../utils/logger.hpp"
 #include "hardwareBase.hpp"
 #include <string>

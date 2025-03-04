@@ -1,6 +1,6 @@
 #pragma once
 #include "pros/motors.hpp"
-#include "../utils/logger.hpp"
+#include "../../utils/logger.hpp"
 #include <string>
 
 namespace devils

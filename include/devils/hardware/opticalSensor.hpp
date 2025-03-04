@@ -4,7 +4,7 @@
 #include "pros/error.h"
 #include "../utils/logger.hpp"
 #include "../geometry/units.hpp"
-#include "hardwareBase.hpp"
+#include "structs/hardwareBase.hpp"
 #include <string>
 
 namespace devils

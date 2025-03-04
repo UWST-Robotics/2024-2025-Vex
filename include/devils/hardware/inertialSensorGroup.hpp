@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "gyro.hpp"
+#include "structs/gyro.h"
 #include "inertialSensor.hpp"
 #include "pros/error.h"
 

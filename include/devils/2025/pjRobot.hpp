@@ -26,7 +26,8 @@ namespace devils
             // Default State
             intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
             mogoGrabber.setMogoGrabbed(false);
-            conveyor.setRingSorting(RingType::BLUE); // TODO: Add Alliance Color Picker
+            conveyor.setRingSorting(RingType::NONE); // TODO: Add Alliance Color Picker
+            conveyor.setPickupRing(true);            // Always allow the conveyor to pick up rings
 
             // Calibrate IMU
             imu.calibrate();

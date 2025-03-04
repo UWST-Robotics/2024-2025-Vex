@@ -1,8 +1,8 @@
 #pragma once
 
 #include "vexbridge/vexbridge.h"
-#include "../utils/runnable.hpp"
-#include "../utils/logger.hpp"
+#include "../../utils/runnable.hpp"
+#include "../../utils/logger.hpp"
 
 namespace devils
 {
