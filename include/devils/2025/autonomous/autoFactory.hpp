@@ -103,39 +103,39 @@ namespace devils
             // NE Mogo
             pjRoutine.drive(18.0);
             pjRoutine.pause(500); // Wait for rings to intake
-            pjRoutine.rotate(M_PI);
+            pjRoutine.rotateTo(M_PI);
             pjRoutine.drive(-24.0);
 
             pjRoutine.addStep(grabMogoRoutine);
 
-            pjRoutine.rotate(M_PI * -0.18);
+            pjRoutine.rotateTo(M_PI * -0.18);
             pjRoutine.drive(16.0);
             pjRoutine.addStep(wobbleRoutine);
             pjRoutine.drive(-16.0);
 
-            pjRoutine.rotate(M_PI * 0.5);
+            pjRoutine.rotateTo(M_PI * 0.5);
             pjRoutine.drive(21.0);
-            pjRoutine.rotate(M_PI * -0.75);
+            pjRoutine.rotateTo(M_PI * -0.75);
             pjRoutine.drive(48.0);
 
             pjRoutine.addStep(wobbleRoutine);
 
             pjRoutine.drive(-12.0);
-            pjRoutine.rotate(M_PI * 0.25);
+            pjRoutine.rotateTo(M_PI * 0.25);
             pjRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
             pjRoutine.drive(4.0);
             pjRoutine.drive(-20.0);
 
             // Center Mogo
             pjRoutine.drive(15.0);
-            pjRoutine.rotate(0);
+            pjRoutine.rotateTo(0);
             pjRoutine.drive(48.0);
-            pjRoutine.rotate(M_PI * -0.75);
+            pjRoutine.rotateTo(M_PI * -0.75);
             pjRoutine.drive(-34.0);
 
             pjRoutine.addStep(grabMogoRoutine);
 
-            pjRoutine.rotate(M_PI * 0.75);
+            pjRoutine.rotateTo(M_PI * 0.75);
             pjRoutine.drive(32, 2000, intakeSpeed);
             pjRoutine.drive(-6, 1000, intakeSpeed);
             pjRoutine.rotate(M_PI * 0.15);
@@ -151,25 +151,25 @@ namespace devils
             pjRoutine.drive(12, 1000, intakeSpeed);
             pjRoutine.drive(-12, 1000, intakeSpeed);
 
-            pjRoutine.rotate(M_PI * -0.25);
+            pjRoutine.rotateTo(M_PI * -0.25);
 
             pjRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
             pjRoutine.drive(26.0);
 
             // NW Mogo
-            pjRoutine.rotate(M_PI * -0.75);
+            pjRoutine.rotateTo(M_PI * -0.75);
             pjRoutine.drive(-36.0);
 
             pjRoutine.addStep(grabMogoRoutine);
 
-            pjRoutine.rotate(M_PI * -0.5);
+            pjRoutine.rotateTo(M_PI * -0.5);
             pjRoutine.drive(24.0);
-            pjRoutine.rotate(M_PI * -0.75);
+            pjRoutine.rotateTo(M_PI * -0.75);
             pjRoutine.drive(34.0);
-            pjRoutine.rotate(0);
+            pjRoutine.rotateTo(0);
             pjRoutine.drive(24.0);
 
-            pjRoutine.rotate(M_PI * 0.75);
+            pjRoutine.rotateTo(M_PI * 0.75);
             pjRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
             pjRoutine.drive(6.0);
             pjRoutine.drive(-22.0);
@@ -587,7 +587,7 @@ namespace devils
                 new AutoGrabMogoStep(mogoGrabber, true),
 
                 // Return to the original position
-                new AutoDriveStep(chassis, odometry, 10.0),
+                new AutoDriveStep(chassis, odometry, 12.0),
             });
 
             AutoBuilder blazeRoutine = AutoBuilder(chassis, odometry);
@@ -608,64 +608,64 @@ namespace devils
 
             // SW Mogo
             blazeRoutine.drive(17.0);
-            blazeRoutine.rotate(M_PI * 0.25);
+            blazeRoutine.rotateTo(M_PI * 0.25);
             blazeRoutine.drive(33.0);
-            blazeRoutine.rotate(M_PI * -0.5);
+            blazeRoutine.rotateTo(M_PI * -0.5);
             blazeRoutine.drive(-23.0);
 
             blazeRoutine.addStep(grabMogoRoutine);
 
-            blazeRoutine.rotate(0);
+            blazeRoutine.rotateTo(0);
             blazeRoutine.drive(24.0);
 
             blazeRoutine.drive(-24.0);
-            blazeRoutine.rotate(M_PI * 0.12);
+            blazeRoutine.rotateTo(M_PI * 0.12);
             blazeRoutine.drive(24.0);
             blazeRoutine.drive(-24.0);
 
-            blazeRoutine.rotate(M_PI);
+            blazeRoutine.rotateTo(M_PI);
             blazeRoutine.drive(21);
-            blazeRoutine.rotate(M_PI * 0.75);
+            blazeRoutine.rotateTo(M_PI * 0.75);
             blazeRoutine.drive(13.5);
 
             blazeRoutine.addStep(wobbleRoutine);
 
             blazeRoutine.drive(-9.0);
-            blazeRoutine.rotate(M_PI * -0.25);
+            blazeRoutine.rotateTo(M_PI * -0.25);
             blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
 
             // SE Mogo
             blazeRoutine.drive(-14.5);
 
             blazeRoutine.drive(17.0);
-            blazeRoutine.rotate(0);
+            blazeRoutine.rotateTo(0);
             blazeRoutine.drive(48.0);
-            blazeRoutine.rotate(M_PI * 0.75);
+            blazeRoutine.rotateTo(M_PI * 0.75);
             blazeRoutine.drive(-34.0);
 
             blazeRoutine.addStep(grabMogoRoutine);
 
-            blazeRoutine.rotate(M_PI * 0.5);
+            blazeRoutine.rotateTo(M_PI * 0.5);
             blazeRoutine.drive(24.0);
-            blazeRoutine.rotate(0);
+            blazeRoutine.rotateTo(0);
             blazeRoutine.drive(24.0);
-            blazeRoutine.rotate(M_PI * -0.5);
+            blazeRoutine.rotateTo(M_PI * -0.5);
             blazeRoutine.drive(24.0);
             blazeRoutine.drive(-24.0);
 
-            blazeRoutine.rotate(M_PI * -0.75);
+            blazeRoutine.rotateTo(M_PI * -0.75);
             blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
             blazeRoutine.drive(4.0);
             blazeRoutine.drive(-16.0);
             blazeRoutine.drive(16.0);
 
             // Blue Wall Stake
-            blazeRoutine.rotate(M_PI * -0.41);
+            blazeRoutine.rotateTo(M_PI * -0.41);
 
             blazeRoutine.pause(5000); // Wait for PJ
 
             blazeRoutine.drive(51.0);
-            blazeRoutine.rotate(M_PI);
+            blazeRoutine.rotateTo(M_PI);
             blazeRoutine.drive(12.0);
             blazeRoutine.drive(-16, 2000, intakeSpeed);
             blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, true));

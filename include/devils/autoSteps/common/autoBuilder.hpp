@@ -150,6 +150,13 @@ namespace devils
             addStep(new AutoDriveStep(chassis, odom, distance, options), timeout);
         }
 
+        /**
+         * Drives for a given duration using open-loop control
+         * @param duration The duration to drive in milliseconds
+         * @param forwardSpeed The forward speed to drive at
+         * @param turnSpeed The turn speed to drive at
+         * @param strafeSpeed The strafe speed to drive at
+         */
         void driveTime(
             uint32_t duration,
             double forwardSpeed,
@@ -198,7 +205,7 @@ namespace devils
             uint32_t timeout = 2000,
             AutoRotateToStep::Options options = AutoRotateToStep::Options::defaultOptions)
         {
-            pose.rotation += this->isBlue ? -distance : distance;
+            pose.rotation += distance;
             addStep(new AutoRotateToStep(chassis, odom, pose.rotation, options), timeout);
         }
 
@@ -212,14 +219,8 @@ namespace devils
             uint32_t timeout = 2000,
             AutoRotateToStep::Options options = AutoRotateToStep::Options::defaultOptions)
         {
-            // pose.rotation = heading;
-            pose.rotation = isBlue ? M_PI - heading : heading;
+            pose.rotation = heading;
             addStep(new AutoRotateToStep(chassis, odom, pose.rotation, options), timeout);
-        }
-
-        void setBlue(bool isBlue)
-        {
-            this->isBlue = isBlue;
         }
 
     private:
@@ -228,7 +229,6 @@ namespace devils
         std::vector<AutoStep *> steps;
 
         // Params
-        bool isBlue = false;
         ChassisBase &chassis;
         OdomSource &odom;
     };
