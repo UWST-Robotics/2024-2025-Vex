@@ -3,6 +3,7 @@
 #include "../devils.h"
 #include "subsystems/ConveyorSystem.hpp"
 #include "subsystems/IntakeSystem.hpp"
+#include "subsystems/GoalRushSystem.hpp"
 #include "subsystems/MogoGrabSystem.hpp"
 #include "autonomous/autoFactory.hpp"
 
@@ -63,6 +64,8 @@ namespace devils
                 bool mogoInput = mainController.get_digital_new_press(DIGITAL_L2);
                 bool slowInput = false; // mainController.get_digital(DIGITAL_L1);
 
+                bool goalRushInput = mainController.get_digital_new_press(DIGITAL_LEFT);
+
                 // Curve Joystick Inputs
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1, 0.15);
                 leftX = JoystickCurve::curve(leftX, 3.0, 0.05, 0.2);
@@ -107,6 +110,17 @@ namespace devils
 
                     if (!shouldGrabGoal)
                         mainController.rumble(".");
+                }
+
+                // Goal Rush
+                if (goalRushInput)
+                {
+                    // Toggle Goal Rush
+                    bool shouldRush = !goalRushSystem.isGoalRushExtended();
+                    goalRushSystem.setGoalRushExtended(shouldRush);
+
+                    if (shouldRush)
+                        mainController.rumble("...");
                 }
 
                 // Slow Mode
@@ -163,12 +177,14 @@ namespace devils
         ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 1);
         ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 2);
         ADIDigitalInput mogoSensor = ADIDigitalInput("MogoSensor", -3);
+        ADIPneumatic goalRushPneumatic = ADIPneumatic("GoalRushPneumatic", 4);
 
         // Subsystems
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
         ConveyorSystem conveyor = ConveyorSystem(conveyorMotors);
         MogoGrabSystem mogoGrabber = MogoGrabSystem(mogoPneumatic);
         IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors, intakeArmSensor);
+        GoalRushSystem goalRushSystem = GoalRushSystem(goalRushPneumatic);
         PerpendicularSensorOdometry odometry = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
 
         // Auto
