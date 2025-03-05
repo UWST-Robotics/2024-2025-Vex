@@ -471,6 +471,10 @@ namespace devils
             MogoGrabSystem &mogoGrabber)
         {
             // Default Options
+            // TODO: PARAMS COPIED FROM BLAZE MATCH AUTO. CHANGE IF NEEDED
+            PIDParams drivePID = {0.15, 0.0, 10};
+            PIDParams rotatePID = {0.7, 0.0, 50.0};
+            PIDParams drivingRotatePID = {1.5, 0.0, 100.0};
             AutoDriveToStep::Options::defaultOptions = {
                 drivePID,
                 drivingRotatePID,
