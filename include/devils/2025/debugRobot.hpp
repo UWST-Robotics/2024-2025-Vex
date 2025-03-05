@@ -19,31 +19,16 @@ namespace devils
 
         void opcontrol() override
         {
-            // blazeRoutine->runAsync();
-            // pjRoutine->runAsync();
-            while (true)
-            {
-                // int32_t objectCount = visionSensor.getObjectCount();
-                // std::cout << "Object Count: " << objectCount << std::endl;
-                pros::delay(500);
-            }
+            blazeRoutine->runAsync();
         }
 
         // Network Tables
-        // VEXBridge bridge = VEXBridge(0);
+        VEXBridge bridge = VEXBridge(0);
 
         // Dummy Chassis
-        DummyChassis blazeChassis = DummyChassis();
-        // AutoStepList *blazeRoutine = AutoFactory::createTestAuto(blazeChassis);
-        // NTOdom blazeOdomNT = NTOdom("Blaze", blazeChassis);
-        // AIVisionSensor visionSensor = AIVisionSensor("TestVision", 1);
-
-        // Autonomous
-        // DummyChassis pjChassis = DummyChassis();
-        // AutoStepList *pjRoutine = AutoFactory::createPJMatchAuto(pjChassis, pjChassis);
-        // NTOdom pjOdomNT = NTOdom("PepperJack", pjChassis);
-
-        // Additional Network Objects
+        DummyChassis dummyChassis = DummyChassis();
+        AutoStepList *blazeRoutine = AutoFactory::createTestAuto(dummyChassis);
+        NTOdom dummyOdomNT = NTOdom("DummyOdom", dummyChassis);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

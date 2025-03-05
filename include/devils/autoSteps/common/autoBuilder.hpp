@@ -13,6 +13,7 @@
 #include "../steps/autoPurePursuitStep.hpp"
 #include "../steps/autoAsyncStep.hpp"
 #include "../steps/autoStopAsyncStep.hpp"
+#include "../transformer/autoTransform.hpp"
 
 namespace devils
 {
@@ -82,7 +83,9 @@ namespace devils
         void setPose(Pose pose)
         {
             this->pose = pose;
-            steps.push_back(new AutoJumpToStep(odom, pose));
+
+            Pose transformedPose = tryTransformPose(pose);
+            steps.push_back(new AutoJumpToStep(odom, transformedPose));
         }
 
         /**
@@ -129,7 +132,8 @@ namespace devils
                 pose.y + distance * std::sin(pose.rotation),
                 pose.rotation);
 
-            addStep(new AutoDriveToStep(chassis, odom, pose, options), timeout);
+            Pose transformedPose = tryTransformPose(pose);
+            addStep(new AutoDriveToStep(chassis, odom, transformedPose, options), timeout);
         }
 
         /**
@@ -146,7 +150,6 @@ namespace devils
                 pose.x + distance * std::cos(pose.rotation),
                 pose.y + distance * std::sin(pose.rotation),
                 pose.rotation);
-
             addStep(new AutoDriveStep(chassis, odom, distance, options), timeout);
         }
 
@@ -186,6 +189,8 @@ namespace devils
             uint32_t timeout = 2000,
             AutoDriveToStep::Options options = AutoDriveToStep::Options::defaultOptions)
         {
+            // TODO: Apply transformations
+
             // Get start/end poses
             Pose prevPose = Pose(pose.x, pose.y, pose.rotation);
             pose = Pose(pose.x + x, pose.y + y, rotation);
@@ -206,7 +211,9 @@ namespace devils
             AutoRotateToStep::Options options = AutoRotateToStep::Options::defaultOptions)
         {
             pose.rotation += distance;
-            addStep(new AutoRotateToStep(chassis, odom, pose.rotation, options), timeout);
+
+            Pose transformedPose = tryTransformPose(pose);
+            addStep(new AutoRotateToStep(chassis, odom, transformedPose.rotation, options), timeout);
         }
 
         /**
@@ -220,12 +227,35 @@ namespace devils
             AutoRotateToStep::Options options = AutoRotateToStep::Options::defaultOptions)
         {
             pose.rotation = heading;
-            addStep(new AutoRotateToStep(chassis, odom, pose.rotation, options), timeout);
+            Pose transformedPose = tryTransformPose(pose);
+            addStep(new AutoRotateToStep(chassis, odom, transformedPose.rotation, options), timeout);
+        }
+
+        /**
+         * Tries to transform a pose using the assigned transformer, if any
+         * @param pose - The pose to transform
+         * @returns The transformed pose
+         */
+        Pose tryTransformPose(Pose pose)
+        {
+            if (transformer != nullptr)
+                return transformer->transform(pose);
+            return pose;
+        }
+
+        /**
+         * Uses a pose transformation when building autonomous
+         * @param transformer - The transformation to apply
+         */
+        void useTransformer(AutoTransform *transformer)
+        {
+            this->transformer = transformer;
         }
 
     private:
         // State
         Pose pose;
+        AutoTransform *transformer = nullptr;
         std::vector<AutoStep *> steps;
 
         // Params

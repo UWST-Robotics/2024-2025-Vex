@@ -69,6 +69,7 @@
 #include "autoSteps/steps/autoPurePursuitStep.hpp"
 #include "autoSteps/steps/autoAsyncStep.hpp"
 #include "autoSteps/steps/autoStopAsyncStep.hpp"
+#include "autoSteps/transformer/mirrorTransform.hpp"
 
 // Display
 #include "display/eyesRenderer.hpp"
