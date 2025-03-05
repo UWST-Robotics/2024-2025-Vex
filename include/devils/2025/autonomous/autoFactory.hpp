@@ -470,6 +470,10 @@ namespace devils
             ConveyorSystem &conveyor,
             MogoGrabSystem &mogoGrabber)
         {
+            // PID Params
+            PIDParams drivePID = {0.15, 0.0, 10};
+            PIDParams drivingRotatePID = {1.5, 0.0, 100.0};
+
             // Default Options
             // TODO: PARAMS COPIED FROM BLAZE MATCH AUTO. CHANGE IF NEEDED
             PIDParams drivePID = {0.15, 0.0, 10};
@@ -482,15 +486,24 @@ namespace devils
                 2.0, // goalDist
                 2.0, // goalSpeed
             };
-            AutoRotateToStep::Options::defaultOptions = {
-                rotatePID,
-                0.4,  // maxSpeed
-                0.15, // minSpeed
-                0.05, // goalDist
-                0.5,  // goalSpeed
-            };
 
-            // AutoBuilder blazeRoutine = AutoBuilder(chassis, odometry);
+            AutoBuilder blazeRoutine = AutoBuilder(chassis, odometry);
+
+            // Initial State
+            blazeRoutine.addAsyncStep(new AutoIntakeMoveArmStep(intake));
+            blazeRoutine.addAsyncStep(new AutoConveyorStep(conveyor, intake, mogoGrabber));
+            blazeRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::INTAKE));
+            blazeRoutine.addStep(new AutoIntakeClawStep(intake, false));
+
+            // Mogo
+            blazeRoutine.drive(12.0, 1000);
+            blazeRoutine.addStep(new AutoConveyorPickupStep(conveyor, true, 500));
+            blazeRoutine.drive(-11.0, 1000);
+            blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, true));
+            blazeRoutine.addStep(new AutoConveyorPickupStep(conveyor, true, 1000));
+            blazeRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
+
+            return blazeRoutine.build();
         }
 
         static AutoStepList *createBlazeSkillsAuto(

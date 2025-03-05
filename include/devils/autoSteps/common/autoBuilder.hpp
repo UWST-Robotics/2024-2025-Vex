@@ -6,6 +6,7 @@
 #include "../steps/autoJumpToStep.hpp"
 #include "../steps/autoDriveStep.hpp"
 #include "../steps/autoDriveToStep.hpp"
+#include "../steps/autoDriveTimeStep.hpp"
 #include "../steps/autoRotateToStep.hpp"
 #include "../steps/autoTimeoutStep.hpp"
 #include "../steps/autoPauseStep.hpp"
@@ -147,6 +148,20 @@ namespace devils
                 pose.rotation);
 
             addStep(new AutoDriveStep(chassis, odom, distance, options), timeout);
+        }
+
+        void driveTime(
+            uint32_t duration,
+            double forwardSpeed,
+            double turnSpeed,
+            double strafeSpeed = 0)
+        {
+            addStep(new AutoDriveTimeStep(
+                chassis,
+                duration,
+                forwardSpeed,
+                turnSpeed,
+                strafeSpeed));
         }
 
         /**

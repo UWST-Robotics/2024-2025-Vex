@@ -46,7 +46,7 @@ namespace devils
         void onUpdate() override
         {
             // Set Speed
-            chassis.setSpeed(forwardSpeed, turnSpeed, strafeSpeed);
+            chassis.move(forwardSpeed, turnSpeed, strafeSpeed);
         }
 
         void onStop() override

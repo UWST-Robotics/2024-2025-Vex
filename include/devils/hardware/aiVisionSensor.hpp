@@ -88,11 +88,6 @@ namespace devils
             // return vexDeviceAiVisionObjectCountGet(port);
         }
 
-    protected:
-        void serialize() override
-        {
-        }
-
     private:
         uint16_t port;
     };

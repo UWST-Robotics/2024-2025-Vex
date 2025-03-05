@@ -68,15 +68,7 @@ namespace devils
             return isEnabled;
         }
 
-    protected:
-        void serialize() override
-        {
-            ntEnabled.set(isEnabled);
-        }
-
     private:
-        NTValue<bool> ntEnabled = ntGroup.makeValue("enabled", false);
-
         bool isEnabled = false;
         pros::ADIDigitalOut led;
     };

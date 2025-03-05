@@ -6,7 +6,7 @@
 
 namespace devils
 {
-    class HardwareBase : private Runnable
+    class HardwareBase
     {
     public:
         /**
@@ -20,16 +20,8 @@ namespace devils
             const std::string name,
             const std::string type,
             const int8_t port)
-            : Runnable(100),
-              name(name),
-              ntGroup("_hardware/" + name)
-        //   ntType(ntGroup.makeValue("type", type))
-        //   ntFault(ntGroup.makeValue<std::string>("fault", ""))
+            : name(name)
         {
-            // TODO: Fix Stringed NT Types
-            // Auto run serialization task
-            if (SERIALIZATION_ENABLED)
-                runAsync();
         }
 
     protected:
@@ -41,32 +33,15 @@ namespace devils
          */
         void reportFault(const std::string fault, const int code = 0)
         {
-            // Set fault
-            // ntFault.set(fault);
-
             // Log to console
             if (LOGGING_ENABLED)
                 Logger::error(name + ": " + fault + " (" + std::to_string(code) + ")");
         }
 
-        /**
-         * Serializes the hardware to the network table.
-         * Called on regular intervals.
-         */
-        virtual void serialize() = 0;
-
         std::string name;
-        NTGroup ntGroup;
-        // NTValue<std::string> ntType;
-        // NTValue<std::string> ntFault;
 
     private:
         static constexpr bool SERIALIZATION_ENABLED = true;
         static constexpr bool LOGGING_ENABLED = false;
-
-        void onUpdate() override
-        {
-            serialize();
-        }
     };
 }

@@ -53,7 +53,7 @@ namespace devils
 
                 bool lowArmInput = mainController.get_digital(DIGITAL_B);
                 bool midArmInput = mainController.get_digital(DIGITAL_A) || mainController.get_digital(DIGITAL_Y);
-                bool highArmInput = mainController.get_digital(DIGITAL_X);
+                bool highArmInput = mainController.get_digital(DIGITAL_X) || mainController.get_digital(DIGITAL_RIGHT);
 
                 bool clawInput = mainController.get_digital_new_press(DIGITAL_R1) || mainController.get_digital_new_press(DIGITAL_R2);
                 bool mogoInput = mainController.get_digital_new_press(DIGITAL_L2) || mainController.get_digital_new_press(DIGITAL_L1);

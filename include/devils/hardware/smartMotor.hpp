@@ -108,12 +108,12 @@ namespace devils
 
         /**
          * Gets the current current draw of the motor in mA.
-         * @return The current current draw of the motor in mA or `PROS_ERR_F` if the current could not be retrieved.
+         * @return The current current draw of the motor in mA or `PROS_ERR` if the current could not be retrieved.
          */
         double getCurrent()
         {
             double current = motor.get_current_draw();
-            if (current == PROS_ERR_F)
+            if (current == PROS_ERR)
                 reportFault("Get Current Failed");
             return current;
         }
@@ -135,43 +135,7 @@ namespace devils
                 reportFault("Set Brake Mode Failed");
         }
 
-    protected:
-        void serialize() override
-        {
-            // Update temp, position, and velocity
-            ntTemperature.set(getTemperature());
-            ntPosition.set(getPosition());
-            // ntVelocity.set(getVelocity());
-
-            // Check if Motor is Connected
-            isConnected = motor.is_installed();
-
-            // Get Motor Fault Bitmask
-            uint32_t motorFaults = motor.get_faults();
-            isOverTemp = motorFaults & 0x01;
-            isDriverFault = motorFaults & 0x02;
-            isOverCurrent = motorFaults & 0x04;
-            isDriverOverCurrent = motorFaults & 0x08;
-
-            // Report Faults
-            if (!isConnected)
-                reportFault("Disconnected");
-            else if (isOverTemp)
-                reportFault("Over Temperature");
-            else if (isDriverFault)
-                reportFault("Driver Fault");
-            else if (isOverCurrent)
-                reportFault("Over Current");
-            else if (isDriverOverCurrent)
-                reportFault("Driver Over Current");
-        }
-
     private:
-        // NT
-        NTValue<float> ntTemperature = ntGroup.makeValue("temperature", 0.0f);
-        NTValue<float> ntPosition = ntGroup.makeValue("position", 0.0f);
-        // NTValue<float> ntVelocity = ntGroup.makeValue("velocity", 0.0f);
-
         // Hardware
         pros::Motor motor;
 

@@ -78,22 +78,7 @@ namespace devils
             rotationSensor.set_position(position);
         }
 
-    protected:
-        void serialize() override
-        {
-            // Update network table values
-            ntAngle.set(getAngle());
-            ntVelocity.set(getVelocity());
-
-            // Check if the sensor is still connected
-            if (!rotationSensor.is_installed())
-                reportFault("Disconnected");
-        }
-
     private:
-        NTValue<double> ntAngle = ntGroup.makeValue("angle", 0.0);
-        NTValue<double> ntVelocity = ntGroup.makeValue("velocity", 0.0);
-
         pros::Rotation rotationSensor;
     };
 }

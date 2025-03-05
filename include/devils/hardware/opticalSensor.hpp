@@ -99,26 +99,7 @@ namespace devils
                 reportFault("Failed to set LED brightness");
         }
 
-    protected:
-        void serialize() override
-        {
-            // Network Tables
-            ntProximity.set(getProximity() * 100);
-            ntHue.set(getHue());
-            ntSaturation.set(getSaturation() * 100);
-            ntBrightness.set(getBrightness() * 100);
-
-            // Fault Check
-            if (!sensor.is_installed())
-                reportFault("Disconnected");
-        }
-
     private:
-        NTValue<double> ntProximity = ntGroup.makeValue("proximity", 0.0);
-        NTValue<double> ntHue = ntGroup.makeValue("hue", 0.0);
-        NTValue<double> ntSaturation = ntGroup.makeValue("saturation", 0.0);
-        NTValue<double> ntBrightness = ntGroup.makeValue("brightness", 0.0);
-
         pros::Optical sensor;
     };
 }

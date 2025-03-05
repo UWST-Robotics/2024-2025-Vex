@@ -38,19 +38,8 @@ namespace devils
             return value;
         }
 
-    protected:
-        /**
-         * Serializes the pneumatic to the network table.
-         */
-        void serialize() override
-        {
-            ntValue.set(getValue());
-        }
-
     private:
         const pros::adi::DigitalIn controller;
-
-        NTValue<bool> ntValue = ntGroup.makeValue("value", false);
 
         bool isInverted = false;
     };

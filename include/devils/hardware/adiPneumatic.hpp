@@ -71,19 +71,8 @@ namespace devils
             return isExtended;
         }
 
-    protected:
-        /**
-         * Serializes the pneumatic to the network table.
-         */
-        void serialize() override
-        {
-            ntExtended.set(isExtended);
-        }
-
     private:
         const pros::adi::DigitalOut controller;
-
-        NTValue<bool> ntExtended = ntGroup.makeValue("extended", false);
 
         bool isExtended = false;
         bool isInverted = false;

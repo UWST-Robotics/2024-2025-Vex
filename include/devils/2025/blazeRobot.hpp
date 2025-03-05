@@ -42,8 +42,13 @@ namespace devils
         void opcontrol() override
         {
             // Default State
-            intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
+            intakeSystem.setArmPosition(IntakeSystem::INTAKE);
             mogoGrabber.setMogoGrabbed(false);
+
+            // Start Macro
+            imu.waitUntilCalibrated();
+            startMacro->run();
+            AutoAsyncStep::stopAll();
 
             // Loop
             while (true)
@@ -128,10 +133,10 @@ namespace devils
 
                 // Conveyor
                 conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
-                conveyor.setArmLowered(intakeSystem.getArmPosition() == IntakeSystem::ArmPosition::BOTTOM_RING); // Always allow the conveyor to move
-                conveyor.setPickupRing(true);                                                                    // Always allow the conveyor to pick up rings
-                conveyor.moveAutomatic(pickupInput ? 1.0 : rightY);
+                conveyor.setPickupRing(true); // Always allow the conveyor to pick up rings
                 conveyor.setRingSorting(RingType::NONE);
+                conveyor.setArmLowered(intakeSystem.getArmPosition() == IntakeSystem::ArmPosition::BOTTOM_RING); // Always allow the conveyor to move
+                conveyor.moveAutomatic(pickupInput ? 1.0 : rightY);
 
                 // Move Chassis
                 chassis.move(leftY * speedMultiplier, combinedX * speedMultiplier);
@@ -160,7 +165,7 @@ namespace devils
         static constexpr double REJECT_OFFSET = 13;      // teeth
 
         // Hardware
-        VEXBridge bridge = VEXBridge(0);
+        // VEXBridge bridge = VEXBridge(0);
 
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 2, -3, 4, -5});
         SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {6, -7, 8, -9, 10});
@@ -190,6 +195,7 @@ namespace devils
         // Auto
         NTOdom ntOdom = NTOdom("Blaze", odometry);
         AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
+        AutoStepList *startMacro = AutoFactory::createBlazeStartMacro(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

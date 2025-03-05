@@ -81,12 +81,6 @@ namespace devils
             return objects;
         }
 
-    protected:
-        void serialize() override
-        {
-            // TODO: Serialize Hardware
-        }
-
     private:
         pros::Vision sensor;
     };
