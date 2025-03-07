@@ -13,6 +13,8 @@ namespace devils
     {
         BlazeRobot()
         {
+            intakeSystem.setArmPositions(IntakeSystem::ArmPositionAngles{-0.04, -0.14});
+
             imu.calibrate();
 
             conveyorSensor.setLEDBrightness(100);
@@ -29,8 +31,7 @@ namespace devils
             // Default State
             intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
             mogoGrabber.setMogoGrabbed(false);
-            conveyor.setRingSorting(RingType::NONE); // TODO: Add Alliance Color Picker
-            conveyor.setPickupRing(true);            // Always allow the conveyor to pick up rings
+            conveyor.setPickupRing(true); // Always allow the conveyor to pick up rings
 
             // Calibrate IMU
             imu.calibrate();
@@ -47,7 +48,7 @@ namespace devils
 
             // Start Macro
             imu.waitUntilCalibrated();
-            startMacro->run();
+            // startMacro->run();
             AutoAsyncStep::stopAll();
 
             // Loop

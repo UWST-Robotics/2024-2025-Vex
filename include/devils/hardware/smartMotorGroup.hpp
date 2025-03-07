@@ -134,7 +134,6 @@ namespace devils
             for (auto motor : motors)
             {
                 double motorCurrent = motor->getCurrent();
-                printf("Motor current: %f\n", motorCurrent);
 
                 // Skip motors that fail to return current
                 if (motorCurrent == PROS_ERR)

@@ -15,10 +15,18 @@ namespace devils
         {
             BOTTOM_RING,    // Grabs rings off the ground
             INTAKE,         // Slightly elevated to allow for intake
-            THIRD_RING,     // Grabs the 3rd ring off a stack, used for autonomous
             FOURTH_RING,    // Grabs the 4th ring off a stack, used for autonomous
             ALLIANCE_STAKE, // Raises the arm to the shorter alliance (red/blue) stakes
             NEUTRAL_STAKE,  // Raises the arm to the taller neutral stakes
+        };
+
+        struct ArmPositionAngles
+        {
+            double bottomRing = -0.06;   // rad
+            double intake = -0.21;       // rad
+            double fourthRing = -0.38;   // rad
+            double allianceStake = -1.2; // rad
+            double neutralStake = -1.6;  // rad
         };
 
         /**
@@ -99,6 +107,24 @@ namespace devils
             isSpeedClampDisabled = isDisabled;
         }
 
+        /**
+         * Sets the parameters for the arm PID controller.
+         * @param params The parameters to set.
+         */
+        void setArmPID(PIDParams params)
+        {
+            armPID = PIDController(params);
+        }
+
+        /**
+         * Sets the arm position angles.
+         * @param angles The angles to set.
+         */
+        void setArmPositions(ArmPositionAngles angles)
+        {
+            armPositionAngles = angles;
+        }
+
     protected:
         /**
          * Converts the arm position to target angle.
@@ -110,18 +136,17 @@ namespace devils
             switch (position)
             {
             case BOTTOM_RING:
-                return BOTTOM_RING_POSITION;
+                return armPositionAngles.bottomRing;
             case INTAKE:
-                return INTAKE_POSITION;
-            case THIRD_RING:
-                return THIRD_RING_POSITION;
+                return armPositionAngles.intake;
             case FOURTH_RING:
-                return FOURTH_RING_POSITION;
+                return armPositionAngles.fourthRing;
             case ALLIANCE_STAKE:
-                return ALLIANCE_STAKE_POSITION;
+                return armPositionAngles.allianceStake;
             case NEUTRAL_STAKE:
-                return NEUTRAL_STAKE_POSITION;
+                return armPositionAngles.neutralStake;
             }
+            return 0;
         }
 
         /**
@@ -164,20 +189,14 @@ namespace devils
         }
 
     private:
-        static constexpr double BOTTOM_RING_POSITION = -0.07;   // rad
-        static constexpr double INTAKE_POSITION = -0.18;        // rad
-        static constexpr double THIRD_RING_POSITION = -0.33;    // rad
-        static constexpr double FOURTH_RING_POSITION = -0.38;   // rad
-        static constexpr double ALLIANCE_STAKE_POSITION = -1.2; // rad
-        static constexpr double NEUTRAL_STAKE_POSITION = -1.6;  // rad
-
         static constexpr double DECEL_DISTANCE = M_PI * 0.2; // rad
-        static constexpr double MAX_SPEED = 0.3;             // %
+        static constexpr double MAX_SPEED = 0.2;             // %
         static constexpr double MIN_SPEED = -0.6;            // %
 
         // State
+        ArmPositionAngles armPositionAngles = ArmPositionAngles();
         ArmPosition targetPosition = BOTTOM_RING;
-        PIDController armPID = PIDController(1.4, 0, 80);
+        PIDController armPID = PIDController(1.8, 0, 80);
         bool isSpeedClampDisabled = false;
 
         // Hardware
