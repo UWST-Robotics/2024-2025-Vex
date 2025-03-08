@@ -5,7 +5,7 @@
 #include "../geometry/units.hpp"
 #include "../geometry/polygon.hpp"
 #include "../odom/odomSource.hpp"
-#include "hardwareBase.hpp"
+#include "structs/hardwareBase.hpp"
 
 namespace devils
 {
@@ -135,26 +135,11 @@ namespace devils
             return (pros::millis() - calibrationStartTime) < CALIBRATION_TIME;
         }
 
-    protected:
-        void serialize() override
-        {
-            ntX.set(currentPose.x);
-            ntY.set(currentPose.y);
-            ntRotation.set(currentPose.rotation);
-
-            if (!gps.is_installed())
-                reportFault("Disconnected");
-        }
-
     private:
         static constexpr int CALIBRATION_TIME = 7000;             // ms
         static constexpr double GPS_ROTATION_OFFSET = M_PI * 0.5; // PROS defaults to north as 0 degrees
         static constexpr double MAX_GPS_X = 72;
         static constexpr double MAX_GPS_Y = 72;
-
-        NTValue<double> ntX = ntGroup.makeValue("x", 0.0);
-        NTValue<double> ntY = ntGroup.makeValue("y", 0.0);
-        NTValue<double> ntRotation = ntGroup.makeValue("rotation", 0.0);
 
         pros::Gps gps;
         Pose currentPose = Pose(0, 0, 0);

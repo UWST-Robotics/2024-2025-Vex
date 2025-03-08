@@ -3,6 +3,7 @@
 #include "../devils.h"
 #include "subsystems/ConveyorSystem.hpp"
 #include "subsystems/IntakeSystem.hpp"
+#include "subsystems/GoalRushSystem.hpp"
 #include "subsystems/MogoGrabSystem.hpp"
 #include "autonomous/autoFactory.hpp"
 
@@ -12,6 +13,8 @@ namespace devils
     {
         BlazeRobot()
         {
+            intakeSystem.setArmPositions(IntakeSystem::ArmPositionAngles{-0.07, -0.18});
+
             imu.calibrate();
 
             conveyorSensor.setLEDBrightness(100);
@@ -28,10 +31,10 @@ namespace devils
             // Default State
             intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
             mogoGrabber.setMogoGrabbed(false);
-            conveyor.setRingSorting(RingType::BLUE); // TODO: Add Alliance Color Picker
+            conveyor.setPickupRing(true); // Always allow the conveyor to pick up rings
 
             // Calibrate IMU
-            imu.calibrate();
+            // imu.calibrate();
             imu.waitUntilCalibrated();
 
             autoRoutine->run();
@@ -40,8 +43,13 @@ namespace devils
         void opcontrol() override
         {
             // Default State
-            intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
+            intakeSystem.setArmPosition(IntakeSystem::INTAKE);
             mogoGrabber.setMogoGrabbed(false);
+
+            // Start Macro
+            // imu.waitUntilCalibrated();
+            // startMacro->run();
+            AutoAsyncStep::stopAll();
 
             // Loop
             while (true)
@@ -61,6 +69,8 @@ namespace devils
                 bool clawInput = mainController.get_digital_new_press(DIGITAL_R1);
                 bool mogoInput = mainController.get_digital_new_press(DIGITAL_L2);
                 bool slowInput = false; // mainController.get_digital(DIGITAL_L1);
+
+                bool goalRushInput = mainController.get_digital_new_press(DIGITAL_LEFT);
 
                 // Curve Joystick Inputs
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1, 0.15);
@@ -108,15 +118,26 @@ namespace devils
                         mainController.rumble(".");
                 }
 
+                // Goal Rush
+                if (goalRushInput)
+                {
+                    // Toggle Goal Rush
+                    bool shouldRush = !goalRushSystem.isGoalRushExtended();
+                    goalRushSystem.setGoalRushExtended(shouldRush);
+
+                    if (shouldRush)
+                        mainController.rumble("...");
+                }
+
                 // Slow Mode
                 double speedMultiplier = slowInput ? 0.5 : 1.0;
 
                 // Conveyor
                 conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
-                conveyor.setArmLowered(intakeSystem.getArmPosition() == IntakeSystem::ArmPosition::BOTTOM_RING); // Always allow the conveyor to move
-                conveyor.setPickupRing(true);                                                                    // Always allow the conveyor to pick up rings
-                conveyor.moveAutomatic(pickupInput ? 1.0 : rightY);
+                conveyor.setPickupRing(true); // Always allow the conveyor to pick up rings
                 conveyor.setRingSorting(RingType::NONE);
+                conveyor.setArmLowered(intakeSystem.getArmPosition() == IntakeSystem::ArmPosition::BOTTOM_RING); // Always allow the conveyor to move
+                conveyor.moveAutomatic(pickupInput ? 1.0 : rightY);
 
                 // Move Chassis
                 chassis.move(leftY * speedMultiplier, combinedX * speedMultiplier);
@@ -145,7 +166,7 @@ namespace devils
         static constexpr double REJECT_OFFSET = 13;      // teeth
 
         // Hardware
-        VEXBridge bridge = VEXBridge(0);
+        // VEXBridge bridge = VEXBridge(0);
 
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 2, -3, 4, -5});
         SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {6, -7, 8, -9, 10});
@@ -162,17 +183,21 @@ namespace devils
         ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 1);
         ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 2);
         ADIDigitalInput mogoSensor = ADIDigitalInput("MogoSensor", -3);
+        ADIPneumatic goalRushPneumatic = ADIPneumatic("GoalRushPneumatic", 4);
 
         // Subsystems
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
         ConveyorSystem conveyor = ConveyorSystem(conveyorMotors);
         MogoGrabSystem mogoGrabber = MogoGrabSystem(mogoPneumatic);
         IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors, intakeArmSensor);
+        GoalRushSystem goalRushSystem = GoalRushSystem(goalRushPneumatic);
         PerpendicularSensorOdometry odometry = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
 
         // Auto
         NTOdom ntOdom = NTOdom("Blaze", odometry);
-        AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
+        // AutoStepList *autoRoutine = AutoFactory::createBlazeSkillsAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
+        AutoStepList *autoRoutine = AutoFactory::createPJMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, goalRushSystem, false);
+        AutoStepList *startMacro = AutoFactory::createBlazeStartMacro(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

@@ -1,7 +1,7 @@
 #pragma once
 #include "differentialWheelOdom.hpp"
 #include "../utils/runnable.hpp"
-#include "../hardware/gyro.hpp"
+#include "../hardware/structs/gyro.h"
 
 #define M_PI 3.14159265358979323846
 

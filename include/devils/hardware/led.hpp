@@ -1,6 +1,5 @@
 #pragma once
 #include "pros/adi.hpp"
-#include "motor.hpp"
 #include "../utils/logger.hpp"
 #include "hardwareBase.hpp"
 #include <string>
@@ -69,15 +68,7 @@ namespace devils
             return isEnabled;
         }
 
-    protected:
-        void serialize() override
-        {
-            ntEnabled.set(isEnabled);
-        }
-
     private:
-        NTValue<bool> ntEnabled = ntGroup.makeValue("enabled", false);
-
         bool isEnabled = false;
         pros::ADIDigitalOut led;
     };

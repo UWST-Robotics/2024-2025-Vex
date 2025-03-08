@@ -26,10 +26,10 @@ namespace devils
             // Default State
             intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
             mogoGrabber.setMogoGrabbed(false);
-            conveyor.setRingSorting(RingType::BLUE); // TODO: Add Alliance Color Picker
+            conveyor.setPickupRing(true); // Always allow the conveyor to pick up rings
 
             // Calibrate IMU
-            imu.calibrate();
+            // imu.calibrate();
             imu.waitUntilCalibrated();
 
             autoRoutine->run();
@@ -52,7 +52,7 @@ namespace devils
 
                 bool lowArmInput = mainController.get_digital(DIGITAL_B);
                 bool midArmInput = mainController.get_digital(DIGITAL_A) || mainController.get_digital(DIGITAL_Y);
-                bool highArmInput = mainController.get_digital(DIGITAL_X);
+                bool highArmInput = mainController.get_digital(DIGITAL_X) || mainController.get_digital(DIGITAL_RIGHT);
 
                 bool clawInput = mainController.get_digital_new_press(DIGITAL_R1) || mainController.get_digital_new_press(DIGITAL_R2);
                 bool mogoInput = mainController.get_digital_new_press(DIGITAL_L2) || mainController.get_digital_new_press(DIGITAL_L1);
@@ -76,6 +76,7 @@ namespace devils
                 else
                     intakeSystem.setArmPosition(IntakeSystem::INTAKE);
                 intakeSystem.moveArmToPosition();
+                intakeSystem.disableSpeedClamp(lowArmInput);
 
                 // Intake Claw
                 if (clawInput)
@@ -104,6 +105,7 @@ namespace devils
                 conveyor.setPickupRing(true);
                 conveyor.setArmLowered(false);
                 conveyor.moveAutomatic(rightY);
+                conveyor.setRingSorting(RingType::NONE);
 
                 // Move Chassis
                 chassis.move(leftY, leftX);
@@ -129,7 +131,7 @@ namespace devils
         static constexpr double REJECT_OFFSET = 13;      // teeth
 
         // Hardware
-        VEXBridge bridge = VEXBridge(21);
+        VEXBridge bridge = VEXBridge(0);
 
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 2, -3, 4, -5});
         SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {6, -7, 8, -9, 10});
@@ -156,7 +158,7 @@ namespace devils
 
         // Auto
         NTOdom ntOdom = NTOdom("PJ", odometry);
-        AutoStepList *autoRoutine = AutoFactory::createPJMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
+        AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, true);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "motor.hpp"
+#include "structs/motor.h"
 #include "smartMotor.hpp"
 #include "pros/error.h"
 
@@ -136,7 +136,7 @@ namespace devils
                 double motorCurrent = motor->getCurrent();
 
                 // Skip motors that fail to return current
-                if (motorCurrent == PROS_ERR_F)
+                if (motorCurrent == PROS_ERR)
                     continue;
 
                 current += motorCurrent;

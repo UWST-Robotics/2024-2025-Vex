@@ -1,7 +1,7 @@
 #pragma once
 #include "pros/adi.hpp"
 #include "../utils/logger.hpp"
-#include "hardwareBase.hpp"
+#include "structs/hardwareBase.hpp"
 #include <string>
 
 namespace devils
@@ -71,19 +71,8 @@ namespace devils
             return isExtended;
         }
 
-    protected:
-        /**
-         * Serializes the pneumatic to the network table.
-         */
-        void serialize() override
-        {
-            ntExtended.set(isExtended);
-        }
-
     private:
         const pros::adi::DigitalOut controller;
-
-        NTValue<bool> ntExtended = ntGroup.makeValue("extended", false);
 
         bool isExtended = false;
         bool isInverted = false;

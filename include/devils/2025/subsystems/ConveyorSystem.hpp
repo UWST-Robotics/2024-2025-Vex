@@ -265,7 +265,7 @@ namespace devils
         static constexpr double RED_HUE = 0;
 
         /// @brief The hue of the blue ring in degrees.
-        static constexpr double BLUE_HUE = 160;
+        static constexpr double BLUE_HUE = 100;
 
         /// @brief The duration to stop the conveyor system when rejecting a blue ring.
         static constexpr double REJECTION_DURATION = 300;
@@ -285,7 +285,7 @@ namespace devils
         //     STOP OPTIONS
 
         /// @brief The offset of the conveyor chain to reject a blue ring.
-        static constexpr double HOOK_STOP_OFFSET = 20;
+        static constexpr double HOOK_STOP_OFFSET = 30;
 
         /// @brief The max range of the hook to stop if can't pick up a ring.
         static constexpr double HOOK_STOP_RANGE = 2;
@@ -302,7 +302,7 @@ namespace devils
         static constexpr double CONVEYOR_LENGTH = 82;
 
         /// @brief The distance between each hook in teeth.
-        static constexpr double HOOK_INTERVAL = 82;
+        static constexpr double HOOK_INTERVAL = 31;
 
         // State
         bool hasMogo = false;

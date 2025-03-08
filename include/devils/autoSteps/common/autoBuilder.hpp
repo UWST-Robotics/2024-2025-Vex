@@ -6,12 +6,14 @@
 #include "../steps/autoJumpToStep.hpp"
 #include "../steps/autoDriveStep.hpp"
 #include "../steps/autoDriveToStep.hpp"
+#include "../steps/autoDriveTimeStep.hpp"
 #include "../steps/autoRotateToStep.hpp"
 #include "../steps/autoTimeoutStep.hpp"
 #include "../steps/autoPauseStep.hpp"
 #include "../steps/autoPurePursuitStep.hpp"
 #include "../steps/autoAsyncStep.hpp"
 #include "../steps/autoStopAsyncStep.hpp"
+#include "../transformer/autoTransform.hpp"
 
 namespace devils
 {
@@ -81,7 +83,9 @@ namespace devils
         void setPose(Pose pose)
         {
             this->pose = pose;
-            steps.push_back(new AutoJumpToStep(odom, pose));
+
+            Pose transformedPose = tryTransformPose(pose);
+            steps.push_back(new AutoJumpToStep(odom, transformedPose));
         }
 
         /**
@@ -128,7 +132,8 @@ namespace devils
                 pose.y + distance * std::sin(pose.rotation),
                 pose.rotation);
 
-            addStep(new AutoDriveToStep(chassis, odom, pose, options), timeout);
+            Pose transformedPose = tryTransformPose(pose);
+            addStep(new AutoDriveToStep(chassis, odom, transformedPose, options), timeout);
         }
 
         /**
@@ -145,8 +150,28 @@ namespace devils
                 pose.x + distance * std::cos(pose.rotation),
                 pose.y + distance * std::sin(pose.rotation),
                 pose.rotation);
-
             addStep(new AutoDriveStep(chassis, odom, distance, options), timeout);
+        }
+
+        /**
+         * Drives for a given duration using open-loop control
+         * @param duration The duration to drive in milliseconds
+         * @param forwardSpeed The forward speed to drive at
+         * @param turnSpeed The turn speed to drive at
+         * @param strafeSpeed The strafe speed to drive at
+         */
+        void driveTime(
+            uint32_t duration,
+            double forwardSpeed,
+            double turnSpeed,
+            double strafeSpeed = 0)
+        {
+            addStep(new AutoDriveTimeStep(
+                chassis,
+                duration,
+                forwardSpeed,
+                turnSpeed,
+                strafeSpeed));
         }
 
         /**
@@ -168,8 +193,12 @@ namespace devils
             Pose prevPose = Pose(pose.x, pose.y, pose.rotation);
             pose = Pose(pose.x + x, pose.y + y, rotation);
 
+            // Transform poses
+            Pose transformedPrevPose = tryTransformPose(prevPose);
+            Pose transformedPose = tryTransformPose(pose);
+
             // Create a spline path
-            SplinePath *path = SplinePath::makeArc(prevPose, pose, delta);
+            SplinePath *path = SplinePath::makeArc(transformedPrevPose, transformedPose, delta);
             addStep(new AutoPurePursuitStep(chassis, odom, path, options), timeout);
         }
 
@@ -184,7 +213,9 @@ namespace devils
             AutoRotateToStep::Options options = AutoRotateToStep::Options::defaultOptions)
         {
             pose.rotation += distance;
-            addStep(new AutoRotateToStep(chassis, odom, pose.rotation, options), timeout);
+
+            Pose transformedPose = tryTransformPose(pose);
+            addStep(new AutoRotateToStep(chassis, odom, transformedPose.rotation, options), timeout);
         }
 
         /**
@@ -198,12 +229,35 @@ namespace devils
             AutoRotateToStep::Options options = AutoRotateToStep::Options::defaultOptions)
         {
             pose.rotation = heading;
-            addStep(new AutoRotateToStep(chassis, odom, pose.rotation, options), timeout);
+            Pose transformedPose = tryTransformPose(pose);
+            addStep(new AutoRotateToStep(chassis, odom, transformedPose.rotation, options), timeout);
+        }
+
+        /**
+         * Tries to transform a pose using the assigned transformer, if any
+         * @param pose - The pose to transform
+         * @returns The transformed pose
+         */
+        Pose tryTransformPose(Pose pose)
+        {
+            if (transformer != nullptr)
+                return transformer->transform(pose);
+            return pose;
+        }
+
+        /**
+         * Uses a pose transformation when building autonomous
+         * @param transformer - The transformation to apply
+         */
+        void useTransformer(AutoTransform *transformer)
+        {
+            this->transformer = transformer;
         }
 
     private:
         // State
         Pose pose;
+        AutoTransform *transformer = nullptr;
         std::vector<AutoStep *> steps;
 
         // Params
