@@ -9,6 +9,7 @@
 #include "autoMogoBranchStep.hpp"
 #include "autoConveyorPickupStep.hpp"
 #include "autoSortStep.hpp"
+#include "autoGoalRushStep.hpp"
 
 namespace devils
 {
@@ -181,12 +182,14 @@ namespace devils
             IntakeSystem &intake,
             ConveyorSystem &conveyor,
             MogoGrabSystem &mogoGrabber,
+            GoalRushSystem &goalRush,
             bool isBlue = false)
         {
             // PID Params
             PIDParams drivePID = {0.15, 0.0, 10};
             PIDParams rotatePID = {0.7, 0.0, 50.0};
             PIDParams drivingRotatePID = {1.5, 0.0, 100.0};
+            PIDParams rushDrivingRotatePID = {0.3, 0.0, 40.0};
 
             // Default Options
             AutoDriveToStep::Options::defaultOptions = {
@@ -205,9 +208,16 @@ namespace devils
             };
 
             // Speed Options
-            AutoDriveToStep::Options mogoGrabSpeed = {
+            AutoDriveToStep::Options rushSpeed = {
                 drivePID,
                 drivingRotatePID,
+                0.5, // maxSpeed
+                4.0, // goalDist
+                4.0  // goalSpeed
+            };
+            AutoDriveToStep::Options mogoGrabSpeed = {
+                drivePID,
+                rushDrivingRotatePID,
                 0.2, // maxSpeed
                 1.0, // goalDist
                 2.0  // goalSpeed
@@ -237,36 +247,38 @@ namespace devils
             pjRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::INTAKE));
             pjRoutine.addStep(new AutoIntakeClawStep(intake, false));
             pjRoutine.addStep(new AutoSortStep(conveyor, isBlue ? RingType::RED : RingType::BLUE));
+            pjRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
+            pjRoutine.addStep(new AutoGoalRushStep(goalRush, false));
 
             // Step 1
-            pjRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
-            pjRoutine.drive(-28.0);
-            pjRoutine.rotateTo(M_PI * 0.85);
-            pjRoutine.drive(-19.5, 2000, mogoGrabSpeed);
+
+            // Mogo Rush is on other side
+            pjRoutine.driveSpline(30,
+                                  isBlue ? -7 : -11,
+                                  isBlue ? M_PI * 0.9 : M_PI * 0.65,
+                                  -12,
+                                  1500,
+                                  rushSpeed);
+            pjRoutine.addStep(new AutoGoalRushStep(goalRush, true));
+            pjRoutine.driveRelative(24.0, 2000, rushSpeed);
+            pjRoutine.addStep(new AutoGoalRushStep(goalRush, false));
+            pjRoutine.drive(-18, 2000, mogoGrabSpeed);
             pjRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, true));
-            pjRoutine.addStopAsyncStep(conveyorStep);
-            pjRoutine.driveRelative(34.0, 10000); // Long timeout in case of tug-a-war
+            pjRoutine.addStep(new AutoConveyorPickupStep(conveyor, true, 1000));
 
             // Step 2a
-            pjRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
-            pjRoutine.driveRelative(-6.0, 1500, mogoGrabSpeed);
-            pjRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, true));
-            pjRoutine.addStep(conveyorStep);
-
-            pjRoutine.rotateTo(M_PI * -0.355);
+            pjRoutine.rotateTo(M_PI * -0.65);
             pjRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::BOTTOM_RING));
-            pjRoutine.driveRelative(22.0, 2000, intakeSpeed);
+            pjRoutine.drive(16, 2000, intakeSpeed);
             pjRoutine.addStep(new AutoIntakeClawStep(intake, true));
-            pjRoutine.driveRelative(-16);
+            pjRoutine.drive(-16);
             pjRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::FOURTH_RING));
-            pjRoutine.driveRelative(22.0, 2000, intakeSpeed);
+            pjRoutine.drive(25.0, 2000, intakeSpeed);
             pjRoutine.addStep(new AutoConveyorPickupStep(conveyor, true, 1000));
-            pjRoutine.driveRelative(-10);
+            pjRoutine.driveRelative(-13);
             pjRoutine.rotateTo(0);
-            pjRoutine.driveRelative(5);
             pjRoutine.addStep(new AutoIntakeClawStep(intake, false));
             pjRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::INTAKE));
-            pjRoutine.drive(-5);
 
             // pjRoutine.pause(4000); // Wait for Blaze
 
@@ -290,7 +302,7 @@ namespace devils
             pjRoutine.drive(16);
             pjRoutine.rotateTo(M_PI);
             pjRoutine.drive(12, 2000, intakeSpeed);
-            pjRoutine.addStep(new AutoConveyorPickupStep(conveyor, true, 2000));
+            pjRoutine.addStep(new AutoConveyorPickupStep(conveyor, true, 1000));
 
             // Step 4
             // pjRoutine.rotateTo(M_PI * -0.75);
@@ -300,20 +312,20 @@ namespace devils
             // pjRoutine.drive(-20);
 
             // Step 4;
-            pjRoutine.rotateTo(M_PI * 0.545);
+            pjRoutine.rotateTo(isBlue ? M_PI * 0.53 : M_PI * 0.56);
             pjRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::BOTTOM_RING));
-            pjRoutine.drive(35.0);
+            pjRoutine.drive(isBlue ? 30.0 : 35.0);
 
-            pjRoutine.drive(18.0, 2000, mogoGrabSpeed);
+            pjRoutine.drive(18.0, 2000, intakeSpeed);
             pjRoutine.addStep(new AutoIntakeClawStep(intake, true));
             pjRoutine.driveRelative(-4.0);
             pjRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::NEUTRAL_STAKE));
             pjRoutine.pause(200);
             pjRoutine.rotateTo(M_PI);
             pjRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::ALLIANCE_STAKE));
-            pjRoutine.drive(-16.0);
+            pjRoutine.drive(-18.0);
             pjRoutine.rotateTo(M_PI);
-            pjRoutine.driveRelative(16.0, 2000, intakeSpeed);
+            pjRoutine.driveRelative(18.0, 2000, intakeSpeed);
             pjRoutine.addStep(new AutoIntakeClawStep(intake, false));
             pjRoutine.driveRelative(-8.0);
             pjRoutine.addStep(new AutoIntakeClawStep(intake, true));

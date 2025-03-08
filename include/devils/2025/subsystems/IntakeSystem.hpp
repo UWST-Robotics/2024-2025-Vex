@@ -22,11 +22,11 @@ namespace devils
 
         struct ArmPositionAngles
         {
-            double bottomRing = -0.06;   // rad
-            double intake = -0.21;       // rad
-            double fourthRing = -0.38;   // rad
-            double allianceStake = -1.2; // rad
-            double neutralStake = -1.6;  // rad
+            double bottomRing = -0.06;    // rad
+            double intake = -0.21;        // rad
+            double fourthRing = -0.45;    // rad
+            double allianceStake = -1.05; // rad
+            double neutralStake = -1.6;   // rad
         };
 
         /**

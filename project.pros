@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "DevilBots",
+    "project_name": "Blue Match",
     "target": "v5",
     "templates": {
       "kernel": {
@@ -256,7 +256,8 @@
     },
     "upload_options": {
       "description": "DevilBots 2024-25 VEX-U Robot Code",
-      "icon": "clawbot"
+      "icon": "clawbot",
+      "slot": 2
     },
     "use_early_access": false
   }

@@ -87,8 +87,8 @@ namespace devils
         }
 
     protected:
-        static constexpr double DELTA_T = 0.01;        // indices
-        static constexpr double LOOKAHEAD_DIST = 12.0; // inches
+        static constexpr double DELTA_T = 0.01;       // indices
+        static constexpr double LOOKAHEAD_DIST = 8.0; // inches
 
         OdomSource &odomSource;
         Path *path;

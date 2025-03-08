@@ -189,14 +189,16 @@ namespace devils
             uint32_t timeout = 2000,
             AutoDriveToStep::Options options = AutoDriveToStep::Options::defaultOptions)
         {
-            // TODO: Apply transformations
-
             // Get start/end poses
             Pose prevPose = Pose(pose.x, pose.y, pose.rotation);
             pose = Pose(pose.x + x, pose.y + y, rotation);
 
+            // Transform poses
+            Pose transformedPrevPose = tryTransformPose(prevPose);
+            Pose transformedPose = tryTransformPose(pose);
+
             // Create a spline path
-            SplinePath *path = SplinePath::makeArc(prevPose, pose, delta);
+            SplinePath *path = SplinePath::makeArc(transformedPrevPose, transformedPose, delta);
             addStep(new AutoPurePursuitStep(chassis, odom, path, options), timeout);
         }
 

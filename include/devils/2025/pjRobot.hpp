@@ -29,7 +29,7 @@ namespace devils
             conveyor.setPickupRing(true); // Always allow the conveyor to pick up rings
 
             // Calibrate IMU
-            imu.calibrate();
+            // imu.calibrate();
             imu.waitUntilCalibrated();
 
             autoRoutine->run();
@@ -158,7 +158,7 @@ namespace devils
 
         // Auto
         NTOdom ntOdom = NTOdom("PJ", odometry);
-        AutoStepList *autoRoutine = AutoFactory::createBlazeSkillsAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
+        AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, true);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();
