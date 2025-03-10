@@ -108,8 +108,7 @@ namespace devils
             pjRoutine.rotateTo(M_PI * 0.25);
             pjRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::INTAKE));
             pjRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
-            pjRoutine.driveRelative(8.0);
-            pjRoutine.drive(-20.0, 1000);
+            pjRoutine.drive(-12.0, 1000);
 
             // Center Mogo
             pjRoutine.drive(15.0);
@@ -127,8 +126,7 @@ namespace devils
             pjRoutine.drive(32, 2000, intakeSpeed);
             pjRoutine.addStep(new AutoConveyorPickupStep(conveyor, true, 500));
             pjRoutine.drive(-6);
-            pjRoutine.rotate(M_PI * 0.15);
-            pjRoutine.rotate(M_PI * -0.3);
+            pjRoutine.rotate(M_PI * -0.15);
             pjRoutine.drive(12, 1000, intakeSpeed);
             pjRoutine.addStep(new AutoConveyorPickupStep(conveyor, true, 500));
             pjRoutine.drive(-12);
@@ -167,8 +165,7 @@ namespace devils
 
             pjRoutine.rotateTo(M_PI * 0.75);
             pjRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, false));
-            pjRoutine.drive(6.0);
-            pjRoutine.drive(-22.0);
+            pjRoutine.drive(-16.0, 1000);
 
             // Climb
             pjRoutine.drive(28.0);
@@ -243,7 +240,7 @@ namespace devils
             pjRoutine.useTransformer(isBlue ? new MirrorTransform() : nullptr);
             pjRoutine.setPose(-42, -36, M_PI);
             pjRoutine.addAsyncStep(new AutoIntakeMoveArmStep(intake));
-            AutoAsyncStep *conveyorStep = pjRoutine.addAsyncStep(new AutoConveyorStep(conveyor, intake, mogoGrabber));
+            pjRoutine.addAsyncStep(new AutoConveyorStep(conveyor, intake, mogoGrabber));
             pjRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::INTAKE));
             pjRoutine.addStep(new AutoIntakeClawStep(intake, false));
             pjRoutine.addStep(new AutoSortStep(conveyor, isBlue ? RingType::RED : RingType::BLUE));
@@ -259,10 +256,12 @@ namespace devils
                                   -12,
                                   1500,
                                   rushSpeed);
+            pjRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::BOTTOM_RING));
             pjRoutine.addStep(new AutoGoalRushStep(goalRush, true));
             pjRoutine.driveRelative(24.0, 2000, rushSpeed);
             pjRoutine.addStep(new AutoGoalRushStep(goalRush, false));
             pjRoutine.drive(-18, 2000, mogoGrabSpeed);
+            pjRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::INTAKE));
             pjRoutine.addStep(new AutoGrabMogoStep(mogoGrabber, true));
             pjRoutine.addStep(new AutoConveyorPickupStep(conveyor, true, 1000));
 
@@ -338,7 +337,6 @@ namespace devils
             pjRoutine.rotateTo(M_PI * 0.5);
             pjRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::INTAKE));
             pjRoutine.drive(32.0);
-            pjRoutine.rotateTo(M_PI * 0.3);
 
             return pjRoutine.build();
         }
@@ -430,6 +428,7 @@ namespace devils
             blazeRoutine.driveRelative(4);
             blazeRoutine.addStep(new AutoIntakeClawStep(intake, false));
             blazeRoutine.driveRelative(-4);
+            blazeRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::INTAKE));
 
             // Step 2
             // blazeRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::ALLIANCE_STAKE));
@@ -468,8 +467,8 @@ namespace devils
             blazeRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::NEUTRAL_STAKE));
 
             // Step 6
-            blazeRoutine.drive(58.0, 2000, maxSpeed);
-            blazeRoutine.addStep(new AutoIntakeSetArmPositionStep(intake, IntakeSystem::ArmPosition::ALLIANCE_STAKE));
+            blazeRoutine.drive(50.0, 2000, maxSpeed);
+            blazeRoutine.rotateTo(M_PI * 0.75);
 
             return blazeRoutine.build();
         }
@@ -654,7 +653,7 @@ namespace devils
             // Blue Wall Stake
             blazeRoutine.rotateTo(M_PI * -0.4);
 
-            blazeRoutine.drive(50);
+            blazeRoutine.drive(51);
             blazeRoutine.addStep(new AutoConveyorPickupStep(conveyor, true, 1500));
             blazeRoutine.rotateTo(M_PI);
             blazeRoutine.drive(16.0);

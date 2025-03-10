@@ -28,7 +28,8 @@ namespace devils
         static void stopAll()
         {
             for (auto asyncStep : allAsyncSteps)
-                asyncStep->forceStop();
+                if (asyncStep != nullptr)
+                    asyncStep->forceStop();
         }
 
         /**

@@ -13,20 +13,24 @@ namespace devils
         /// @brief Represents the possible positions of the intake arm.
         enum ArmPosition
         {
-            BOTTOM_RING,    // Grabs rings off the ground
-            INTAKE,         // Slightly elevated to allow for intake
-            FOURTH_RING,    // Grabs the 4th ring off a stack, used for autonomous
-            ALLIANCE_STAKE, // Raises the arm to the shorter alliance (red/blue) stakes
-            NEUTRAL_STAKE,  // Raises the arm to the taller neutral stakes
+            BOTTOM_RING,        // Grabs rings off the ground
+            INTAKE,             // Slightly elevated to allow for intake
+            FOURTH_RING,        // Grabs the 4th ring off a stack, used for autonomous
+            ALLIANCE_STAKE,     // Raises the arm to the shorter alliance (red/blue) stakes
+            NEUTRAL_STAKE,      // Raises the arm to the taller neutral stakes
+            NEUTRAL_STAKE_DOWN, // Pushes downwards on the neutral stakes
+            MOGO,               // Mogo gambit
         };
 
         struct ArmPositionAngles
         {
-            double bottomRing = -0.06;    // rad
-            double intake = -0.21;        // rad
-            double fourthRing = -0.45;    // rad
-            double allianceStake = -1.05; // rad
-            double neutralStake = -1.6;   // rad
+            double bottomRing = -0.06;       // rad
+            double intake = -0.21;           // rad
+            double fourthRing = -0.45;       // rad
+            double allianceStake = -1.05;    // rad
+            double neutralStake = -1.6;      // rad
+            double neutralStakeDown = -1.65; // rad
+            double mogo = -1;                // rad
         };
 
         /**
@@ -145,6 +149,10 @@ namespace devils
                 return armPositionAngles.allianceStake;
             case NEUTRAL_STAKE:
                 return armPositionAngles.neutralStake;
+            case NEUTRAL_STAKE_DOWN:
+                return armPositionAngles.neutralStakeDown;
+            case MOGO:
+                return armPositionAngles.mogo;
             }
             return 0;
         }

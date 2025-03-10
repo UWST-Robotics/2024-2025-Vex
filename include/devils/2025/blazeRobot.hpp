@@ -13,7 +13,7 @@ namespace devils
     {
         BlazeRobot()
         {
-            intakeSystem.setArmPositions(IntakeSystem::ArmPositionAngles{-0.07, -0.18});
+            intakeSystem.setArmPositions(IntakeSystem::ArmPositionAngles{-0.07, -0.16});
 
             imu.calibrate();
 
@@ -151,7 +151,7 @@ namespace devils
         {
             // Stop autonomous
             AutoAsyncStep::stopAll();
-            autoRoutine->stop();
+            // autoRoutine->stop();
 
             // Stop the robot
             chassis.stop();
@@ -197,7 +197,7 @@ namespace devils
         NTOdom ntOdom = NTOdom("Blaze", odometry);
         // AutoStepList *autoRoutine = AutoFactory::createBlazeSkillsAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
         AutoStepList *autoRoutine = AutoFactory::createPJMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, goalRushSystem, false);
-        AutoStepList *startMacro = AutoFactory::createBlazeStartMacro(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
+        // AutoStepList *startMacro = AutoFactory::createBlazeStartMacro(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

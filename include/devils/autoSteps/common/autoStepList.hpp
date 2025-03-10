@@ -70,7 +70,8 @@ namespace devils
         {
             // Stop the Current Step
             if (index < steps.size())
-                steps[index]->onStop();
+                if (steps[index] != nullptr)
+                    steps[index]->onStop();
         }
 
         bool checkFinished() override

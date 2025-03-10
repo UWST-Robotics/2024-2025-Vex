@@ -52,7 +52,9 @@ namespace devils
 
                 bool lowArmInput = mainController.get_digital(DIGITAL_B);
                 bool midArmInput = mainController.get_digital(DIGITAL_A) || mainController.get_digital(DIGITAL_Y);
-                bool highArmInput = mainController.get_digital(DIGITAL_X) || mainController.get_digital(DIGITAL_RIGHT);
+                bool highArmInput = mainController.get_digital(DIGITAL_X);
+                bool mogoArmInput = mainController.get_digital(DIGITAL_DOWN);
+                bool neutralStakeDownInput = mainController.get_digital(DIGITAL_RIGHT);
 
                 bool clawInput = mainController.get_digital_new_press(DIGITAL_R1) || mainController.get_digital_new_press(DIGITAL_R2);
                 bool mogoInput = mainController.get_digital_new_press(DIGITAL_L2) || mainController.get_digital_new_press(DIGITAL_L1);
@@ -73,6 +75,10 @@ namespace devils
                     intakeSystem.setArmPosition(IntakeSystem::ALLIANCE_STAKE);
                 else if (highArmInput)
                     intakeSystem.setArmPosition(IntakeSystem::NEUTRAL_STAKE);
+                else if (mogoArmInput)
+                    intakeSystem.setArmPosition(IntakeSystem::MOGO);
+                else if (neutralStakeDownInput)
+                    intakeSystem.setArmPosition(IntakeSystem::NEUTRAL_STAKE_DOWN);
                 else
                     intakeSystem.setArmPosition(IntakeSystem::INTAKE);
                 intakeSystem.moveArmToPosition();
@@ -158,7 +164,7 @@ namespace devils
 
         // Auto
         NTOdom ntOdom = NTOdom("PJ", odometry);
-        AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, true);
+        AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, false);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();
