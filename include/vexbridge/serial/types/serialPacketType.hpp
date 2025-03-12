@@ -17,6 +17,8 @@ namespace vexbridge
         {
         }
 
+        virtual ~SerialPacketType() = default;
+
         SerialPacketTypeID type;
         virtual SerialPacket *deserialize(EncodedSerialPacket *packet) = 0;
         virtual EncodedSerialPacket *serialize(SerialPacket *packet) = 0;

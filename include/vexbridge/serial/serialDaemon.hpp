@@ -33,8 +33,7 @@ namespace vexbridge
         }
         ~SerialDaemon()
         {
-            if (serial != nullptr)
-                delete serial;
+            delete serial;
         }
 
         /**

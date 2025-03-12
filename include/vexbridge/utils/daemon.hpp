@@ -16,10 +16,6 @@ namespace vexbridge
                               { runTask(); })
         {
         }
-        ~Daemon()
-        {
-            daemonTask.remove();
-        }
 
     protected:
         /**

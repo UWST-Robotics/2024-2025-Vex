@@ -13,6 +13,7 @@ namespace vexbridge
     public:
         /**
          * Adds a serial packet to the write queue.
+         * Moves ownership of the packet to the queue.
          * @param packet The packet to write.
          */
         void push(SerialPacket *packet)
@@ -37,6 +38,7 @@ namespace vexbridge
 
         /**
          * Pops a packet from the queue.
+         * Moves ownership of the packet to the caller.
          * @return The packet popped from the queue or nullptr if the queue is empty.
          */
         SerialPacket *pop()
