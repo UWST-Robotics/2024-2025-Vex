@@ -4,14 +4,13 @@
 #include <cstring>
 #include "../types/serialPacket.hpp"
 #include "../types/serialPacketType.hpp"
-#include "../../utils/ntLogger.hpp"
 #include "../../utils/bufferWriter.hpp"
 #include "../../utils/bufferReader.hpp"
 #include "updateValuePacket.hpp"
 
-namespace vexbridge
+namespace vexbridge::serial
 {
-    typedef vexbridge::UpdateValuePacket<bool> UpdateBoolPacket;
+    typedef vexbridge::serial::UpdateValuePacket<bool> UpdateBoolPacket;
 
     struct UpdateBoolPacketType : public UpdateValuePacketType<bool>
     {

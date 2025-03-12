@@ -6,7 +6,7 @@
 #include "../utils/checksum.hpp"
 #include "../utils/byteStuffer.hpp"
 
-namespace vexbridge
+namespace vexbridge::serial
 {
     /**
      * Encodes serial packets for transmission over a serial port.

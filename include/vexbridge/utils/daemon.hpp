@@ -2,7 +2,7 @@
 
 #include "pros/rtos.hpp"
 
-namespace vexbridge
+namespace vexbridge::utils
 {
     /**
      * Represents a daemon that runs in the background while the user program is running.

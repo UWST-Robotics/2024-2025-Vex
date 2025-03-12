@@ -15,6 +15,9 @@
 #include "serial/packets/batchPacket.hpp"
 #include "serial/packets/pingPacket.hpp"
 #include "serial/packets/fetchPacket.hpp"
+#include "serial/drivers/vexSerialDriver.hpp"
+
+using namespace vexbridge::serial;
 
 namespace vexbridge
 {
@@ -29,7 +32,7 @@ namespace vexbridge
          * Creates a new VEXBridge instance.
          * @param port The VEX V5 port to connect to.
          */
-        VEXBridge(uint8_t port) : daemon(port)
+        VEXBridge(uint8_t port) : daemon(new VEXSerialDriver(port))
         {
             if (instance != nullptr)
                 delete instance;
@@ -154,7 +157,7 @@ namespace vexbridge
 vexbridge::VEXBridge *vexbridge::VEXBridge::instance = nullptr;
 
 // Assign Packet Types
-vexbridge::SerialPacketType *vexbridge::SerialPacketTypes::packetTypes[13] = {
+vexbridge::serial::SerialPacketType *vexbridge::serial::SerialPacketTypes::packetTypes[13] = {
     new ResetPacketType(),
     new UpdateLabelPacketType(),
     new FetchPacketType(),

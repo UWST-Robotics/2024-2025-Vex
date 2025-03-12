@@ -1,7 +1,6 @@
 #pragma once
 
 #include "vexBridge.hpp"
-#include "utils/ntLogger.hpp"
 
 uint16_t idCounter = 0;
 
@@ -68,7 +67,7 @@ namespace vexbridge
             else if constexpr (std::is_same<T, std::string>::value)
                 serialInstance->updateString(id, value.c_str());
             else
-                NTLogger::logWarning("NTValue is using unsupported type " + std::string(typeid(T).name()));
+                throw std::runtime_error("Unsupported NTValue type: " + std::string(typeid(T).name()));
         }
 
         /**

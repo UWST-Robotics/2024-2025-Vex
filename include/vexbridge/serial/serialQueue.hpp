@@ -6,7 +6,7 @@
 #include "types/serialPacketTypeID.hpp"
 #include "packets/batchPacket.hpp"
 
-namespace vexbridge
+namespace vexbridge::serial
 {
     class SerialQueue
     {

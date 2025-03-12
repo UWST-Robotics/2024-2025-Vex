@@ -4,7 +4,7 @@
 #include <cstddef>
 #include "serialPacket.hpp"
 
-namespace vexbridge
+namespace vexbridge::serial
 {
     /**
      * Represents a packet that includes a serialized payload.

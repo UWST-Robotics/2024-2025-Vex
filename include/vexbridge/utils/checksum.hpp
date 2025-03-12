@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace vexbridge
+namespace vexbridge::utils
 {
     /**
      * Helper class for calculating checksums.

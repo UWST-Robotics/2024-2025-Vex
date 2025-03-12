@@ -3,7 +3,7 @@
 #include <cstdint>
 #include "serialPacketTypeID.hpp"
 
-namespace vexbridge
+namespace vexbridge::serial
 {
     /**
      * Represents a packet with it's payload deserialized.

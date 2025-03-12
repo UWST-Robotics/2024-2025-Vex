@@ -6,7 +6,7 @@
 #include "../../utils/bufferWriter.hpp"
 #include "../../utils/bufferReader.hpp"
 
-namespace vexbridge
+namespace vexbridge::serial
 {
     struct GenericAckPacket : public SerialPacket
     {

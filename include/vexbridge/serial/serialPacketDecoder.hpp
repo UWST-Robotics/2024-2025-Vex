@@ -11,7 +11,7 @@
 #include "serialPacketTypes.hpp"
 #include "../utils/byteStuffer.hpp"
 
-namespace vexbridge
+namespace vexbridge::serial
 {
     /**
      * Decodes serial packets received over a serial port.
@@ -44,11 +44,7 @@ namespace vexbridge
             // Check if the checksum is valid
             uint8_t calculatedChecksum = Checksum::calc(decodedBuffer, payloadSize + 4);
             if (checksum != calculatedChecksum)
-            {
-                NTLogger::logWarning("Packet " + std::to_string(id) + " has invalid checksum " +
-                                     "(" + std::to_string(checksum) + " != " + std::to_string(calculatedChecksum) + ")");
                 return nullptr;
-            }
 
             // Create Temporary Packet to store payload
             static EncodedSerialPacket *tempPacket = new EncodedSerialPacket();

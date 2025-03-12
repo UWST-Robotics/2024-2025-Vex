@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace vexbridge
+namespace vexbridge::serial
 {
     enum class SerialPacketTypeID : uint8_t
     {

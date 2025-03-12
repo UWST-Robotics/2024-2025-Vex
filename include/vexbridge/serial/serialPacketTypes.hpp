@@ -4,7 +4,7 @@
 #include "types/serialPacket.hpp"
 #include "types/encodedSerialPacket.hpp"
 
-namespace vexbridge
+namespace vexbridge::serial
 {
     struct SerialPacketTypes
     {

@@ -4,11 +4,12 @@
 #include <cstring>
 #include "../types/serialPacket.hpp"
 #include "../types/serialPacketType.hpp"
-#include "../../utils/ntLogger.hpp"
 #include "../../utils/bufferWriter.hpp"
 #include "../../utils/bufferReader.hpp"
 
-namespace vexbridge
+using namespace vexbridge::utils;
+
+namespace vexbridge::serial
 {
     template <typename T>
     struct UpdateValuePacket : public SerialPacket

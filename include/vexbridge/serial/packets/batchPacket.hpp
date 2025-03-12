@@ -9,7 +9,9 @@
 #include "../../utils/bufferReader.hpp"
 #include "../serialPacketTypes.hpp"
 
-namespace vexbridge
+using namespace vexbridge::utils;
+
+namespace vexbridge::serial
 {
     struct BatchPacket : public SerialPacket
     {

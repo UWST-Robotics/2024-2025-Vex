@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <cstddef>
 
-namespace vexbridge
+namespace vexbridge::utils
 {
     /**
      * Reads data sequentially from a buffer.

@@ -5,7 +5,7 @@
 #include <string>
 #include <algorithm>
 
-namespace vexbridge
+namespace vexbridge::utils
 {
     /**
      * Writes data sequentially into a buffer.

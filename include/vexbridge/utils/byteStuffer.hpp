@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <stddef.h>
 
-namespace vexbridge
+namespace vexbridge::utils
 {
     struct ByteStuffer
     {
