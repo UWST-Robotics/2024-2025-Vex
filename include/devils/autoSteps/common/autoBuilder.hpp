@@ -134,6 +134,8 @@ namespace devils
 
             Pose transformedPose = tryTransformPose(pose);
             addStep(new AutoDriveToStep(chassis, odom, transformedPose, options), timeout);
+
+            AutoDriveToStep(chassis, odom, transformedPose, options).run();
         }
 
         /**

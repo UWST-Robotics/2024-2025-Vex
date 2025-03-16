@@ -83,6 +83,9 @@ namespace devils
 
         bool checkFinished() override
         {
+            // Check against the target pose, not the lookahead pose
+            AutoDriveToStep::targetPose = path->getPoseAt(path->getLength() - 1);
+
             return AutoDriveToStep::checkFinished();
         }
 
