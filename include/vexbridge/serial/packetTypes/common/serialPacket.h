@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include "serialPacketTypeID.hpp"
+#include "serialPacketTypeID.h"
 
 namespace vexbridge::serial
 {
@@ -10,6 +10,7 @@ namespace vexbridge::serial
      */
     struct SerialPacket
     {
+        // Required for inheritance
         virtual ~SerialPacket() = default;
 
         SerialPacketTypeID type = SerialPacketTypeID::UNKNOWN;

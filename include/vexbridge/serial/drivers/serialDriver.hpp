@@ -1,6 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include "../../utils/buffer.h"
+
+using namespace vexbridge::utils;
 
 namespace vexbridge::serial
 {
@@ -11,17 +14,16 @@ namespace vexbridge::serial
     {
         /**
          * Writes data to the serial port.
-         * @param buffer The buffer to write to the serial port.
-         * @param length The length of the buffer.
+         * @param buffer Data is read from this buffer into the serial port.
          * @return True if the write was successful, false otherwise.
          */
-        virtual bool write(uint8_t *buffer, int32_t length) = 0;
+        virtual bool write(Buffer &buffer) = 0;
 
         /**
          * Reads data from the serial port.
-         * @param buffer The buffer to read from the serial port.
+         * @param buffer Data is written to this buffer from the serial port.
          * @return The number of bytes read or -1 if an error occurred.
          */
-        virtual int32_t read(uint8_t *buffer) = 0;
+        virtual int32_t read(Buffer &buffer) = 0;
     };
 }

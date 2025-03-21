@@ -2,8 +2,9 @@
 
 #include <cstdint>
 #include <cstring>
-#include "../types/serialPacket.hpp"
-#include "../types/serialPacketType.hpp"
+#include "common/serialPacket.h"
+#include "common/serialPacketType.h"
+#include "common/encodedSerialPacket.h"
 #include "../../utils/bufferWriter.hpp"
 #include "../../utils/bufferReader.hpp"
 #include "updateValuePacket.hpp"

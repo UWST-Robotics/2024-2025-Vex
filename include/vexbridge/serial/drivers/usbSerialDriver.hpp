@@ -3,7 +3,29 @@
 #include "pros/serial.hpp"
 #include "pros/error.h"
 #include "SerialDriver.hpp"
-#include "../../utils/sdkExtensions.h"
+#include "../utils/buffer.h"
+
+using namespace vexbridge::utils;
+
+// External C functions from the closed-source VEX V5 SDK
+extern "C"
+{
+    /**
+     * Writes a buffer to the serial port.
+     * @param channel The channel to write to. Use 1 for stdout.
+     * @param buffer The buffer to write.
+     * @param length The length of the buffer.
+     * @return The number of bytes written or -1 if an error occurred.
+     */
+    int32_t vexSerialWriteBuffer(uint32_t channel, uint8_t *buffer, uint32_t length);
+
+    /**
+     * Reads a character from the serial port.
+     * @param channel The channel to read from. Use 1 for stdin.
+     * @return The character read or -1 if no character is available.
+     */
+    int32_t vexSerialReadChar(uint32_t channel);
+}
 
 namespace vexbridge::serial
 {
@@ -13,17 +35,17 @@ namespace vexbridge::serial
     class USBSerialDriver : public SerialDriver
     {
     public:
-        USBSerialDriver(uint8_t port)
+        USBSerialDriver()
         {
         }
 
-        bool write(uint8_t *buffer, int32_t length)
+        bool write(Buffer &buffer)
         {
             // Grab the mutex
             mutex.take(0);
 
             // Write packet to USB
-            int32_t writeRes = vexSerialWriteBuffer(1, buffer, length);
+            int32_t writeRes = vexSerialWriteBuffer(1, buffer.data(), buffer.size());
             if (writeRes < 0)
                 return false;
 
@@ -31,13 +53,12 @@ namespace vexbridge::serial
             mutex.give();
         }
 
-        int32_t read(uint8_t *buffer) override
+        int32_t read(Buffer &buffer) override
         {
             // Grab the mutex
             mutex.take(0);
 
             // Iterate over all available characters
-            uint32_t bytesRead = 0;
             while (true)
             {
                 // Read a single character from the serial port
@@ -46,14 +67,14 @@ namespace vexbridge::serial
                     break;
 
                 // Add the character to the buffer
-                buffer[bytesRead++] = (uint8_t)charRead;
+                buffer.push_back((uint8_t)charRead);
             }
 
             // Release the mutex
             mutex.give();
 
             // Return the number of bytes read
-            return bytesRead;
+            return buffer.size();
         }
 
     private:

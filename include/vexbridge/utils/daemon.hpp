@@ -37,6 +37,6 @@ namespace vexbridge::utils
         Daemon(const Daemon &) = delete;
         Daemon &operator=(const Daemon &) = delete;
 
-        pros::Task daemonTask;
+        const pros::Task daemonTask;
     };
 };

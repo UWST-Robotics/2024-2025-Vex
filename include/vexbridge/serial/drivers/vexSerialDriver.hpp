@@ -4,6 +4,9 @@
 #include "pros/error.h"
 #include "SerialDriver.hpp"
 #include <cmath>
+#include "../utils/buffer.h"
+
+using namespace vexbridge::utils;
 
 namespace vexbridge::serial
 {
@@ -18,37 +21,40 @@ namespace vexbridge::serial
         {
         }
 
-        bool write(uint8_t *buffer, int32_t length)
+        bool write(Buffer &buffer)
         {
             // Flush the serial port
             serial.flush();
 
             // Write the packet to the serial port
-            int32_t writeRes = serial.write(buffer, length);
+            int32_t writeRes = serial.write(buffer.data(), buffer.size());
             if (writeRes == PROS_ERR)
                 return false;
 
             // Check if the entire packet was written
-            if (writeRes != length)
+            if (writeRes != buffer.size())
                 return false;
 
             // Wait for transmission to complete
-            uint32_t writeDelay = ceil(WRITE_DELAY_PER_BYTE * length);
+            uint32_t writeDelay = ceil(WRITE_DELAY_PER_BYTE * buffer.size());
             pros::delay(writeDelay);
 
             // Return success
             return true;
         }
 
-        int32_t read(uint8_t *buffer) override
+        int32_t read(Buffer &buffer) override
         {
             // Check if there is data to read
             int32_t readBufferSize = serial.get_read_avail();
             if (readBufferSize == PROS_ERR)
                 return -1;
 
+            // Allocate buffer space
+            buffer.resize(readBufferSize);
+
             // Read data from the serial port
-            int32_t bytesRead = serial.read(buffer, readBufferSize);
+            int32_t bytesRead = serial.read(buffer.data(), readBufferSize);
             if (bytesRead == PROS_ERR)
                 return -1;
 

@@ -9,7 +9,7 @@ namespace devils
     /**
      * Syncs odometry data to VEXBridge.
      */
-    class NTOdom : private Runnable
+    class VBOdom : private Runnable
     {
     public:
         /**
@@ -17,15 +17,15 @@ namespace devils
          * @param name The name of the odometry data.
          * @param odometry The odometry source to sync.
          */
-        NTOdom(std::string name, OdomSource &odometry)
+        VBOdom(std::string name, OdomSource &odometry)
             : odometry(odometry),
               group("_poses/" + name),
-              xValue(group.makeValue("x", 0.0f)),
-              yValue(group.makeValue("y", 0.0f)),
-              rotation(group.makeValue("rotation", 0.0f)),
-              width(group.makeValue("width", 15.0f)),
-              length(group.makeValue("length", 15.0f)),
-              speed(group.makeValue("speed", 0.0f))
+              xValue(group.addValue("x", 0.0f)),
+              yValue(group.addValue("y", 0.0f)),
+              rotation(group.addValue("rotation", 0.0f)),
+              width(group.addValue("width", 15.0f)),
+              length(group.addValue("length", 15.0f)),
+              speed(group.addValue("speed", 0.0f))
         {
             this->runAsync();
         }
@@ -52,13 +52,13 @@ namespace devils
         }
 
     private:
-        NTGroup group;
-        NTValue<float> xValue;
-        NTValue<float> yValue;
-        NTValue<float> rotation;
-        NTValue<float> width;
-        NTValue<float> length;
-        NTValue<float> speed;
+        VBGroup group;
+        VBValue<float> xValue;
+        VBValue<float> yValue;
+        VBValue<float> rotation;
+        VBValue<float> width;
+        VBValue<float> length;
+        VBValue<float> speed;
         OdomSource &odometry;
     };
 }

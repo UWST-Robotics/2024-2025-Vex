@@ -75,7 +75,7 @@
 #include "display/eyesRenderer.hpp"
 
 // Utils
-#include "utils/ntOdom.hpp"
+#include "utils/vbOdom.hpp"
 
 // VEXBridge
 #include "../vexbridge/vexbridge.h"

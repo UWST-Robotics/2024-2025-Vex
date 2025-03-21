@@ -103,7 +103,7 @@ namespace devils
         }
 
         // VEXBridge
-        VEXBridge bridge = VEXBridge(0);
+        // VEXBridge bridge = VEXBridge(0);
 
         // Hardware
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-6, 7, -8, 9, -10});
@@ -119,7 +119,7 @@ namespace devils
         // AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, odometry);
 
         // NT
-        NTOdom ntOdom = NTOdom("TankOdom", odometry);
+        VBOdom vbOdom = VBOdom("TankOdom", odometry);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

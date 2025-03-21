@@ -1,175 +1,121 @@
 #pragma once
 
 #include <cstring>
-#include "serial/serialDaemon.hpp"
-#include "serial/packets/resetPacket.hpp"
-#include "serial/packets/updateLabelPacket.hpp"
-#include "serial/packets/updateBoolPacket.hpp"
-#include "serial/packets/updateIntPacket.hpp"
-#include "serial/packets/updateFloatPacket.hpp"
-#include "serial/packets/updateDoublePacket.hpp"
-#include "serial/packets/updateStringPacket.hpp"
-#include "serial/packets/genericAckPacket.hpp"
-#include "serial/packets/genericNAckPacket.hpp"
-#include "serial/packets/logPacket.hpp"
-#include "serial/packets/batchPacket.hpp"
-#include "serial/packets/pingPacket.hpp"
-#include "serial/packets/fetchPacket.hpp"
-#include "serial/drivers/vexSerialDriver.hpp"
+#include "table/valueTable.hpp"
+#include "table/labelTable.hpp"
+#include "serial/serialWriter.hpp"
 
+using namespace vexbridge::table;
 using namespace vexbridge::serial;
 
 namespace vexbridge
 {
     /**
-     * Represents a serial port connection to the VEXBridge.
-     * This is a singleton class - only one instance should be created.
+     * Global interface to the VEXBridge.
      */
     class VEXBridge
     {
     public:
         /**
-         * Creates a new VEXBridge instance.
-         * @param port The VEX V5 port to connect to.
+         * Retrieves a value from VEXBridge.
+         * @param label The label of the value.
+         * @param defaultValue The default value to return if the value does not exist.
+         * @return The value of the value or the default value if the value does not exist.
          */
-        VEXBridge(uint8_t port) : daemon(new VEXSerialDriver(port))
+        template <typename T>
+        static T get(const std::string label, const T defaultValue)
         {
-            if (instance != nullptr)
-                delete instance;
-            instance = this;
+            // Get the ID of the value
+            if (!labelTable.contains(label))
+                return defaultValue;
+            int16_t id = labelTable.get(label);
 
-            // Call reset to clear NT
-            reset();
-        }
-        ~VEXBridge()
-        {
-            instance = nullptr;
+            // Get the value
+            return getByID<T>(id, defaultValue);
         }
 
         /**
-         * Resets all values.
+         * Updates a value to the VEXBridge.
+         * Sends a packet to the VEXBridge to update the value.
+         * @param label The label of the value.
+         * @param value The new value.
          */
-        void reset()
+        template <typename T>
+        static void set(const std::string label, const T value)
         {
-            ResetPacket *packet = new ResetPacket();
-            packet->type = SerialPacketTypeID::RESET;
-            daemon.writePacket(packet);
+            setByID(getOrAssignID(label), value);
         }
 
         /**
-         * Labels a value ID
-         * @param id The ID to label.
-         * @param name The label for the ID.
+         * Gets the ID of a label from the VEXBridge.
+         * If the label does not exist, it will be assigned an ID.
+         * @param label The label to get the ID of.
+         * @return The ID of the label.
          */
-        void labelID(uint16_t id, const char *name)
+        static uint16_t getOrAssignID(const std::string label)
         {
-            UpdateLabelPacket *packet = new UpdateLabelPacket();
-            packet->type = SerialPacketTypeID::UPDATE_LABEL;
-            packet->ntID = id;
-            packet->label = name;
-            daemon.writePacket(packet);
+            if (!labelTable.contains(label))
+            {
+                auto id = labelTable.create(label);
+                SerialWriter::assignLabel(id, label);
+            }
+            return labelTable.get(label);
         }
 
         /**
-         * Updates a boolean value.
+         * Gets the value of an ID from the VEXBridge.
          * @param id The ID of the value.
-         * @param value The value to update.
+         * @param defaultValue The default value to return if the value does not exist.
+         * @return The value of the value or the default value if the value does not exist.
          */
-        void updateBoolean(uint16_t id, bool value)
+        template <typename T>
+        static T getByID(const uint16_t id, const T defaultValue)
         {
-            UpdateBoolPacket *packet = new UpdateBoolPacket();
-            packet->type = SerialPacketTypeID::UPDATE_BOOL;
-            packet->ntID = id;
-            packet->newValue = value;
-            daemon.writePacket(packet);
+            // Check the type
+            if (!valueTable.isType<T>(id))
+                throw std::runtime_error("Type mismatch for value " + std::to_string(id));
+
+            // Check if the value exists
+            if (!valueTable.contains(id))
+                return defaultValue;
+
+            // Get the value
+            return valueTable.get<T>(id);
         }
 
         /**
-         * Updates an integer value.
+         * Updates a value to the VEXBridge.
+         * Sends a packet to the VEXBridge to update the value.
          * @param id The ID of the value.
-         * @param value The value to update.
+         * @param value The new value.
          */
-        void updateInt(uint16_t id, int value)
+        template <typename T>
+        static void setByID(const uint16_t id, const T value)
         {
-            UpdateIntPacket *packet = new UpdateIntPacket();
-            packet->type = SerialPacketTypeID::UPDATE_INT;
-            packet->ntID = id;
-            packet->newValue = value;
-            daemon.writePacket(packet);
-        }
+            if (valueTable.get<T>(id) == value)
+                return;
+            valueTable.set(id, value);
 
-        /**
-         * Updates a float value.
-         * @param id The ID of the value.
-         * @param value The value to update.
-         */
-        void updateFloat(uint16_t id, float value)
-        {
-            UpdateFloatPacket *packet = new UpdateFloatPacket();
-            packet->type = SerialPacketTypeID::UPDATE_FLOAT;
-            packet->ntID = id;
-            packet->newValue = value;
-            daemon.writePacket(packet);
-        }
-
-        /**
-         * Updates a double value.
-         * @param id The ID of the value.
-         * @param value The value to update.
-         */
-        void updateDouble(uint16_t id, double value)
-        {
-            UpdateDoublePacket *packet = new UpdateDoublePacket();
-            packet->type = SerialPacketTypeID::UPDATE_DOUBLE;
-            packet->ntID = id;
-            packet->newValue = value;
-            daemon.writePacket(packet);
-        }
-
-        /**
-         * Updates a string value.
-         * @param id The ID of the value.
-         * @param value The value to update.
-         */
-        void updateString(uint16_t id, const char *value)
-        {
-            UpdateStringPacket *packet = new UpdateStringPacket();
-            packet->type = SerialPacketTypeID::UPDATE_STRING;
-            packet->ntID = id;
-            packet->newValue = value;
-            daemon.writePacket(packet);
-        }
-
-        static VEXBridge *getInstance()
-        {
-            return instance;
+            // Send the serial packet
+            if (std::is_same<T, bool>::value)
+                SerialWriter::updateBoolean(id, value);
+            else if (std::is_same<T, int>::value)
+                SerialWriter::updateInt(id, value);
+            else if (std::is_same<T, float>::value)
+                SerialWriter::updateFloat(id, value);
+            else if (std::is_same<T, double>::value)
+                SerialWriter::updateDouble(id, value);
+            // TODO: Add support for strings
+            else
+                throw std::runtime_error("Unsupported type to update: " + std::string(typeid(T).name()));
         }
 
     private:
-        // Singleton
-        static VEXBridge *instance;
-
-        SerialDaemon daemon;
+        static ValueTable valueTable;
+        static LabelTable labelTable;
     };
 }
 
-// Singleton instance
-vexbridge::VEXBridge *vexbridge::VEXBridge::instance = nullptr;
-
-// Assign Packet Types
-vexbridge::serial::SerialPacketType *vexbridge::serial::SerialPacketTypes::packetTypes[13] = {
-    new ResetPacketType(),
-    new UpdateLabelPacketType(),
-    new FetchPacketType(),
-    new LogPacketType(),
-    new PingPacketType(),
-    new GenericAckPacketType(),
-    new GenericNAckPacketType(),
-
-    new UpdateBoolPacketType(),
-    new UpdateIntPacketType(),
-    new UpdateFloatPacketType(),
-    new UpdateDoublePacketType(),
-    new UpdateStringPacketType(),
-
-    new BatchPacketType()};
+// Initialize static members
+ValueTable vexbridge::VEXBridge::valueTable;
+LabelTable vexbridge::VEXBridge::labelTable;

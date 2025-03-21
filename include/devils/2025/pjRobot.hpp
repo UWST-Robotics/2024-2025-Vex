@@ -137,7 +137,7 @@ namespace devils
         static constexpr double REJECT_OFFSET = 13;      // teeth
 
         // Hardware
-        VEXBridge bridge = VEXBridge(0);
+        // VEXBridge bridge = VEXBridge(0);
 
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 2, -3, 4, -5});
         SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {6, -7, 8, -9, 10});
@@ -163,7 +163,7 @@ namespace devils
         PerpendicularSensorOdometry odometry = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
 
         // Auto
-        NTOdom ntOdom = NTOdom("PJ", odometry);
+        VBOdom vbOdom = VBOdom("PJ", odometry);
         AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, false);
 
         // Renderer

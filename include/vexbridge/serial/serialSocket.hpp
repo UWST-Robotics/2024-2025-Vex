@@ -3,36 +3,29 @@
 #include <cstdint>
 #include <queue>
 #include "../utils/daemon.hpp"
-#include "../utils/sdkExtensions.h"
 #include "pros/serial.hpp"
 #include "pros/error.h"
-#include "serialQueue.hpp"
 #include "serialPacketDecoder.hpp"
 #include "serialPacketEncoder.hpp"
-#include "packets/genericAckPacket.hpp"
-#include "packets/genericNAckPacket.hpp"
-#include "types/serialPacket.hpp"
+#include "packetTypes/genericAckPacket.hpp"
+#include "packetTypes/genericNAckPacket.hpp"
 #include "drivers/serialDriver.hpp"
 
 namespace vexbridge::serial
 {
     /**
-     * Background daemon that handles serial read and write operations.
+     * Opens a socket to a serial port.
      */
-    class SerialDaemon : private Daemon
+    class SerialSocket : private Daemon
     {
     public:
         /**
          * Creates a new serial daemon.
          * @param serialDriver The serial driver to use for reading and writing data.
          */
-        SerialDaemon(SerialDriver *serialDriver)
+        SerialSocket(SerialDriver &serialDriver)
             : serial(serialDriver)
         {
-        }
-        ~SerialDaemon()
-        {
-            delete serial;
         }
 
         /**
@@ -40,9 +33,17 @@ namespace vexbridge::serial
          * Moves ownership of the packet to the queue.
          * @param packet The packet to write.
          */
-        void writePacket(SerialPacket *packet)
+        void writePacket(std::unique_ptr<SerialPacket> packet)
         {
-            writeQueue.push(packet);
+            // Check if the queue is full
+            if (writeQueue.size() >= MAX_QUEUE_SIZE)
+                throw std::runtime_error("Serial write queue is full.");
+
+            // TODO: Attempt to update an existing NT value in the queue
+            // TODO: Attempt to merge multiple packets into one
+
+            // Push the packet to the queue
+            writeQueue.push_back(std::move(packet));
         }
 
     protected:
@@ -52,24 +53,19 @@ namespace vexbridge::serial
             while (!writeQueue.empty())
             {
                 // Get the next packet in the queue
-                SerialPacket *packet = writeQueue.pop();
-                if (packet == nullptr)
-                    continue;
-
-                // Stats
-                uint32_t startTime = pros::millis();
+                auto packet = std::move(writeQueue.front());
+                writeQueue.pop_front();
 
                 // Write the packet to the serial port
                 try
                 {
-                    writePacketToSerial(packet);
+                    writePacketToSerial(*packet.get());
                 }
                 catch (std::exception &e)
                 {
+                    // Do nothing
+                    // It's typical for the write operation to fail if the SBC is disconnected/not replying
                 }
-
-                // Delete the packet from memory
-                delete packet;
 
                 // Wait for SBC to pull RTS back down
                 pros::delay(POST_RECEIVE_DELAY);
@@ -85,29 +81,27 @@ namespace vexbridge::serial
          * @param packet The packet to write.
          * @return 0 if the packet was written successfully, -1 if the packet failed to write.
          */
-        int writePacketToSerial(SerialPacket *packet)
+        int writePacketToSerial(SerialPacket &packet)
         {
-            // Set Packet ID
+            // Generate a new Packet ID
+            // Continuously cycles through 0-255 (1 byte)
             static uint8_t packetIDCounter = 0;
-            packet->id = packetIDCounter++;
+            packet.id = packetIDCounter++;
 
             // Serialize the packet
-            static uint8_t *writeBuffer = new uint8_t[MAX_BUFFER_SIZE];
-            size_t packetSize = SerialPacketEncoder::encode(packet, writeBuffer);
+            Buffer writeBuffer = SerialPacketEncoder::encode(packet);
 
             // Loop until success or max retries
             for (int i = 0; i < MAX_RETRIES; i++)
             {
-                // Log
-                // NTLogger::log("Writing packet " + std::to_string(packet->id) + " of type " + std::to_string((uint8_t)packet->type));
-
                 // Write to Serial
-                bool didWrite = serial->write(writeBuffer, (int32_t)packetSize);
+                bool didWrite = serial.write(writeBuffer);
                 if (!didWrite)
                     continue;
 
                 // Wait for an ack
-                int ackRes = waitForAck(packet->id);
+                // TODO: Async ack handling
+                int ackRes = waitForAck(packet.id);
                 if (ackRes != 0)
                     continue;
             }
@@ -137,25 +131,27 @@ namespace vexbridge::serial
                 pros::delay(UPDATE_INTERVAL);
 
                 // Read data from the serial port
-                SerialPacket *packet = readPacket();
-                if (packet == nullptr)
+                auto packet = readPacket();
+
+                // Check if a packet was read
+                if (!packet)
                     continue;
 
                 // Check if the packet is a nack
-                GenericNAckPacket *nackPacket = dynamic_cast<GenericNAckPacket *>(packet);
+                GenericNAckPacket *nackPacket = dynamic_cast<GenericNAckPacket *>(packet.get());
                 if (nackPacket != nullptr)
                     return -1; // <-- Exit to re-send the packet
 
                 // Check if the packet is an ack
-                GenericAckPacket *ackPacket = dynamic_cast<GenericAckPacket *>(packet);
+                GenericAckPacket *ackPacket = dynamic_cast<GenericAckPacket *>(packet.get());
                 if (ackPacket == nullptr)
                     continue; // <-- Skip if not an ack
 
                 // Check if the ack is for the correct packet
-                // TODO: Fix me!
                 if (ackPacket->id != packetID)
                     return -1; // <-- Exit to re-send the packet
 
+                // Ack received
                 return 0;
             }
 
@@ -167,20 +163,23 @@ namespace vexbridge::serial
          * Reads a packet from the serial port
          * @return The packet read from the serial port or nullptr if no packet is available.
          */
-        SerialPacket *readPacket()
+        std::unique_ptr<SerialPacket> readPacket()
         {
-            static uint8_t *readBuffer = new uint8_t[MAX_BUFFER_SIZE];
-            int32_t bytesRead = serial->read(readBuffer);
+            // Read data from the serial port
+            Buffer readBuffer;
+            int32_t bytesRead = serial.read(readBuffer);
 
             // Abort if no data was read
             if (bytesRead <= 0)
                 return nullptr;
 
             // Append to the read queue
-            // This allows packets to be split across multiple reads
-            readQueue.insert(readQueue.end(), readBuffer, readBuffer + bytesRead);
+            // This allows packets to be split across multiple read operations
+            readQueue.reserve(readQueue.size() + bytesRead);
+            readQueue.insert(readQueue.end(), readBuffer.begin(), readBuffer.end());
 
             // Trim the read queue to prevent it from growing too large
+            // Prevents memory leaks if the read queue is never cleared (e.g. if no packets are found / garbage data is received)
             if (readQueue.size() > MAX_BUFFER_SIZE)
                 readQueue.erase(readQueue.begin(), readQueue.begin() + readQueue.size() - MAX_BUFFER_SIZE);
 
@@ -198,16 +197,21 @@ namespace vexbridge::serial
                 if (readQueue[i] != ByteStuffer::END_FLAG)
                     continue;
 
-                // Decode the packet up to the null byte
-                SerialPacket *packet = SerialPacketDecoder::decode(&readQueue[0], i);
+                // Decode the packet up to the end flag
+                try
+                {
+                    // TODO: Only splice the read queue up to "i"
+                    auto packet = SerialPacketDecoder::decode(readQueue);
+                    return packet;
+                }
+                catch (std::exception &e)
+                {
+                    // Do nothing
+                    // It's typical for the decoder to throw an exception if the packet got corrupt during transmission
+                }
 
-                // Remove the packet from the read queue
+                // Remove the current segment from the read queue
                 readQueue.erase(readQueue.begin(), readQueue.begin() + i + 1);
-
-                // Check if the packet is valid
-                if (packet == nullptr)
-                    continue;
-                return packet;
             }
 
             // No packet found
@@ -215,19 +219,16 @@ namespace vexbridge::serial
         }
 
     private:
-        static constexpr int32_t VEX_WRITE_BUFFER_SIZE = 1024;
         static constexpr uint32_t TIMEOUT = 50;        // ms
         static constexpr uint32_t UPDATE_INTERVAL = 2; // ms
-        static constexpr uint32_t BAUDRATE = 115200;
         static constexpr uint8_t MAX_RETRIES = 3;
         static constexpr size_t MAX_QUEUE_SIZE = 512;
         static constexpr size_t MAX_BUFFER_SIZE = 1024;
-        static constexpr double WRITE_DELAY_PER_BYTE = 0.08; // ms (estimate based off of 115200 baud)
-        static constexpr uint32_t POST_RECEIVE_DELAY = 4;    // ms
+        static constexpr uint32_t POST_RECEIVE_DELAY = 4; // ms
         static constexpr bool WAIT_FOR_ACK = false;
 
-        SerialDriver *serial = nullptr;
-        SerialQueue writeQueue;
+        SerialDriver &serial;
+        std::deque<std::unique_ptr<SerialPacket>> writeQueue;
         std::vector<uint8_t> readQueue;
     };
 }

@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <string>
 #include <algorithm>
+#include "buffer.h"
 
 namespace vexbridge::utils
 {
@@ -16,30 +17,19 @@ namespace vexbridge::utils
         /**
          * Creates a new buffer writer.
          * @param buffer The buffer to write to.
-         * @param length The length of the buffer.
          */
-        BufferWriter(uint8_t *buffer, size_t length)
-            : buffer(buffer),
-              length(length)
+        BufferWriter(Buffer &buffer)
+            : buffer(buffer)
         {
-        }
-
-        /**
-         * Sets the write head position
-         * @param offset The new offset in bytes
-         */
-        void setOffset(size_t offset)
-        {
-            this->offset = offset;
         }
 
         /**
          * Gets the current write head position
          * @return The current offset in bytes
          */
-        size_t getOffset()
+        size_t getOffset() const
         {
-            return offset;
+            return buffer.size();
         }
 
         /**
@@ -48,9 +38,7 @@ namespace vexbridge::utils
          */
         void writeUInt8(uint8_t value)
         {
-            if (offset >= length)
-                return;
-            buffer[offset++] = value;
+            buffer.push_back(value);
         }
 
         /**
@@ -59,10 +47,8 @@ namespace vexbridge::utils
          */
         void writeUInt16LE(uint16_t value)
         {
-            if (offset + 1 >= length)
-                return;
-            buffer[offset++] = value & 0xFF;
-            buffer[offset++] = value >> 8;
+            buffer.push_back(value & 0xFF);
+            buffer.push_back(value >> 8);
         }
 
         /**
@@ -71,10 +57,8 @@ namespace vexbridge::utils
          */
         void writeUInt16BE(uint16_t value)
         {
-            if (offset + 1 >= length)
-                return;
-            buffer[offset++] = value >> 8;
-            buffer[offset++] = value & 0xFF;
+            buffer.push_back(value >> 8);
+            buffer.push_back(value & 0xFF);
         }
 
         /**
@@ -102,9 +86,15 @@ namespace vexbridge::utils
         /**
          * Writes a byte array to the buffer.
          * @param bytes The bytes to write.
+         * @param length The number of bytes to write. Must be less than or equal to the length of the array.
          */
-        void writeBytes(uint8_t *bytes, uint16_t length)
+        void writeBytes(Buffer bytes, uint16_t length)
         {
+            // Check if the length is greater than the array length
+            if (length > bytes.size())
+                length = bytes.size();
+
+            // Write the bytes
             for (uint16_t i = 0; i < length; i++)
                 writeUInt8(bytes[i]);
         }
@@ -162,8 +152,6 @@ namespace vexbridge::utils
         }
 
     private:
-        uint8_t *buffer;
-        size_t length;
-        size_t offset = 0;
+        Buffer &buffer;
     };
 }
