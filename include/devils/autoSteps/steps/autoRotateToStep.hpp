@@ -77,7 +77,7 @@ namespace devils
         {
             // Get Current Pose
             Pose currentPose = odomSource.getPose();
-            double currentVelocity = odomSource.getAngularVelocity();
+            double currentVelocity = odomSource.getVelocity().rotation;
 
             // Calculate distance to start and target
             double currentAngle = currentPose.rotation;

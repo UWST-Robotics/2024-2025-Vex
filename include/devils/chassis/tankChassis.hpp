@@ -41,10 +41,6 @@ namespace devils
             double fixedTurn = std::clamp(turn, -1.0, 1.0);
             double fixedStrafe = std::clamp(strafe, -1.0, 1.0);
 
-            fixedForward *= forwardSpeed;
-            fixedTurn *= turnSpeed;
-            fixedStrafe *= strafeSpeed;
-
             moveTank(forward + turn, forward - turn);
         }
 

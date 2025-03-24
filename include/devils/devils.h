@@ -25,7 +25,6 @@
 
 // Odom
 #include "odom/odomSource.hpp"
-#include "odom/complementaryFilterOdom.hpp"
 #include "odom/differentialWheelOdom.hpp"
 #include "odom/tankChassisOdom.hpp"
 #include "odom/perpendicularSensorOdom.hpp"

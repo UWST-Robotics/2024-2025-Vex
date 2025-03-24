@@ -32,22 +32,11 @@ namespace devils
             lastUpdateTimestamp = pros::millis();
         }
 
-        Vector2 &getVelocity() override
-        {
-            return PoseVelocityCalculator::getVelocity();
-        }
-
-        double getAngularVelocity() override
-        {
-            return PoseVelocityCalculator::getAngularVelocity();
-        }
-
         /**
          * Updates the odometry from vertical and horizontal tracking wheels.
          */
         void onUpdate() override
         {
-
             // Get Sensor Angles in Degrees
             double verticalAngle = verticalSensor.getAngle();
             if (errno != 0)
@@ -118,7 +107,7 @@ namespace devils
             currentPose.y += deltaY;
 
             // Update Velocity
-            updateVelocity(currentPose);
+            PoseVelocityCalculator::updateVelocity(currentPose);
         }
 
         /**
@@ -161,6 +150,11 @@ namespace devils
         {
             this->verticalSensorOffset = &verticalSensorOffset;
             this->horizontalSensorOffset = &horizontalSensorOffset;
+        }
+
+        PoseVelocity &getVelocity() override
+        {
+            return PoseVelocityCalculator::getVelocity();
         }
 
     private:

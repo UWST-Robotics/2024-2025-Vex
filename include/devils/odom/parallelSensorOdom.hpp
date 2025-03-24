@@ -2,6 +2,7 @@
 
 #include "differentialWheelOdom.hpp"
 #include "../utils/runnable.hpp"
+#include "poseVelocityCalculator.hpp"
 
 #define M_PI 3.14159265358979323846
 
@@ -44,16 +45,6 @@ namespace devils
         void setTicksPerRevolution(double ticksPerRevolution)
         {
             this->ticksPerRevolution = ticksPerRevolution;
-        }
-
-        Vector2 &getVelocity() override
-        {
-            return PoseVelocityCalculator::getVelocity();
-        }
-
-        double getAngularVelocity() override
-        {
-            return PoseVelocityCalculator::getAngularVelocity();
         }
 
     private:

@@ -2,6 +2,7 @@
 #include "differentialWheelOdom.hpp"
 #include "../utils/runnable.hpp"
 #include "../hardware/structs/gyro.h"
+#include "poseVelocityCalculator.hpp"
 
 #define M_PI 3.14159265358979323846
 
@@ -59,16 +60,6 @@ namespace devils
         void useIMU(IGyro *imu)
         {
             this->imu = imu;
-        }
-
-        Vector2 &getVelocity() override
-        {
-            return PoseVelocityCalculator::getVelocity();
-        }
-
-        double getAngularVelocity() override
-        {
-            return PoseVelocityCalculator::getAngularVelocity();
         }
 
     private:

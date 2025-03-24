@@ -86,17 +86,12 @@ namespace devils
             currentPose.rotation += deltaRotation;
 
             // Update Velocity
-            updateVelocity(currentPose);
+            PoseVelocityCalculator::updateVelocity(currentPose);
         }
 
-        Vector2 &getVelocity() override
+        PoseVelocity &getVelocity() override
         {
             return PoseVelocityCalculator::getVelocity();
-        }
-
-        double getAngularVelocity() override
-        {
-            return PoseVelocityCalculator::getAngularVelocity();
         }
 
     private:

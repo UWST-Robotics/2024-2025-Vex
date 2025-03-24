@@ -7,7 +7,7 @@
 #include "../../chassis/chassisBase.hpp"
 #include "../../utils/pidController.hpp"
 #include "../../utils/timer.hpp"
-#include "../../odom/poseVelocityCalculator.hpp"
+#include "../../motionProfile/motionProfile.hpp"
 
 namespace devils
 {
@@ -20,23 +20,17 @@ namespace devils
     public:
         struct Options
         {
-            /// @brief The PID parameters for translation. Uses delta inches as the error.
-            PIDParams translationPID = PIDParams{0.1, 0.0, 0.0};
-
             /// @brief The PID parameters for rotation. Uses delta radians as the error.
             PIDParams rotationPID = PIDParams{0.05, 0.0, 0.0};
 
-            /// @brief THe minimum speed in %
-            double minSpeed = 0.0;
+            /// @brief The maximum rotational speed in % output
+            double maxRotationSpeed = 0.5;
 
-            /// @brief The maximum speed in %
-            double maxSpeed = 0.5;
+            /// @brief The motion profile for translation. Uses delta inches as the error.
+            std::shared_ptr<MotionProfile> motionProfile; // TODO: Default motion profile
 
             /// @brief The maximum final distance to the target in inches
             double goalDist = 6.0;
-
-            /// @brief The maximum final speed of the robot in in/s. (Defaults to no limit)
-            double goalSpeed = std::numeric_limits<double>::max();
 
             /// @brief The minimum distance from the target to apply rotation. If we are closer than this, we will not rotate to avoid oscillation.
             double minDistanceToRotate = 6.0;
@@ -61,7 +55,6 @@ namespace devils
               odomSource(odomSource),
               targetPose(targetPose),
               options(options),
-              translationPID(options.translationPID),
               rotationPID(options.rotationPID)
         {
         }
@@ -69,7 +62,6 @@ namespace devils
         void onStart() override
         {
             // Reset PID Controllers
-            translationPID.reset();
             rotationPID.reset();
         }
 
@@ -101,8 +93,9 @@ namespace devils
             }
 
             // Calculate Forward Speed
-            double speed = translationPID.update(distanceToTarget);
-            speed = std::clamp(speed, -options.maxSpeed, options.maxSpeed);
+            // double speed = translationPID.update(distanceToTarget);
+            // speed = std::clamp(speed, -options.maxSpeed, options.maxSpeed);
+            double speed = options.motionProfile->getSpeed(distanceToTarget);
 
             // Calculate Turn Speed
             double turnSpeed = 0;
@@ -112,7 +105,7 @@ namespace devils
                 double angleDiff = Math::angleDiff(targetAngleRads, currentPose.rotation);
 
                 turnSpeed = rotationPID.update(angleDiff);
-                turnSpeed = std::clamp(turnSpeed, -options.maxSpeed, options.maxSpeed);
+                turnSpeed = std::clamp(turnSpeed, -options.maxRotationSpeed, options.maxRotationSpeed);
             }
 
             // Move Chassis
@@ -129,23 +122,18 @@ namespace devils
         {
             // Get Current State
             Pose currentPose = odomSource.getPose();
-            Vector2 currentVelocity = odomSource.getVelocity();
 
             // Calculate distance to target pose
             double distanceToTarget = currentPose.distanceTo(targetPose);
 
             // Check if we reached the goal
-            bool isAtGoalPose = fabs(distanceToTarget) < options.goalDist;
-            bool isAtGoalVelocity = currentVelocity.magnitude() < options.goalSpeed;
-
-            return isAtGoalPose && isAtGoalVelocity;
+            return fabs(distanceToTarget) < options.goalDist;
         }
 
     protected:
         // Params
         ChassisBase &chassis;
         OdomSource &odomSource;
-        PIDController translationPID;
         PIDController rotationPID;
         Pose targetPose = Pose();
         Options options;
