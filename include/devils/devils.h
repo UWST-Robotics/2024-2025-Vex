@@ -72,5 +72,9 @@
 // Utils
 #include "utils/vbOdom.hpp"
 
+// MotionProfile
+#include "motionProfile/motionProfile.hpp"
+#include "motionProfile/trapezoidMotionProfile.hpp"
+
 // VEXBridge
 #include "../vexbridge/vexbridge.h"

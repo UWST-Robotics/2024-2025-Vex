@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../geometry/poseVelocity.hpp"
-
 namespace devils
 {
     /**
@@ -10,11 +8,10 @@ namespace devils
     struct MotionProfile
     {
         /**
-         * Gets the target velocity given the current velocity and goal distance
-         * @param currentPoseVelocity The current velocity as a `PoseVelocity`
-         * @param goalDistance The goal distance in inches
-         * @return The output speed in inches per second
+         * Gets the speed at a given position
+         * @param position The current position in inches
+         * @return The target velocity in inches per second
          */
-        virtual double getSpeed(double goalDistance) = 0;
+        virtual double getSpeed(double position) = 0;
     };
 }

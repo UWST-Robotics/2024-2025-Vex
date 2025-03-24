@@ -6,6 +6,7 @@
 #include "./steps/autoJumpToStep.hpp"
 #include "./steps/autoDriveStep.hpp"
 #include "./steps/autoDriveToStep.hpp"
+#include "./steps/autoDriveMotionProfileStep.hpp"
 #include "./steps/autoDriveTimeStep.hpp"
 #include "./steps/autoRotateToStep.hpp"
 #include "./steps/autoTimeoutStep.hpp"
@@ -13,6 +14,7 @@
 #include "./steps/autoPurePursuitStep.hpp"
 #include "./steps/autoBoomerangStep.hpp"
 #include "./transformer/poseTransform.h"
+#include "../motionProfile/trapezoidMotionProfile.hpp"
 
 namespace devils
 {
@@ -111,11 +113,82 @@ namespace devils
             uint32_t timeout = 2000,
             AutoDriveToStep::Options options = AutoDriveToStep::Options::defaultOptions)
         {
+            // Set the current pose
+            this->pose = pose;
+
             // Transform the pose
             Pose transformedPose = tryTransformPose(pose);
 
             // Return a new `AutoBoomerangStep` with the given pose
             return std::make_unique<AutoTimeoutStep>(std::make_unique<AutoBoomerangStep>(chassis, odom, transformedPose, options), timeout);
+        }
+
+        /**
+         * Drives to a given pose using a motion profile.
+         * Set constraints using `useMotionProfile` before calling this method.
+         * @param x The x position to drive to in inches
+         * @param y The y position to drive to in inches
+         * @param rotation The rotation to drive to in degrees
+         * @param startingVelocity The starting velocity in inches per second
+         * @param endingVelocity The ending velocity in inches per second
+         * @param timeout The timeout in milliseconds
+         * @param options The options for the drive step
+         * @returns A pointer to the created step
+         */
+        AutoStepPtr driveToMotionProfile(
+            double x,
+            double y,
+            double rotation,
+            double startingVelocity = 0,
+            double endingVelocity = 0,
+            uint32_t timeout = 2000,
+            AutoDriveToStep::Options options = AutoDriveToStep::Options::defaultOptions)
+        {
+            // Create a new pose
+            Pose targetPose = Pose(x, y, Units::degToRad(rotation));
+
+            // Return a new `AutoBoomerangStep` with the given pose
+            return driveToMotionProfile(
+                targetPose,
+                startingVelocity,
+                endingVelocity,
+                timeout,
+                options);
+        }
+
+        /**
+         * Drives to a given pose using a motion profile.
+         * Set constraints using `useMotionProfile` before calling this method.
+         * @param pose The pose to drive to
+         * @param startingVelocity The starting velocity in inches per second
+         * @param endingVelocity The ending velocity in inches per second
+         * @param timeout The timeout in milliseconds
+         * @param options The options for the drive step
+         * @returns A pointer to the created step
+         */
+        AutoStepPtr driveToMotionProfile(
+            Pose pose,
+            double startingVelocity = 0,
+            double endingVelocity = 0,
+            uint32_t timeout = 2000,
+            AutoDriveToStep::Options options = AutoDriveToStep::Options::defaultOptions)
+        {
+            // Check if motion profile constraints are set
+            if (!constraints)
+                throw std::runtime_error("No motion profile constraints set. Call `useMotionProfile` first.");
+
+            // Create new `PathInfo`
+            TrapezoidMotionProfile::PathInfo pathInfo;
+            pathInfo.startingVelocity = startingVelocity;
+            pathInfo.goalDistance = pose.distanceTo(this->pose);
+            pathInfo.endingVelocity = endingVelocity;
+
+            // Create a new motion profile
+            auto motionProfile = std::make_shared<TrapezoidMotionProfile>(*constraints, pathInfo);
+            motionProfile->calc();
+
+            // Return a new `AutoTimeoutStep` with the given step
+            return std::make_unique<AutoTimeoutStep>(std::make_unique<AutoDriveMotionProfileStep>(chassis, odom, pose, motionProfile, options), timeout);
         }
 
         /**
@@ -166,6 +239,15 @@ namespace devils
             this->transformer = std::move(transformer);
         }
 
+        /**
+         * Uses a motion profile when building autonomous
+         * @param constraints - The constraints to use
+         */
+        void useMotionProfile(std::shared_ptr<TrapezoidMotionProfile::RobotConstraints> constraints)
+        {
+            this->constraints = constraints;
+        }
+
     protected:
         /**
          * Tries to transform a pose using the assigned transformer, if any
@@ -188,6 +270,9 @@ namespace devils
 
         /// @brief The active transformer used to transform poses
         std::unique_ptr<PoseTransform> transformer = nullptr;
+
+        // Motion profile references
+        std::shared_ptr<TrapezoidMotionProfile::RobotConstraints> constraints;
 
         // Input references
         ChassisBase &chassis;

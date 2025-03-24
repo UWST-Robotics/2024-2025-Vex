@@ -20,17 +20,23 @@ namespace devils
     public:
         struct Options
         {
+            /// @brief The PID parameters for translation. Uses delta inches as the error.
+            PIDParams translationPID = PIDParams{0.1, 0.0, 0.0};
+
             /// @brief The PID parameters for rotation. Uses delta radians as the error.
             PIDParams rotationPID = PIDParams{0.05, 0.0, 0.0};
 
-            /// @brief The maximum rotational speed in % output
-            double maxRotationSpeed = 0.5;
+            /// @brief THe minimum speed in %
+            double minSpeed = 0.0;
 
-            /// @brief The motion profile for translation. Uses delta inches as the error.
-            std::shared_ptr<MotionProfile> motionProfile; // TODO: Default motion profile
+            /// @brief The maximum speed in %
+            double maxSpeed = 0.5;
 
             /// @brief The maximum final distance to the target in inches
             double goalDist = 6.0;
+
+            /// @brief The maximum final speed of the robot in in/s. (Defaults to no limit)
+            double goalSpeed = std::numeric_limits<double>::max();
 
             /// @brief The minimum distance from the target to apply rotation. If we are closer than this, we will not rotate to avoid oscillation.
             double minDistanceToRotate = 6.0;
@@ -55,7 +61,8 @@ namespace devils
               odomSource(odomSource),
               targetPose(targetPose),
               options(options),
-              rotationPID(options.rotationPID)
+              rotationPID(options.rotationPID),
+              translationPID(options.translationPID)
         {
         }
 
@@ -93,9 +100,7 @@ namespace devils
             }
 
             // Calculate Forward Speed
-            // double speed = translationPID.update(distanceToTarget);
-            // speed = std::clamp(speed, -options.maxSpeed, options.maxSpeed);
-            double speed = options.motionProfile->getSpeed(distanceToTarget);
+            double speed = getSpeed(distanceToTarget);
 
             // Calculate Turn Speed
             double turnSpeed = 0;
@@ -105,7 +110,7 @@ namespace devils
                 double angleDiff = Math::angleDiff(targetAngleRads, currentPose.rotation);
 
                 turnSpeed = rotationPID.update(angleDiff);
-                turnSpeed = std::clamp(turnSpeed, -options.maxRotationSpeed, options.maxRotationSpeed);
+                turnSpeed = std::clamp(turnSpeed, -options.maxSpeed, options.maxSpeed);
             }
 
             // Move Chassis
@@ -131,10 +136,22 @@ namespace devils
         }
 
     protected:
+        /**
+         * Gets the speed at a given distance to the target.
+         * @param distanceToTarget The distance to the target in inches
+         * @returns The target speed in inches per second
+         */
+        virtual double getSpeed(double distanceToTarget)
+        {
+            double outputSpeed = translationPID.update(distanceToTarget);
+            return std::clamp(outputSpeed, options.minSpeed, options.maxSpeed);
+        }
+
         // Params
         ChassisBase &chassis;
         OdomSource &odomSource;
         PIDController rotationPID;
+        PIDController translationPID;
         Pose targetPose = Pose();
         Options options;
     };
