@@ -10,6 +10,9 @@ namespace vexbridge::utils
      */
     struct Checksum
     {
+        // Prevent instantiation
+        Checksum() = delete;
+
         /**
          * Calculates the 8-bit checksum of a byte array using a simple sum algorithm.
          * @param buffer The buffer to calculate the checksum of.

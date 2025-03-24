@@ -2,38 +2,40 @@
 
 #include <cstdint>
 #include <queue>
+#include <unordered_set>
+#include <memory>
 #include "../utils/daemon.hpp"
 #include "pros/serial.hpp"
 #include "pros/error.h"
-#include "serialPacketDecoder.hpp"
-#include "serialPacketEncoder.hpp"
+#include "serialization/serialPacketDecoder.hpp"
+#include "serialization/serialPacketEncoder.hpp"
 #include "packetTypes/genericAckPacket.hpp"
 #include "packetTypes/genericNAckPacket.hpp"
 #include "drivers/serialDriver.hpp"
+#include "../utils/globalInstances.hpp"
 
 namespace vexbridge::serial
 {
     /**
      * Opens a socket to a serial port.
      */
-    class SerialSocket : private Daemon
+    class SerialSocket : private Daemon, public GlobalInstances<SerialSocket>
     {
     public:
         /**
          * Creates a new serial daemon.
          * @param serialDriver The serial driver to use for reading and writing data.
          */
-        SerialSocket(SerialDriver &serialDriver)
-            : serial(serialDriver)
+        SerialSocket(std::unique_ptr<SerialDriver> serialDriver)
+            : serial(std::move(serialDriver))
         {
         }
 
         /**
          * Adds a serial packet to the write queue.
-         * Moves ownership of the packet to the queue.
          * @param packet The packet to write.
          */
-        void writePacket(std::unique_ptr<SerialPacket> packet)
+        void writePacket(std::shared_ptr<SerialPacket> packet)
         {
             // Check if the queue is full
             if (writeQueue.size() >= MAX_QUEUE_SIZE)
@@ -43,7 +45,17 @@ namespace vexbridge::serial
             // TODO: Attempt to merge multiple packets into one
 
             // Push the packet to the queue
-            writeQueue.push_back(std::move(packet));
+            writeQueue.push_back(packet);
+        }
+
+        /**
+         * Writes a packet to all active serial sockets.
+         * @param packet The packet to write.
+         */
+        static void writePacketToAll(std::shared_ptr<SerialPacket> packet)
+        {
+            for (auto socket : allInstances)
+                socket->writePacket(packet);
         }
 
     protected:
@@ -53,7 +65,7 @@ namespace vexbridge::serial
             while (!writeQueue.empty())
             {
                 // Get the next packet in the queue
-                auto packet = std::move(writeQueue.front());
+                auto packet = writeQueue.front();
                 writeQueue.pop_front();
 
                 // Write the packet to the serial port
@@ -95,7 +107,7 @@ namespace vexbridge::serial
             for (int i = 0; i < MAX_RETRIES; i++)
             {
                 // Write to Serial
-                bool didWrite = serial.write(writeBuffer);
+                bool didWrite = serial->write(writeBuffer);
                 if (!didWrite)
                     continue;
 
@@ -167,7 +179,7 @@ namespace vexbridge::serial
         {
             // Read data from the serial port
             Buffer readBuffer;
-            int32_t bytesRead = serial.read(readBuffer);
+            int32_t bytesRead = serial->read(readBuffer);
 
             // Abort if no data was read
             if (bytesRead <= 0)
@@ -227,8 +239,8 @@ namespace vexbridge::serial
         static constexpr uint32_t POST_RECEIVE_DELAY = 4; // ms
         static constexpr bool WAIT_FOR_ACK = false;
 
-        SerialDriver &serial;
-        std::deque<std::unique_ptr<SerialPacket>> writeQueue;
+        std::unique_ptr<SerialDriver> serial;
+        std::deque<std::shared_ptr<SerialPacket>> writeQueue;
         std::vector<uint8_t> readQueue;
     };
 }

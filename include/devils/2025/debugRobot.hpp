@@ -23,7 +23,7 @@ namespace devils
         }
 
         // Network Tables
-        // VEXBridge bridge = VEXBridge(0);
+        VEXBridge bridge = VEXBridge(0);
 
         // Dummy Chassis
         DummyChassis dummyChassis = DummyChassis();

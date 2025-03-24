@@ -15,7 +15,7 @@ namespace vexbridge::serial
     template <typename T>
     struct UpdateValuePacket : public SerialPacket
     {
-        uint16_t ntID;
+        uint16_t valueID;
         T newValue;
     };
 
@@ -37,8 +37,8 @@ namespace vexbridge::serial
             newPacket->type = packet.type;
 
             // Read packet contents from payload
-            BufferReader reader(packet->payload, packet->payloadSize);
-            newPacket->ntID = reader.readUInt16BE();
+            BufferReader reader(packet.payload);
+            newPacket->valueID = reader.readUInt16BE();
             newPacket->newValue = deserializeValue(reader);
             return newPacket;
         }
@@ -53,8 +53,8 @@ namespace vexbridge::serial
             BufferWriter writer(payload);
 
             // Write value
-            writer.writeUInt16BE(updateValuePacket->ntID);
-            serializeValue(writer, updateValuePacket->newValue);
+            writer.writeUInt16BE(updateValuePacket.valueID);
+            serializeValue(writer, updateValuePacket.newValue);
 
             // Make new encoded packet
             auto newPacket = std::make_unique<EncodedSerialPacket>();

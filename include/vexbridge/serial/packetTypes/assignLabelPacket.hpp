@@ -14,7 +14,7 @@ namespace vexbridge::serial
 {
     struct AssignLabelPacket : public SerialPacket
     {
-        uint16_t ntID;
+        uint16_t valueID;
         std::string label;
     };
 
@@ -33,7 +33,7 @@ namespace vexbridge::serial
 
             // Read packet contents from payload
             BufferReader reader(packet.payload);
-            newPacket->ntID = reader.readUInt16BE();
+            newPacket->valueID = reader.readUInt16BE();
             newPacket->label = reader.readString8();
             return newPacket;
         }
@@ -48,7 +48,7 @@ namespace vexbridge::serial
             BufferWriter writer(payload);
 
             // Write value
-            writer.writeUInt16BE(updateLabelPacket.ntID);
+            writer.writeUInt16BE(updateLabelPacket.valueID);
             writer.writeString8(updateLabelPacket.label);
 
             // Make new encoded packet

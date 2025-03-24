@@ -2,9 +2,9 @@
 
 #include <cstdint>
 #include "allPacketTypes.hpp"
-#include "packetTypes/common/serialPacketType.h"
-#include "../utils/checksum.hpp"
-#include "../utils/byteStuffer.hpp"
+#include "../packetTypes/common/serialPacketType.h"
+#include "../../utils/checksum.hpp"
+#include "../../utils/byteStuffer.hpp"
 
 namespace vexbridge::serial
 {

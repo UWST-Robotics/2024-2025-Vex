@@ -4,6 +4,9 @@
 #include "table/valueTable.hpp"
 #include "table/labelTable.hpp"
 #include "serial/serialWriter.hpp"
+#include "serial/serialSocket.hpp"
+#include "serial/drivers/usbSerialDriver.hpp"
+#include "serial/drivers/vexSerialDriver.hpp"
 
 using namespace vexbridge::table;
 using namespace vexbridge::serial;
@@ -11,11 +14,26 @@ using namespace vexbridge::serial;
 namespace vexbridge
 {
     /**
-     * Global interface to the VEXBridge.
+     * Interface for interacting with the VEXBridge.
      */
     class VEXBridge
     {
     public:
+        /**
+         * Opens a new socket connection to the VEXBridge.
+         * Once instantiated, all calls to `VEXBridge` can be made statically.
+         * @param port The port to connect to. `0` for USB, `1 - 21` for VEX V5 ports.
+         */
+        VEXBridge(uint8_t port)
+        {
+            if (port == 0)
+                socket = std::make_unique<SerialSocket>(std::make_unique<USBSerialDriver>());
+            else if (port >= 1 && port <= 21)
+                socket = std::make_unique<SerialSocket>(std::make_unique<VEXSerialDriver>(port));
+            else
+                throw std::runtime_error("Invalid port number: " + std::to_string(port));
+        }
+
         /**
          * Retrieves a value from VEXBridge.
          * @param label The label of the value.
@@ -113,6 +131,8 @@ namespace vexbridge
     private:
         static ValueTable valueTable;
         static LabelTable labelTable;
+
+        std::unique_ptr<SerialSocket> socket;
     };
 }
 

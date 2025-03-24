@@ -2,8 +2,8 @@
 
 #include "pros/serial.hpp"
 #include "pros/error.h"
-#include "SerialDriver.hpp"
-#include "../utils/buffer.h"
+#include "serialDriver.hpp"
+#include "../../utils/buffer.h"
 
 using namespace vexbridge::utils;
 

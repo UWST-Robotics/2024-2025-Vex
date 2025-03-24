@@ -12,7 +12,7 @@ namespace vexbridge::utils
     class Daemon
     {
     public:
-        Daemon() : daemonTask([=]
+        Daemon() : daemonTask([=, this]
                               { runTask(); })
         {
         }

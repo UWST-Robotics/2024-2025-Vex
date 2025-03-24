@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pros/serial.hpp"
+#include "pros/link.hpp"
 #include "pros/error.h"
 #include "serialDriver.hpp"
 #include <cmath>
@@ -11,33 +11,31 @@ using namespace vexbridge::utils;
 namespace vexbridge::serial
 {
     /**
-     * Interface for reading and writing data to a VEX V5 serial port.
+     * Interface for reading and writing data to another robot via a VEX V5 radio.
      */
-    class VEXSerialDriver : public SerialDriver
+    class RadioSerialDriver : public SerialDriver
     {
     public:
-        VEXSerialDriver(uint8_t port)
-            : serial(port)
+        /**
+         * Creates a new radio serial driver.
+         * @param port The port of the radio to use.
+         * @param isTransmitter True if the radio is a transmitter, false if it is a receiver.
+         */
+        RadioSerialDriver(uint8_t port, bool isTransmitter)
+            : serial(port, LINK_NAME, isTransmitter ? pros::E_LINK_TX : pros::E_LINK_RX)
         {
         }
 
         bool write(Buffer &buffer)
         {
-            // Flush the serial port
-            serial.flush();
-
             // Write the packet to the serial port
-            int32_t writeRes = serial.write(buffer.data(), buffer.size());
+            uint32_t writeRes = serial.transmit_raw(buffer.data(), buffer.size());
             if (writeRes == PROS_ERR)
                 return false;
 
             // Check if the entire packet was written
             if (writeRes != buffer.size())
                 return false;
-
-            // Wait for transmission to complete
-            uint32_t writeDelay = ceil(WRITE_DELAY_PER_BYTE * buffer.size());
-            pros::delay(writeDelay);
 
             // Return success
             return true;
@@ -46,7 +44,7 @@ namespace vexbridge::serial
         int32_t read(Buffer &buffer) override
         {
             // Check if there is data to read
-            int32_t readBufferSize = serial.get_read_avail();
+            uint32_t readBufferSize = serial.raw_receivable_size();
             if (readBufferSize == PROS_ERR)
                 return -1;
 
@@ -54,12 +52,12 @@ namespace vexbridge::serial
             buffer.resize(readBufferSize);
 
             // Read data from the serial port
-            int32_t bytesRead = serial.read(buffer.data(), readBufferSize);
+            uint32_t bytesRead = serial.receive_raw(buffer.data(), readBufferSize);
             if (bytesRead == PROS_ERR)
                 return -1;
 
             // Flush the serial port
-            int32_t flushRes = serial.flush();
+            uint32_t flushRes = serial.clear_receive_buf();
             if (flushRes == PROS_ERR)
                 return -1;
 
@@ -68,8 +66,8 @@ namespace vexbridge::serial
         }
 
     private:
-        static constexpr double WRITE_DELAY_PER_BYTE = 0.08; // ms (estimate based off of 115200 baud)
+        const std::string LINK_NAME = "vexbridge";
 
-        pros::Serial serial;
+        pros::Link serial;
     };
 }

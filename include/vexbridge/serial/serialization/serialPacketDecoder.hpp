@@ -2,11 +2,11 @@
 
 #include <cstdint>
 #include "allPacketTypes.hpp"
-#include "../utils/bufferReader.hpp"
-#include "../utils/checksum.hpp"
-#include "../utils/byteStuffer.hpp"
-#include "../utils/buffer.h"
-#include "packetTypes/common/serialPacketType.h"
+#include "../../utils/bufferReader.hpp"
+#include "../../utils/checksum.hpp"
+#include "../../utils/byteStuffer.hpp"
+#include "../../utils/buffer.h"
+#include "../packetTypes/common/serialPacketType.h"
 
 using namespace vexbridge::utils;
 

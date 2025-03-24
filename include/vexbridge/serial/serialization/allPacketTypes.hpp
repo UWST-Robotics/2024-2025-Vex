@@ -1,15 +1,16 @@
-#include "serialPacketType.h"
+#pragma once
 
-#include "../assignLabelPacket.hpp"
-#include "../updateIntPacket.hpp"
-#include "../updateFloatPacket.hpp"
-#include "../updateDoublePacket.hpp"
-#include "../updateStringPacket.hpp"
-#include "../genericAckPacket.hpp"
-#include "../genericNAckPacket.hpp"
-#include "../logPacket.hpp"
-#include "../pingPacket.hpp"
-#include "../resetPacket.hpp"
+#include "../packetTypes/common/serialPacketType.h"
+#include "../packetTypes/assignLabelPacket.hpp"
+#include "../packetTypes/updateIntPacket.hpp"
+#include "../packetTypes/updateFloatPacket.hpp"
+#include "../packetTypes/updateDoublePacket.hpp"
+#include "../packetTypes/updateStringPacket.hpp"
+#include "../packetTypes/genericAckPacket.hpp"
+#include "../packetTypes/genericNAckPacket.hpp"
+#include "../packetTypes/logPacket.hpp"
+#include "../packetTypes/pingPacket.hpp"
+#include "../packetTypes/resetPacket.hpp"
 
 namespace vexbridge::serial
 {
