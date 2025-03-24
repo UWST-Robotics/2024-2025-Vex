@@ -5,7 +5,6 @@
 #include "subsystems/IntakeSystem.hpp"
 #include "subsystems/GoalRushSystem.hpp"
 #include "subsystems/MogoGrabSystem.hpp"
-#include "autonomous/autoFactory.hpp"
 
 namespace devils
 {
@@ -37,7 +36,7 @@ namespace devils
             // imu.calibrate();
             imu.waitUntilCalibrated();
 
-            autoRoutine->run();
+            // autoRoutine->run();
         }
 
         void opcontrol() override
@@ -46,10 +45,8 @@ namespace devils
             intakeSystem.setArmPosition(IntakeSystem::INTAKE);
             mogoGrabber.setMogoGrabbed(false);
 
-            // Start Macro
-            // imu.waitUntilCalibrated();
-            // startMacro->run();
-            AutoAsyncStep::stopAll();
+            // Stop autonomous
+            AutoStep::stopAll();
 
             // Loop
             while (true)
@@ -150,12 +147,9 @@ namespace devils
         void disabled() override
         {
             // Stop autonomous
-            AutoAsyncStep::stopAll();
-            // autoRoutine->stop();
+            AutoStep::stopAll();
 
-            // Stop the robot
-            chassis.stop();
-
+            // Release the mogo grabber
             mogoGrabber.setMogoGrabbed(false);
         }
 
@@ -196,7 +190,7 @@ namespace devils
         // Auto
         VBOdom vbOdom = VBOdom("Blaze", odometry);
         // AutoStepList *autoRoutine = AutoFactory::createBlazeSkillsAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
-        AutoStepList *autoRoutine = AutoFactory::createPJMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, goalRushSystem, false);
+        // AutoStepList *autoRoutine = AutoFactory::createPJMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, goalRushSystem, false);
         // AutoStepList *startMacro = AutoFactory::createBlazeStartMacro(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
 
         // Renderer

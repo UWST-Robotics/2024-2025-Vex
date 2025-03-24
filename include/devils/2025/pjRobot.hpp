@@ -4,7 +4,7 @@
 #include "subsystems/ConveyorSystem.hpp"
 #include "subsystems/IntakeSystem.hpp"
 #include "subsystems/MogoGrabSystem.hpp"
-#include "autonomous/autoFactory.hpp"
+#include "autonomous/pjSkillsAuto.hpp"
 
 namespace devils
 {
@@ -32,7 +32,8 @@ namespace devils
             // imu.calibrate();
             imu.waitUntilCalibrated();
 
-            autoRoutine->run();
+            // Run Autonomous
+            PJSkillsAuto::runSkills(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
         }
 
         void opcontrol() override
@@ -40,6 +41,9 @@ namespace devils
             // Default State
             intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
             mogoGrabber.setMogoGrabbed(false);
+
+            // Stop autonomous
+            AutoStep::stopAll();
 
             // Loop
             while (true)
@@ -126,8 +130,8 @@ namespace devils
             // Stop the robot
             chassis.stop();
 
-            // Stop all async tasks
-            AutoAsyncStep::stopAll();
+            // Stop autonomous
+            AutoStep::stopAll();
         }
 
         // Constants
@@ -164,7 +168,6 @@ namespace devils
 
         // Auto
         VBOdom vbOdom = VBOdom("PJ", odometry);
-        AutoStepList *autoRoutine = AutoFactory::createBlazeMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, false);
 
         // Renderer
         EyesRenderer eyes = EyesRenderer();

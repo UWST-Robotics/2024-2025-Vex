@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include "pros/rtos.hpp"
-#include "../common/autoStep.hpp"
+#include "../autoStep.hpp"
 #include "../../utils/math.hpp"
 #include "../../odom/odomSource.hpp"
 #include "../../chassis/chassisBase.hpp"
@@ -35,8 +35,8 @@ namespace devils
             /// @brief The maximum final distance to the target in inches
             double goalDist = 6.0;
 
-            /// @brief The maximum final speed of the robot in in/s
-            double goalSpeed = 6.0;
+            /// @brief The maximum final speed of the robot in in/s. (Defaults to no limit)
+            double goalSpeed = std::numeric_limits<double>::max();
 
             /// @brief The minimum distance from the target to apply rotation. If we are closer than this, we will not rotate to avoid oscillation.
             double minDistanceToRotate = 6.0;

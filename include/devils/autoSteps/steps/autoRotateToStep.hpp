@@ -1,6 +1,6 @@
 #pragma once
 #include "pros/rtos.hpp"
-#include "../common/autoStep.hpp"
+#include "../autoStep.hpp"
 #include "../../odom/odomSource.hpp"
 #include "../../chassis/chassisBase.hpp"
 #include "../../utils/math.hpp"
@@ -29,8 +29,8 @@ namespace devils
             /// @brief The distance to the goal in radians
             double goalDist = 0.015;
 
-            /// @brief The maximum speed of the robot in rad/s
-            double goalSpeed = 0.01;
+            /// @brief The maximum goal speed of the robot in rad/s. (Defaults to no limit)
+            double goalSpeed = std::numeric_limits<double>::max();
 
             /// @brief Setting this to false will rotate to the absolute angle instead of the minimum distance.
             bool useMinimumDistance = true;

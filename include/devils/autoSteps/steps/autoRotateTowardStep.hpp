@@ -1,24 +1,18 @@
 #pragma once
 #include "pros/rtos.hpp"
 #include "autoRotateToStep.hpp"
-#include "../common/autoStep.hpp"
+#include "../autoStep.hpp"
 #include "../../odom/odomSource.hpp"
 #include "../../chassis/chassisBase.hpp"
 #include "../../utils/math.hpp"
 
 namespace devils
 {
-    // Forward Declaration
-    class AbsoluteStepConverter;
-
     /**
      * Rotates the robot toward a specific pose along its center of rotation.
      */
     class AutoRotateTowardStep : public AutoRotateToStep
     {
-        // Allow the absolute step converter to access private members
-        friend class AbsoluteStepConverter;
-
     public:
         /**
          * Rotates the robot toward a specific pose along its center of rotation.

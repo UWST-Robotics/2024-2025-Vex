@@ -54,9 +54,7 @@
 #include "trajectory/structs/trajectoryState.hpp"
 
 // AutoSteps
-#include "autoSteps/common/autoStep.hpp"
-#include "autoSteps/common/autoStepList.hpp"
-#include "autoSteps/common/autoBuilder.hpp"
+#include "autoSteps/autoBuilder.hpp"
 #include "autoSteps/steps/autoTimeoutStep.hpp"
 #include "autoSteps/steps/autoDriveTimeStep.hpp"
 #include "autoSteps/steps/autoDriveToStep.hpp"
@@ -67,8 +65,6 @@
 #include "autoSteps/steps/autoJumpToStep.hpp"
 #include "autoSteps/steps/autoBranchStep.hpp"
 #include "autoSteps/steps/autoPurePursuitStep.hpp"
-#include "autoSteps/steps/autoAsyncStep.hpp"
-#include "autoSteps/steps/autoStopAsyncStep.hpp"
 #include "autoSteps/transformer/mirrorTransform.hpp"
 
 // Display

@@ -1,7 +1,7 @@
 #pragma once
 #include "pros/rtos.hpp"
 #include "autoRotateToStep.hpp"
-#include "../common/autoStep.hpp"
+#include "../autoStep.hpp"
 #include "../../odom/odomSource.hpp"
 #include "../../chassis/chassisBase.hpp"
 #include "../../utils/math.hpp"

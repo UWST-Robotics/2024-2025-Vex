@@ -3,7 +3,6 @@
 #include "../devils.h"
 #include "subsystems/ConveyorSystem.hpp"
 #include "subsystems/IntakeSystem.hpp"
-#include "autonomous/autoFactory.hpp"
 
 namespace devils
 {

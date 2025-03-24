@@ -5,9 +5,10 @@
 namespace devils
 {
     /**
-     * Used to transform pose depending on a set of transformations
+     * Base class for transforming poses.
+     * Used to reuse autonomous steps across different alliance orientations.
      */
-    struct AutoTransform
+    struct PoseTransform
     {
         /**
          * Transforms the pose to another location

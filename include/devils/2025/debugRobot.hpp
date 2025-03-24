@@ -19,7 +19,6 @@ namespace devils
 
         void opcontrol() override
         {
-            blazeRoutine->runAsync();
         }
 
         // Network Tables
@@ -27,7 +26,7 @@ namespace devils
 
         // Dummy Chassis
         DummyChassis dummyChassis = DummyChassis();
-        AutoStepList *blazeRoutine = AutoFactory::createTestAuto(dummyChassis);
+        // AutoStepList *blazeRoutine = AutoFactory::createTestAuto(dummyChassis);
         VBOdom vbOdom = VBOdom("DummyOdom", dummyChassis);
 
         // Renderer

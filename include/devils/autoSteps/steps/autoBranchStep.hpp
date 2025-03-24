@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/autoStep.hpp"
+#include "../autoStep.hpp"
 
 namespace devils
 {

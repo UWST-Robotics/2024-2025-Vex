@@ -19,7 +19,13 @@ namespace vexbridge::serial
     /**
      * Opens a socket to a serial port.
      */
-    class SerialSocket : private Daemon, public GlobalInstances<SerialSocket>
+    class SerialSocket :
+
+        // Runs `update` in a separate PROS task
+        private Daemon,
+
+        // Tracks all active serial sockets
+        public GlobalInstances<SerialSocket>
     {
     public:
         /**
