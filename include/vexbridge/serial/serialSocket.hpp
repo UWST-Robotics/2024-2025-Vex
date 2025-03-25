@@ -13,6 +13,7 @@
 #include "packetTypes/genericNAckPacket.hpp"
 #include "drivers/serialDriver.hpp"
 #include "../utils/globalInstances.hpp"
+#include "helpers/updateValuePacketMerger.hpp"
 
 namespace vexbridge::serial
 {
@@ -47,8 +48,13 @@ namespace vexbridge::serial
             if (writeQueue.size() >= MAX_QUEUE_SIZE)
                 throw std::runtime_error("Serial write queue is full.");
 
-            // TODO: Attempt to update an existing NT value in the queue
-            // TODO: Attempt to merge multiple packets into one
+            // Check if the packet is nullptr
+            if (!packet)
+                throw std::runtime_error("Cannot write a nullptr packet.");
+
+            // Attempt to merge an `UpdateValuePacket` into the queue
+            if (UpdateValuePacketMerger::mergeInQueue(writeQueue, packet))
+                return;
 
             // Push the packet to the queue
             writeQueue.push_back(packet);
@@ -73,6 +79,8 @@ namespace vexbridge::serial
                 // Get the next packet in the queue
                 auto packet = writeQueue.front();
                 writeQueue.pop_front();
+
+                // TODO: Attempt to merge equivalent packets into a `BatchPacket`
 
                 // Write the packet to the serial port
                 try

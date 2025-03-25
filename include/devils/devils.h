@@ -48,9 +48,6 @@
 
 // Trajectory
 #include "trajectory/trajectory.hpp"
-#include "trajectory/trajectoryGenerator.hpp"
-#include "trajectory/structs/trajectoryConstraints.hpp"
-#include "trajectory/structs/trajectoryState.hpp"
 
 // AutoSteps
 #include "autoSteps/autoBuilder.hpp"

@@ -110,8 +110,10 @@ namespace vexbridge
         template <typename T>
         static void setByID(const uint16_t id, const T value)
         {
-            if (valueTable.get<T>(id) == value)
+            if (valueTable.contains(id) &&
+                valueTable.get<T>(id) == value)
                 return;
+
             valueTable.set(id, value);
 
             // Send the serial packet

@@ -41,6 +41,15 @@ namespace vexbridge::utils
         }
 
         /**
+         * Gets the number of bytes available to read.
+         * @return The number of bytes available to read.
+         */
+        size_t getBytesAvailable() const
+        {
+            return buffer.size() - offset;
+        }
+
+        /**
          * Reads an unsigned 8-bit integer from the buffer.
          * @return The integer read from the buffer.
          */

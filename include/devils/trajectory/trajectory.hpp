@@ -1,70 +1,102 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include "../geometry/pose.hpp"
-#include "structs/trajectoryState.hpp"
 
 namespace devils
 {
     class Trajectory
     {
     public:
+        /// @brief Represents the instantaneous state of a trajectory at a given time
+        struct State
+        {
+            /// @brief The time in seconds
+            double time = 0;
+
+            /// @brief The velocity in inches per second
+            double velocity = 0;
+
+            /// @brief The acceleration in inches per second squared
+            double acceleration = 0;
+
+            /// @brief The jerk in inches per second cubed
+            double jerk = 0;
+
+            /// @brief The current pose
+            Pose currentPose = Pose(0, 0, 0);
+        };
+
         /**
          * Creates a new instance of a trajectory
+         * @param trajectoryStates A list of states along the trajectory
          */
-        Trajectory(std::vector<TrajectoryState *> trajectoryStates)
+        Trajectory(std::unique_ptr<std::vector<State>> trajectoryStates)
+            : trajectoryStates(std::move(trajectoryStates))
         {
-            this->trajectoryStates = trajectoryStates;
-            this->duration = trajectoryStates.back()->time;
         }
 
         /**
-         * Gets the trajectory state at a given time
+         * Gets the trajectory state at a given time.
+         * Lerps between the two closest calculated states.
          * @param t The time in seconds
-         * @return The trajectory state
+         * @return The trajectory state at the given time
          */
-        TrajectoryState getStateAt(double t)
+        State getStateAt(const double t)
         {
-            // Check OOB
+            // Check if the trajectory is empty
+            if (!trajectoryStates || trajectoryStates->empty())
+                throw std::runtime_error("Trajectory is empty");
+
+            // Check if the time is before the trajectory starts
             if (t <= 0)
-                return *trajectoryStates.front();
-            if (t >= duration)
-                return *trajectoryStates.back();
+                return trajectoryStates->front();
 
-            // Binary search for the state
-            auto nextStateItr = std::lower_bound(
-                trajectoryStates.begin(),
-                trajectoryStates.end(),
-                t,
-                [](TrajectoryState *state, double time)
+            // Find the two closest states to the given time
+            for (size_t i = 0; i < trajectoryStates->size() - 1; i++)
+            {
+                // Get the two states
+                auto previousState = trajectoryStates->at(i);
+                auto nextState = trajectoryStates->at(i + 1);
+
+                // Check if the time is between the two states
+                if (t >= previousState.time && t <= nextState.time)
                 {
-                    return state->time < time;
-                });
-            auto prevStateItr = nextStateItr - 1;
+                    // Calculate the interpolation time
+                    double deltaTime = nextState.time - previousState.time;
+                    double timeBetween = t - previousState.time;
+                    double interpolationTime = timeBetween / deltaTime;
 
-            // Get the states
-            TrajectoryState *nextState = *nextStateItr;
-            TrajectoryState *prevState = *prevStateItr;
+                    // Interpolate between the two states
+                    return lerpStates(previousState, nextState, interpolationTime);
+                }
+            }
 
-            // Calculate dt between the two states
-            // This is the percentage of the way between the two states
-            double dt = (t - prevState->time) / (nextState->time - prevState->time);
-
-            // Interpolate between the two states
-            return prevState->lerp(nextState, dt);
+            // Default to the final state
+            return trajectoryStates->back();
         }
 
+    protected:
         /**
-         * Gets the duration of the trajectory
-         * @return The duration in seconds
+         * Linearly interpolates between two states.
+         * @param a The first state
+         * @param b The second state
+         * @param t The time to interpolate (0 to 1)
+         * @return The interpolated state
          */
-        double getDuration()
+        State lerpStates(const State a, const State b, const double t) const
         {
-            return duration;
+            State state;
+            state.time = t;
+            state.velocity = a.velocity + (b.velocity - a.velocity) * t;
+            state.acceleration = a.acceleration + (b.acceleration - a.acceleration) * t;
+            state.jerk = a.jerk + (b.jerk - a.jerk) * t;
+            state.currentPose = Pose::lerp(a.currentPose, b.currentPose, t);
+            return state;
         }
 
     private:
-        std::vector<TrajectoryState *> trajectoryStates;
-        double duration;
+        std::unique_ptr<std::vector<State>> trajectoryStates;
     };
 }

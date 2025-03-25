@@ -66,39 +66,26 @@ namespace devils
         void calc()
         {
             // Check if we've already calculated the profile
-            if (calculatedVelocities.size() > 0)
+            if (accelVelocities.size() > 0 && decelVelocities.size() > 0)
                 return;
 
             // Calculate acceleration phase
             // This will create the acceleration segment of the S-Curve
-            auto accelVelocities = calculateAccelVelocities(pathInfo.startingVelocity);
+            accelVelocities = calculateAccelVelocities(pathInfo.startingVelocity);
 
             // Calculate deceleration phase
             // This will create the deceleration segment of the S-Curve
-            auto decelVelocities = calculateAccelVelocities(pathInfo.endingVelocity);
-
-            // Intersect the two segments
-            // This steps through each position and clamps the velocity to the minimum of the two segments
-            for (double position = 0; position <= pathInfo.goalDistance; position += DELTA_POS)
-            {
-                // Get the position
-                double decelPosition = pathInfo.goalDistance - position;
-
-                // Get each velocity
-                double accelVelocity = getVelocityAtPosition(accelVelocities, position);
-                double decelVelocity = getVelocityAtPosition(decelVelocities, decelPosition);
-
-                // Clamp to the minimum
-                double velocity = std::min(accelVelocity, decelVelocity);
-
-                // Append to the list of calculated velocities
-                calculatedVelocities.push_back(ProfilePoint{position, velocity});
-            }
+            decelVelocities = calculateAccelVelocities(pathInfo.endingVelocity);
         }
 
         double getSpeed(double position) override
         {
-            return getVelocityAtPosition(calculatedVelocities, position);
+            // Get each velocity
+            double accelVelocity = getVelocityAtPosition(accelVelocities, position);
+            double decelVelocity = getVelocityAtPosition(decelVelocities, pathInfo.goalDistance - position);
+
+            // Clamp to the minimum of the two curves
+            return std::min(accelVelocity, decelVelocity);
         }
 
     protected:
@@ -195,8 +182,11 @@ namespace devils
         /// @brief The maximum allowed time in seconds
         static constexpr double MAX_TIME = 20.0;
 
-        /// @brief The velocities at each step
-        std::vector<ProfilePoint> calculatedVelocities;
+        /// @brief The velocities along the acceleration curve
+        std::vector<ProfilePoint> accelVelocities;
+
+        /// @brief The velocities along the deceleration curve
+        std::vector<ProfilePoint> decelVelocities;
 
         /// @brief The robot constraints
         RobotConstraints constraints;

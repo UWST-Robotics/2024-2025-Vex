@@ -22,7 +22,7 @@ namespace vexbridge::serial
         static void updateBoolean(uint16_t id, bool value)
         {
             auto packet = std::make_shared<UpdateBoolPacket>();
-            packet->id = id;
+            packet->type = SerialPacketTypeID::UPDATE_BOOL;
             packet->valueID = id;
             packet->newValue = value;
             SerialSocket::writePacketToAll(packet);
@@ -31,7 +31,7 @@ namespace vexbridge::serial
         static void updateInt(uint16_t id, int32_t value)
         {
             auto packet = std::make_shared<UpdateIntPacket>();
-            packet->id = id;
+            packet->type = SerialPacketTypeID::UPDATE_INT;
             packet->valueID = id;
             packet->newValue = value;
             SerialSocket::writePacketToAll(packet);
@@ -40,7 +40,7 @@ namespace vexbridge::serial
         static void updateFloat(uint16_t id, float value)
         {
             auto packet = std::make_shared<UpdateFloatPacket>();
-            packet->id = id;
+            packet->type = SerialPacketTypeID::UPDATE_FLOAT;
             packet->valueID = id;
             packet->newValue = value;
             SerialSocket::writePacketToAll(packet);
@@ -49,7 +49,7 @@ namespace vexbridge::serial
         static void updateDouble(uint16_t id, double value)
         {
             auto packet = std::make_shared<UpdateDoublePacket>();
-            packet->id = id;
+            packet->type = SerialPacketTypeID::UPDATE_DOUBLE;
             packet->valueID = id;
             packet->newValue = value;
             SerialSocket::writePacketToAll(packet);
@@ -58,7 +58,7 @@ namespace vexbridge::serial
         static void assignLabel(uint16_t id, std::string label)
         {
             auto packet = std::make_shared<AssignLabelPacket>();
-            packet->id = id;
+            packet->type = SerialPacketTypeID::ASSIGN_LABEL;
             packet->valueID = id;
             packet->label = label;
             SerialSocket::writePacketToAll(packet);

@@ -20,7 +20,7 @@ namespace vexbridge::serial
 
     struct AssignLabelPacketType : public SerialPacketType
     {
-        AssignLabelPacketType() : SerialPacketType(SerialPacketTypeID::UPDATE_LABEL)
+        AssignLabelPacketType() : SerialPacketType(SerialPacketTypeID::ASSIGN_LABEL)
         {
         }
 

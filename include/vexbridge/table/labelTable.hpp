@@ -18,8 +18,11 @@ namespace vexbridge::table
          * @param label The label to search for.
          * @return The ID of the label or -1 if not found.
          */
-        uint16_t get(const std::string &label)
+        int32_t get(const std::string &label)
         {
+            if (!contains(label))
+                return -1;
+
             return labelToID.at(label);
         }
 
@@ -48,7 +51,7 @@ namespace vexbridge::table
             uint16_t id = idCounter++;
 
             // Assign the ID to the label
-            labelToID.at(label) = id;
+            labelToID[label] = id;
 
             // Release mutex and return the ID
             mutex.give();

@@ -8,7 +8,7 @@ namespace vexbridge::serial
     {
         UNKNOWN = 0x00,
         RESET = 0x01,
-        UPDATE_LABEL = 0x02,
+        ASSIGN_LABEL = 0x02,
         FETCH_VALUES = 0x03,
         LOG = 0x04,
         PING = 0x05,

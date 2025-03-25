@@ -17,7 +17,7 @@ namespace vexbridge::table
         template <typename T>
         void set(const uint16_t id, const T value)
         {
-            idToPath.at(id) = value;
+            idToPath[id] = value;
         }
 
         /**
@@ -38,6 +38,9 @@ namespace vexbridge::table
         template <typename T>
         bool isType(const uint16_t id) const
         {
+            if (!contains(id))
+                return false;
+
             return idToPath.at(id).type() == typeid(T);
         }
 
@@ -48,6 +51,8 @@ namespace vexbridge::table
         template <typename T>
         T get(const uint16_t id) const
         {
+            if (!contains(id))
+                throw std::runtime_error("Value not found");
             return std::any_cast<T>(idToPath.at(id));
         }
 

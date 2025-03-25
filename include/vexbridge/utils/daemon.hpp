@@ -31,12 +31,27 @@ namespace vexbridge::utils
         void runTask()
         {
             while (true)
-                update();
+            {
+                try
+                {
+                    update();
+                }
+                catch (const std::exception &e)
+                {
+                    printf("Daemon exception: %s\n", e.what());
+                    pros::delay(REVIVE_DELAY);
+                }
+            }
         }
 
+        // Disable copy and assignment
         Daemon(const Daemon &) = delete;
         Daemon &operator=(const Daemon &) = delete;
 
+        // Constants
+        static constexpr uint32_t REVIVE_DELAY = 1000;
+
+        // The task that runs the daemon
         const pros::Task daemonTask;
     };
 };
