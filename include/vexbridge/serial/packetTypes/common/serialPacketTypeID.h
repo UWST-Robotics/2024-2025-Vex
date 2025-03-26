@@ -21,6 +21,11 @@ namespace vexbridge::serial
         UPDATE_DOUBLE = 0x24,
         UPDATE_STRING = 0x25,
 
+        UPDATE_BOOL_ARRAY = 0x31,
+        UPDATE_INT_ARRAY = 0x32,
+        UPDATE_FLOAT_ARRAY = 0x33,
+        UPDATE_DOUBLE_ARRAY = 0x34,
+
         BATCH_PACKET = 0xFF,
     };
 }

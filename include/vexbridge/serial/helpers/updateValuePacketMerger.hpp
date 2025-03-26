@@ -9,6 +9,10 @@
 #include "../packetTypes/updateFloatPacket.hpp"
 #include "../packetTypes/updateDoublePacket.hpp"
 #include "../packetTypes/updateStringPacket.hpp"
+#include "../packetTypes/updateBoolArrayPacket.hpp"
+#include "../packetTypes/updateIntArrayPacket.hpp"
+#include "../packetTypes/updateFloatArrayPacket.hpp"
+#include "../packetTypes/updateDoubleArrayPacket.hpp"
 
 namespace vexbridge::serial
 {
@@ -79,6 +83,14 @@ namespace vexbridge::serial
                 return updateDoublePacket->valueID;
             if (auto updateStringPacket = std::dynamic_pointer_cast<UpdateStringPacket>(serialPacket))
                 return updateStringPacket->valueID;
+            if (auto updateBoolArrayPacket = std::dynamic_pointer_cast<UpdateBoolArrayPacket>(serialPacket))
+                return updateBoolArrayPacket->valueID;
+            if (auto updateIntArrayPacket = std::dynamic_pointer_cast<UpdateIntArrayPacket>(serialPacket))
+                return updateIntArrayPacket->valueID;
+            if (auto updateFloatArrayPacket = std::dynamic_pointer_cast<UpdateFloatArrayPacket>(serialPacket))
+                return updateFloatArrayPacket->valueID;
+            if (auto updateDoubleArrayPacket = std::dynamic_pointer_cast<UpdateDoubleArrayPacket>(serialPacket))
+                return updateDoubleArrayPacket->valueID;
             return -1;
         }
     };

@@ -43,6 +43,8 @@ namespace devils
         // VEXBridge
         VEXBridge bridge = VEXBridge(11);
         VBValue<int> test = VBValue<int>("Test", 0);
+        VBValue<std::string> testString = VBValue<std::string>("TestString", "Hello, World!");
+        VBValue<std::vector<int>> testArray = VBValue<std::vector<int>>("TestArray", {1, 2, 3});
 
         // Hardware
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-6, 7, -8, 9, -10});

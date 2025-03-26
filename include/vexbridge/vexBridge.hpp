@@ -115,19 +115,15 @@ namespace vexbridge
                 return;
 
             valueTable.set(id, value);
+            updateValue<T>(id, value);
+        }
 
-            // Send the serial packet
-            if (std::is_same<T, bool>::value)
-                SerialWriter::updateBoolean(id, value);
-            else if (std::is_same<T, int>::value)
-                SerialWriter::updateInt(id, value);
-            else if (std::is_same<T, float>::value)
-                SerialWriter::updateFloat(id, value);
-            else if (std::is_same<T, double>::value)
-                SerialWriter::updateDouble(id, value);
-            // TODO: Add support for strings
-            else
-                throw std::runtime_error("Unsupported type to update: " + std::string(typeid(T).name()));
+    protected:
+        template <typename T>
+        static void updateValue(const uint16_t id, const T value)
+        {
+            // Uses template specialization to determine the correct packet type
+            throw std::runtime_error("Unsupported type to update: " + std::string(typeid(T).name()));
         }
 
     private:
@@ -136,6 +132,53 @@ namespace vexbridge
 
         std::unique_ptr<SerialSocket> socket;
     };
+}
+
+// Append template specializations for each type
+template <>
+void vexbridge::VEXBridge::updateValue<bool>(const uint16_t id, const bool value)
+{
+    SerialWriter::updateBool(id, value);
+}
+template <>
+void vexbridge::VEXBridge::updateValue<int32_t>(const uint16_t id, const int32_t value)
+{
+    SerialWriter::updateInt(id, value);
+}
+template <>
+void vexbridge::VEXBridge::updateValue<float>(const uint16_t id, const float value)
+{
+    SerialWriter::updateFloat(id, value);
+}
+template <>
+void vexbridge::VEXBridge::updateValue<double>(const uint16_t id, const double value)
+{
+    SerialWriter::updateDouble(id, value);
+}
+template <>
+void vexbridge::VEXBridge::updateValue<std::string>(const uint16_t id, const std::string value)
+{
+    SerialWriter::updateString(id, value);
+}
+template <>
+void vexbridge::VEXBridge::updateValue<std::vector<bool>>(const uint16_t id, const std::vector<bool> value)
+{
+    SerialWriter::updateBoolArray(id, value);
+}
+template <>
+void vexbridge::VEXBridge::updateValue<std::vector<int32_t>>(const uint16_t id, const std::vector<int32_t> value)
+{
+    SerialWriter::updateIntArray(id, value);
+}
+template <>
+void vexbridge::VEXBridge::updateValue<std::vector<float>>(const uint16_t id, const std::vector<float> value)
+{
+    SerialWriter::updateFloatArray(id, value);
+}
+template <>
+void vexbridge::VEXBridge::updateValue<std::vector<double>>(const uint16_t id, const std::vector<double> value)
+{
+    SerialWriter::updateDoubleArray(id, value);
 }
 
 // Initialize static members

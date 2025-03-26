@@ -11,6 +11,10 @@
 #include "../packetTypes/logPacket.hpp"
 #include "../packetTypes/pingPacket.hpp"
 #include "../packetTypes/resetPacket.hpp"
+#include "../packetTypes/updateBoolArrayPacket.hpp"
+#include "../packetTypes/updateIntArrayPacket.hpp"
+#include "../packetTypes/updateFloatArrayPacket.hpp"
+#include "../packetTypes/updateDoubleArrayPacket.hpp"
 
 namespace vexbridge::serial
 {
@@ -42,7 +46,7 @@ namespace vexbridge::serial
         }
 
         /// @brief Array containing all SerialPacketType objects
-        static SerialPacketType *ALL_PACKET_TYPES[10];
+        static SerialPacketType *ALL_PACKET_TYPES[14];
     };
 }
 
@@ -57,4 +61,8 @@ vexbridge::serial::SerialPacketType *vexbridge::serial::AllPacketTypes::ALL_PACK
     new GenericNAckPacketType(),
     new LogPacketType(),
     new PingPacketType(),
-    new ResetPacketType()};
+    new ResetPacketType(),
+    new UpdateBoolArrayPacketType(),
+    new UpdateIntArrayPacketType(),
+    new UpdateFloatArrayPacketType(),
+    new UpdateDoubleArrayPacketType()};

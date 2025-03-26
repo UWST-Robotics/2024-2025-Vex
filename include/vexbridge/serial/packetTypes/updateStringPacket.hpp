@@ -21,12 +21,12 @@ namespace vexbridge::serial
 
         std::string deserializeValue(BufferReader &reader) override
         {
-            return reader.readString8();
+            return reader.readString16();
         }
 
         void serializeValue(BufferWriter &writer, std::string value) override
         {
-            writer.writeString8(value);
+            writer.writeString16(value);
         }
     };
 }
