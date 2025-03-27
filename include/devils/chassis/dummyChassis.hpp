@@ -58,17 +58,17 @@ namespace devils
             updateVelocity(currentPose);
         }
 
-        void setPose(Pose &pose) override
+        void setPose(Pose pose) override
         {
             currentPose = pose;
         }
 
-        Pose &getPose() override
+        Pose getPose() override
         {
             return currentPose;
         }
 
-        PoseVelocity &getVelocity() override
+        PoseVelocity getVelocity() override
         {
             return PoseVelocityCalculator::getVelocity();
         }

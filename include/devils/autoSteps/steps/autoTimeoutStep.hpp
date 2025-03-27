@@ -18,9 +18,9 @@ namespace devils
          * @param duration The duration of the step in milliseconds.
          */
         AutoTimeoutStep(
-            std::unique_ptr<AutoStep> autoStep,
+            AutoStepPtr autoStep,
             uint32_t duration)
-            : autoStep(std::move(autoStep)),
+            : autoStep(autoStep),
               timer(duration)
         {
         }
@@ -68,7 +68,7 @@ namespace devils
 
     protected:
         // Params
-        std::unique_ptr<AutoStep> autoStep;
+        AutoStepPtr autoStep;
         Timer timer;
     };
 }

@@ -11,20 +11,20 @@
 
 namespace vexbridge::serial
 {
-    typedef vexbridge::serial::UpdateValueArrayPacket<int32_t> UpdateIntArrayPacket;
+    typedef vexbridge::serial::UpdateValueArrayPacket<int> UpdateIntArrayPacket;
 
-    struct UpdateIntArrayPacketType : public UpdateValueArrayPacketType<int32_t>
+    struct UpdateIntArrayPacketType : public UpdateValueArrayPacketType<int>
     {
         UpdateIntArrayPacketType() : UpdateValueArrayPacketType(SerialPacketTypeID::UPDATE_INT_ARRAY)
         {
         }
 
-        int32_t deserializeValue(BufferReader &reader) override
+        int deserializeValue(BufferReader &reader) override
         {
             return reader.readUInt16BE();
         }
 
-        void serializeValue(BufferWriter &writer, int32_t value) override
+        void serializeValue(BufferWriter &writer, int value) override
         {
             writer.writeUInt16BE(value);
         }

@@ -12,7 +12,7 @@ namespace devils
          * Gets current velocity of the robot.
          * @return The current velocity of the robot as a `PoseVelocity`.
          */
-        virtual PoseVelocity &getVelocity()
+        virtual PoseVelocity getVelocity()
         {
             return currentVelocity;
         }

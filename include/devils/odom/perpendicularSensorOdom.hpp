@@ -113,7 +113,7 @@ namespace devils
         /**
          * Gets the current pose of the robot.
          */
-        Pose &getPose() override
+        Pose getPose() override
         {
             return currentPose;
         }
@@ -122,7 +122,7 @@ namespace devils
          * Sets the current pose of the robot.
          * @param pose The pose to set the robot to.
          */
-        void setPose(Pose &pose) override
+        void setPose(Pose pose) override
         {
             currentPose = pose;
 
@@ -152,7 +152,7 @@ namespace devils
             this->horizontalSensorOffset = &horizontalSensorOffset;
         }
 
-        PoseVelocity &getVelocity() override
+        PoseVelocity getVelocity() override
         {
             return PoseVelocityCalculator::getVelocity();
         }

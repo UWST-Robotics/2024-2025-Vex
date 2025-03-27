@@ -39,7 +39,7 @@ namespace devils
             double goalSpeed = std::numeric_limits<double>::max();
 
             /// @brief The minimum distance from the target to apply rotation. If we are closer than this, we will not rotate to avoid oscillation.
-            double minDistanceToRotate = 6.0;
+            double minDistanceToRotate = 1.0;
 
             /// @brief The default options for the drive step.
             static Options defaultOptions;
@@ -143,8 +143,17 @@ namespace devils
          */
         virtual double getSpeed(double distanceToTarget)
         {
+            // Calculate output speed
             double outputSpeed = translationPID.update(distanceToTarget);
-            return std::clamp(outputSpeed, options.minSpeed, options.maxSpeed);
+
+            // Apply max speed
+            outputSpeed = std::clamp(outputSpeed, -options.maxSpeed, options.maxSpeed);
+
+            // Apply min speed
+            if (std::fabs(outputSpeed) < options.minSpeed)
+                outputSpeed = std::copysign(options.minSpeed, outputSpeed);
+
+            return outputSpeed;
         }
 
         // Params

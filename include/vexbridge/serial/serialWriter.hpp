@@ -32,7 +32,7 @@ namespace vexbridge::serial
             SerialSocket::writePacketToAll(packet);
         }
 
-        static void updateInt(uint16_t id, int32_t value)
+        static void updateInt(uint16_t id, int value)
         {
             auto packet = std::make_shared<UpdateIntPacket>();
             packet->type = SerialPacketTypeID::UPDATE_INT;
@@ -86,7 +86,7 @@ namespace vexbridge::serial
             SerialSocket::writePacketToAll(packet);
         }
 
-        static void updateIntArray(uint16_t id, std::vector<int32_t> value)
+        static void updateIntArray(uint16_t id, std::vector<int> value)
         {
             auto packet = std::make_shared<UpdateIntArrayPacket>();
             packet->type = SerialPacketTypeID::UPDATE_INT_ARRAY;

@@ -141,7 +141,7 @@ void vexbridge::VEXBridge::updateValue<bool>(const uint16_t id, const bool value
     SerialWriter::updateBool(id, value);
 }
 template <>
-void vexbridge::VEXBridge::updateValue<int32_t>(const uint16_t id, const int32_t value)
+void vexbridge::VEXBridge::updateValue<int>(const uint16_t id, const int value)
 {
     SerialWriter::updateInt(id, value);
 }
@@ -166,7 +166,7 @@ void vexbridge::VEXBridge::updateValue<std::vector<bool>>(const uint16_t id, con
     SerialWriter::updateBoolArray(id, value);
 }
 template <>
-void vexbridge::VEXBridge::updateValue<std::vector<int32_t>>(const uint16_t id, const std::vector<int32_t> value)
+void vexbridge::VEXBridge::updateValue<std::vector<int>>(const uint16_t id, const std::vector<int> value)
 {
     SerialWriter::updateIntArray(id, value);
 }

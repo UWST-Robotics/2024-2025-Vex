@@ -79,7 +79,7 @@ namespace devils
          * Gets the current pose of the robot since the last `GPS::update`
          * @return The current pose of the robot
          */
-        Pose &getPose() override
+        Pose getPose() override
         {
             return currentPose;
         }
@@ -90,7 +90,7 @@ namespace devils
          * @param pose The pose to set the robot to
          * @return The current pose of the robot
          */
-        void setPose(Pose &pose) override
+        void setPose(Pose pose) override
         {
             currentPose = pose;
 

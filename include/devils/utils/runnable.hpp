@@ -12,7 +12,6 @@ namespace devils
     public:
         Runnable() = default;
         Runnable(int updateInterval) : updateInterval(updateInterval) {}
-        ~Runnable() { stop(); }
 
         /**
          * Function that is called when the object starts running.
@@ -39,36 +38,13 @@ namespace devils
          * Runs the object asynchronously.
          * @return The PROS task that runs the object.
          */
-        pros::Task *runAsync()
+        void runAsync()
         {
             // Stop any existing async tasks
             stop();
 
             // Start task asynchronously
-            currentTask = new pros::Task(
-                [=, this]
-                {
-                    // Start Event
-                    onStart();
-
-                    // Loop
-                    while (!checkFinished())
-                    {
-                        try
-                        {
-                            onUpdate();
-                        }
-                        catch (const std::exception &e)
-                        {
-                            Logger::error("An error occurred in Runnable: " + std::string(e.what()));
-                        }
-                        pros::delay(updateInterval);
-                    }
-
-                    // Stop Event
-                    onStop();
-                });
-            return currentTask;
+            currentTask = std::make_unique<pros::Task>(std::bind(&Runnable::run, this));
         }
 
         /**
@@ -77,11 +53,10 @@ namespace devils
          */
         void stop()
         {
-            if (currentTask != nullptr)
+            if (currentTask)
             {
                 onStop();
                 currentTask->remove();
-                delete currentTask;
                 currentTask = nullptr;
             }
         }
@@ -91,12 +66,29 @@ namespace devils
          */
         void run()
         {
-            runAsync();
-            currentTask->join();
+            // Start Event
+            onStart();
+
+            // Loop
+            while (!checkFinished())
+            {
+                try
+                {
+                    onUpdate();
+                }
+                catch (const std::exception &e)
+                {
+                    Logger::error("An error occurred in Runnable: " + std::string(e.what()));
+                }
+                pros::delay(updateInterval);
+            }
+
+            // Stop Event
+            onStop();
         }
 
     private:
-        pros::Task *currentTask = nullptr;
+        std::unique_ptr<pros::Task> currentTask = nullptr;
         int updateInterval = 20;
     };
 }

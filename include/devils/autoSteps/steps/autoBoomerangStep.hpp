@@ -47,6 +47,14 @@ namespace devils
             // Get the distance to the target
             double distance = currentPose.distanceTo(targetPose);
 
+            // Calculate the dot product
+            double currentDotTarget = cos(currentPose.rotation) * (targetPose.x - currentPose.x) +
+                                      sin(currentPose.rotation) * (targetPose.y - currentPose.y);
+
+            // Drive in reverse if the goal is behind us
+            if (currentDotTarget < 0)
+                distance = -distance;
+
             // Calculate the carrot pose
             Pose carrotPose = Pose(
                 targetPose.x - distance * cos(targetPose.rotation) * LEAD_DISTANCE,

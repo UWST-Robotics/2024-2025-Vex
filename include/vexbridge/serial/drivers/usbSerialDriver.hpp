@@ -51,6 +51,7 @@ namespace vexbridge::serial
 
             // Release the mutex
             mutex.give();
+            return true;
         }
 
         int32_t read(Buffer &buffer) override

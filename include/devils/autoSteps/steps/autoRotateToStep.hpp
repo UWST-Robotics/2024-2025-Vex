@@ -20,11 +20,11 @@ namespace devils
             /// @brief The PID parameters to snap to an angle. Uses delta radians as the error.
             PIDParams pidParams = PIDParams{0.1, 0.0, 0.0};
 
-            /// @brief The maximum speed in %
-            double maxSpeed = 0.3;
-
             /// @brief The minimum speed in %
             double minSpeed = 0.1;
+
+            /// @brief The maximum speed in %
+            double maxSpeed = 0.3;
 
             /// @brief The distance to the goal in radians
             double goalDist = 0.015;
