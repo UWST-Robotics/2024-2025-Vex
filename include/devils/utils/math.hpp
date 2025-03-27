@@ -100,6 +100,25 @@ namespace devils
         }
 
         /**
+         * Clamps a value between a minimum and maximum.
+         * Allows for a deadband around zero such that negative values are clamped to -min and positive values are clamped to +min.
+         * @param value The value to clamp.
+         * @param min The minimum value.
+         * @param max The maximum value.
+         * @return The clamped value.
+         */
+        static double deadbandClamp(
+            const double value,
+            const double min,
+            const double max)
+        {
+            if (value >= 0)
+                return std::clamp(value, min, max);
+            else
+                return std::clamp(value, -max, -min);
+        }
+
+        /**
          * Calculates the difference between two radian angles.
          * @param a The first angle in radians.
          * @param b The second angle in radians.

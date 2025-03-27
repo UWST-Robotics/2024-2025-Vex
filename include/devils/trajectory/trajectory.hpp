@@ -15,17 +15,20 @@ namespace devils
             /// @brief The time in seconds
             double time = 0;
 
-            /// @brief The velocity in inches per second
+            /// @brief The linear velocity in inches per second
             double velocity = 0;
 
-            /// @brief The acceleration in inches per second squared
+            /// @brief The angular velocity in radians per second
+            double angularVelocity = 0;
+
+            /// @brief The linear acceleration in inches per second squared
             double acceleration = 0;
 
-            /// @brief The jerk in inches per second cubed
-            double jerk = 0;
+            /// @brief The angular acceleration in radians per second squared
+            double angularAcceleration = 0;
 
             /// @brief The current pose
-            Pose currentPose = Pose(0, 0, 0);
+            Pose pose = Pose(0, 0, 0);
         };
 
         /**
@@ -35,6 +38,14 @@ namespace devils
         Trajectory(std::unique_ptr<std::vector<State>> trajectoryStates)
             : trajectoryStates(std::move(trajectoryStates))
         {
+        }
+
+        /**
+         * Gets the duration of the trajectory in milliseconds
+         */
+        uint32_t duration() const
+        {
+            return trajectoryStates->back().time * 1000;
         }
 
         /**
