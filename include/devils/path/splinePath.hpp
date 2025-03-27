@@ -2,13 +2,13 @@
 
 #include <vector>
 #include "path.hpp"
-#include "structs/splinePose.hpp"
+#include "splinePose.hpp"
 #include "../geometry/lerp.hpp"
 
 namespace devils
 {
     /**
-     * Represents a path that is interpolated using cubic splines.
+     * Cubic spline interpolated path
      */
     class SplinePath : public Path
     {
@@ -30,12 +30,12 @@ namespace devils
          * @param delta Distance of the entry and exit anchor points in inches
          * @return The spline path
          */
-        static SplinePath *makeArc(Pose from, Pose to, double delta = 18.0)
+        static SplinePath makeArc(Pose from, Pose to, double delta = 18.0)
         {
             std::vector<SplinePose> poses;
             poses.push_back(SplinePose(from.x, from.y, from.rotation, delta, delta));
             poses.push_back(SplinePose(to.x, to.y, to.rotation, delta, delta));
-            return new SplinePath(poses);
+            return SplinePath(poses);
         }
 
         /**

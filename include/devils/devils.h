@@ -44,7 +44,6 @@
 #include "path/path.hpp"
 #include "path/linearPath.hpp"
 #include "path/splinePath.hpp"
-#include "path/structs/splinePose.hpp"
 
 // Trajectory
 #include "trajectory/trajectory.hpp"
@@ -66,12 +65,9 @@
 // Display
 #include "display/eyesRenderer.hpp"
 
-// Utils
-#include "utils/vbOdom.hpp"
-
-// MotionProfile
-#include "motionProfile/motionProfile.hpp"
-#include "motionProfile/trapezoidMotionProfile.hpp"
+// VEXBridge Extensions
+#include "vexbridge/vbOdom.hpp"
+#include "vexbridge/vbPath.hpp"
 
 // VEXBridge
 #include "../vexbridge/vexbridge.h"

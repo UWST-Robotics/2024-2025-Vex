@@ -100,10 +100,11 @@ namespace devils
         {
             State state;
             state.time = t;
-            state.velocity = a.velocity + (b.velocity - a.velocity) * t;
-            state.acceleration = a.acceleration + (b.acceleration - a.acceleration) * t;
-            state.jerk = a.jerk + (b.jerk - a.jerk) * t;
-            state.currentPose = Pose::lerp(a.currentPose, b.currentPose, t);
+            state.velocity = std::lerp(a.velocity, b.velocity, t);
+            state.angularVelocity = std::lerp(a.angularVelocity, b.angularVelocity, t);
+            state.acceleration = std::lerp(a.acceleration, b.acceleration, t);
+            state.angularAcceleration = std::lerp(a.angularAcceleration, b.angularAcceleration, t);
+            state.pose = Pose::lerp(a.pose, b.pose, t);
             return state;
         }
 

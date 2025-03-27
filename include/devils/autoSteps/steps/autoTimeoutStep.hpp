@@ -20,7 +20,7 @@ namespace devils
         AutoTimeoutStep(
             AutoStepPtr autoStep,
             uint32_t duration)
-            : autoStep(autoStep),
+            : autoStep(std::move(autoStep)),
               timer(duration)
         {
         }

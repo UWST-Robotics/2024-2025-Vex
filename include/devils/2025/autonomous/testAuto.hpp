@@ -7,14 +7,11 @@
 
 namespace devils
 {
-    struct PJSkillsAuto
+    struct TestAuto
     {
-        static void runSkills(
+        static void run(
             ChassisBase &chassis,
-            OdomSource &odometry,
-            IntakeSystem &intake,
-            ConveyorSystem &conveyor,
-            MogoGrabSystem &mogoGrabber)
+            OdomSource &odometry)
         {
             // PID Params
             PIDParams drivePID = {0.15, 0.0, 10};
@@ -32,15 +29,22 @@ namespace devils
             };
             AutoRotateToStep::Options::defaultOptions = {
                 rotatePID,
-                0.15, // minSpeed
-                0.4,  // maxSpeed
+                0.1,  // minSpeed
+                0.5,  // maxSpeed
                 0.05, // goalDist
                 0.5,  // goalSpeed
             };
 
+            // Create Test Path
+            SplinePath testPath = SplinePath::makeArc(Pose(-48, -36, 0), Pose(-10, -44, Units::degToRad(-30)));
+            VBPath::sync("testPath", testPath);
+
             // Initialize
             AutoBuilder pjRoutine = AutoBuilder(chassis, odometry);
-            auto step = pjRoutine.setPose(-66, -48, 0);
+            pjRoutine.setPose(-48, -36, 0)->run();
+            pjRoutine.pause(1000)->run();
+            pjRoutine.driveTo(-10, -44, -30)->run();
+            chassis.stop();
         }
     };
 }

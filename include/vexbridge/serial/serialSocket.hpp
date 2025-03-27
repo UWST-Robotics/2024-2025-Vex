@@ -5,14 +5,15 @@
 #include <unordered_set>
 #include <memory>
 #include "../utils/daemon.hpp"
+#include "../utils/globalInstances.hpp"
 #include "pros/serial.hpp"
 #include "pros/error.h"
 #include "serialization/serialPacketDecoder.hpp"
 #include "serialization/serialPacketEncoder.hpp"
 #include "packetTypes/genericAckPacket.hpp"
 #include "packetTypes/genericNAckPacket.hpp"
+#include "packetTypes/resetPacket.hpp"
 #include "drivers/serialDriver.hpp"
-#include "../utils/globalInstances.hpp"
 #include "helpers/updateValuePacketMerger.hpp"
 
 namespace vexbridge::serial
@@ -36,6 +37,10 @@ namespace vexbridge::serial
         SerialSocket(std::unique_ptr<SerialDriver> serialDriver)
             : serial(std::move(serialDriver))
         {
+            // Write Reset Packet
+            auto resetPacket = std::make_shared<ResetPacket>();
+            resetPacket->type = SerialPacketTypeID::RESET;
+            writePacket(resetPacket);
         }
 
         /**

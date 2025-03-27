@@ -1,6 +1,5 @@
 #pragma once
 
-#include "motionProfile.hpp"
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
@@ -11,7 +10,7 @@ namespace devils
     /**
      *  Represents a 1-dimensional trapezoidal motion profile
      */
-    class TrapezoidMotionProfile : public MotionProfile
+    class TrapezoidMotionProfile
     {
     public:
         /// @brief List of constraints for the robot's motion
@@ -78,7 +77,7 @@ namespace devils
             decelVelocities = calculateAccelVelocities(pathInfo.endingVelocity);
         }
 
-        double getSpeed(double position) override
+        double getSpeed(double position)
         {
             // Get each velocity
             double accelVelocity = getVelocityAtPosition(accelVelocities, position);

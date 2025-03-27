@@ -7,7 +7,6 @@
 #include "../../chassis/chassisBase.hpp"
 #include "../../utils/pidController.hpp"
 #include "../../utils/timer.hpp"
-#include "../../motionProfile/motionProfile.hpp"
 
 namespace devils
 {

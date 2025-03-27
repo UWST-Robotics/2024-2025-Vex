@@ -3,6 +3,7 @@
 #include "../devils.h"
 #include "subsystems/ConveyorSystem.hpp"
 #include "subsystems/IntakeSystem.hpp"
+#include "autonomous/testAuto.hpp"
 
 namespace devils
 {
@@ -18,9 +19,9 @@ namespace devils
         {
             imu.setHeadingScale(1.013);
 
-            odometry.useIMU(&imu);
-            odometry.setTicksPerRevolution(300);
-            odometry.runAsync();
+            // odometry.useIMU(&imu);
+            // odometry.setTicksPerRevolution(300);
+            // odometry.runAsync();
         }
 
         void autonomous() override
@@ -29,11 +30,7 @@ namespace devils
 
         void opcontrol() override
         {
-            while (true)
-            {
-                test.set(test.get() + 1);
-                pros::delay(1000);
-            }
+            TestAuto::run(chassis, odometry);
         }
 
         void disabled() override
@@ -41,10 +38,7 @@ namespace devils
         }
 
         // VEXBridge
-        VEXBridge bridge = VEXBridge(11);
-        VBValue<int> test = VBValue<int>("Test", 0);
-        VBValue<std::string> testString = VBValue<std::string>("TestString", "Hello, World!");
-        VBValue<std::vector<int>> testArray = VBValue<std::vector<int>>("TestArray", {1, 2, 3});
+        VEXBridge bridge = VEXBridge(0);
 
         // Hardware
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-6, 7, -8, 9, -10});
@@ -53,10 +47,12 @@ namespace devils
         InertialSensor imu = InertialSensor("IMU", 15);
 
         // Subsystems
-        TankChassis chassis = TankChassis(leftMotors, rightMotors);
+        // TankChassis chassis = TankChassis(leftMotors, rightMotors);
+        DummyChassis chassis = DummyChassis();
 
         // Auto
-        TankChassisOdom odometry = TankChassisOdom(chassis, 1.375, 11);
+        // TankChassisOdom odometry = TankChassisOdom(chassis, 1.375, 11);
+        OdomSource &odometry = chassis;
 
         // NT
         VBOdom vbOdom = VBOdom("TankOdom", odometry);
