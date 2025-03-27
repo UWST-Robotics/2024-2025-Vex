@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <cmath>
+#include "trajectoryConstraints.hpp"
 
 namespace devils
 {
@@ -13,16 +14,6 @@ namespace devils
     class TrapezoidMotionProfile
     {
     public:
-        /// @brief List of constraints for the robot's motion
-        struct RobotConstraints
-        {
-            /// @brief The maximum velocity in inches per second
-            double maxVelocity;
-
-            /// @brief The maximum acceleration in inches per second squared
-            double maxAcceleration;
-        };
-
         /// @brief Path parameters
         struct PathInfo
         {
@@ -52,7 +43,7 @@ namespace devils
          * @param constraints The robot constraints
          * @param pathInfo The path information
          */
-        TrapezoidMotionProfile(RobotConstraints constraints, PathInfo pathInfo)
+        TrapezoidMotionProfile(TrajectoryConstraints constraints, PathInfo pathInfo)
             : constraints(constraints),
               pathInfo(pathInfo)
         {
@@ -187,8 +178,8 @@ namespace devils
         /// @brief The velocities along the deceleration curve
         std::vector<ProfilePoint> decelVelocities;
 
-        /// @brief The robot constraints
-        RobotConstraints constraints;
+        /// @brief Constraints of trajectory generation
+        TrajectoryConstraints constraints;
 
         /// @brief The path information
         PathInfo pathInfo;

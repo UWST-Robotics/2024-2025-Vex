@@ -25,10 +25,16 @@ namespace devils
             double maxSpeed = 0.5;
 
             /// @brief A proportional constant. Must be greater than 0. Larger values will result in more aggressive control.
-            double proportionGain = 0.0;
+            double proportionGain = 1;
 
             /// @brief A damping coefficient. Must be between 0 and 1. Larger values will result in increased damping.
-            double dampingCoefficient = 0.5;
+            double dampingCoefficient = 0.8;
+
+            /// @brief Proportion (P in PID) between translational velocity and motor voltage
+            double translationP = 0.82;
+
+            /// @brief Proportion (P in PID) between rotational velocity and motor voltage
+            double rotationP = 0.0;
 
             /// @brief The default options for the drive step.
             static Options defaultOptions;
@@ -62,7 +68,8 @@ namespace devils
         void onUpdate() override
         {
             // Get the current time
-            auto t = pros::millis() - startTime;
+            double t = pros::millis() - startTime;
+            t /= 1000.0; // Convert to seconds
 
             // Get current setpoint
             auto setpoint = trajectory->getStateAt(t);
@@ -82,6 +89,13 @@ namespace devils
                 -error.x * sin(currentPosition.rotation) + error.y * cos(currentPosition.rotation),
                 error.rotation);
 
+            VEXBridge::set("errorX", localError.x);
+            VEXBridge::set("errorY", localError.y);
+            VEXBridge::set("errorR", localError.rotation);
+            VEXBridge::set("_poses/setpoint/x", setpoint.pose.x);
+            VEXBridge::set("_poses/setpoint/y", setpoint.pose.y);
+            VEXBridge::set("_poses/setpoint/rotation", setpoint.pose.rotation);
+
             // Calculate controller gain
             // k = 2 * zeta * sqrt(w^2 + b * v^2)
             double controllerGain = std::pow(setpoint.angularVelocity, 2) +
@@ -90,6 +104,8 @@ namespace devils
 
             // Calculate sinc (sin(x) / x)
             double sinc = sin(localError.rotation) / localError.rotation;
+            if (std::isnan(sinc))
+                sinc = 1.0; // Handle the case where localError.rotation is 0
 
             // Calculate translation output
             // v = v_d * cos(e_r) + k * e_x
@@ -106,8 +122,21 @@ namespace devils
             translationOutput = Math::deadbandClamp(translationOutput, options.minSpeed, options.maxSpeed);
             rotationOutput = std::clamp(rotationOutput, -options.maxSpeed, options.maxSpeed);
 
+            VEXBridge::set("translationOutput", translationOutput);
+            VEXBridge::set("rotationOutput", rotationOutput);
+            VEXBridge::set("controllerGain", controllerGain);
+
+            // Get Current Velocity
+            auto currentVelocity = odomSource.getVelocity();
+
+            // Calculate the delta velocity and angular velocity
+            auto deltaVelocity = currentVelocity.magnitude() - setpoint.velocity;
+            auto deltaAngularVelocity = currentVelocity.rotation - setpoint.angularVelocity;
+
             // Set the chassis output
-            chassis.move(translationOutput, rotationOutput);
+            chassis.move(
+                options.translationP * translationOutput,
+                options.rotationP * rotationOutput);
         }
 
         void onStop() override
@@ -122,7 +151,7 @@ namespace devils
             auto t = pros::millis() - startTime;
 
             // Check if the trajectory is finished
-            return trajectory->duration() <= t;
+            return trajectory->duration() * 1000 <= t;
         }
 
     protected:
@@ -134,3 +163,6 @@ namespace devils
         uint32_t startTime = 0;
     };
 }
+
+// Define the default options
+devils::AutoRamseteStep::Options devils::AutoRamseteStep::Options::defaultOptions = devils::AutoRamseteStep::Options();

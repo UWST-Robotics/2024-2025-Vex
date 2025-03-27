@@ -9,43 +9,41 @@ namespace devils
     class Trajectory
     {
     public:
-        /// @brief Represents the instantaneous state of a trajectory at a given time
-        struct State
+        /// @brief Point along the trajectory
+        struct Point
         {
-            /// @brief The time in seconds
-            double time = 0;
+            /// @brief The current time in seconds
+            double t;
 
-            /// @brief The linear velocity in inches per second
-            double velocity = 0;
+            /// @brief The current position
+            Pose pose;
 
-            /// @brief The angular velocity in radians per second
-            double angularVelocity = 0;
-
-            /// @brief The linear acceleration in inches per second squared
-            double acceleration = 0;
+            /// @brief The translation velocity in inches per second
+            double velocity;
 
             /// @brief The angular acceleration in radians per second squared
-            double angularAcceleration = 0;
+            double angularVelocity;
 
-            /// @brief The current pose
-            Pose pose = Pose(0, 0, 0);
+            /// @brief The linear acceleration in inches per second squared
+            double acceleration;
         };
 
         /**
          * Creates a new instance of a trajectory
-         * @param trajectoryStates A list of states along the trajectory
+         * @param trajectoryPoints A list of generated points along the trajectory
          */
-        Trajectory(std::unique_ptr<std::vector<State>> trajectoryStates)
-            : trajectoryStates(std::move(trajectoryStates))
+        Trajectory(std::unique_ptr<std::vector<Point>> trajectoryPoints)
+            : trajectoryPoints(std::move(trajectoryPoints))
         {
         }
 
         /**
-         * Gets the duration of the trajectory in milliseconds
+         * Gets the duration of the trajectory in seconds
+         * @return The duration of the trajectory in seconds
          */
-        uint32_t duration() const
+        double duration() const
         {
-            return trajectoryStates->back().time * 1000;
+            return trajectoryPoints->back().t;
         }
 
         /**
@@ -54,29 +52,29 @@ namespace devils
          * @param t The time in seconds
          * @return The trajectory state at the given time
          */
-        State getStateAt(const double t)
+        Point getStateAt(const double t)
         {
             // Check if the trajectory is empty
-            if (!trajectoryStates || trajectoryStates->empty())
+            if (!trajectoryPoints || trajectoryPoints->empty())
                 throw std::runtime_error("Trajectory is empty");
 
             // Check if the time is before the trajectory starts
             if (t <= 0)
-                return trajectoryStates->front();
+                return trajectoryPoints->front();
 
             // Find the two closest states to the given time
-            for (size_t i = 0; i < trajectoryStates->size() - 1; i++)
+            for (size_t i = 0; i < trajectoryPoints->size() - 1; i++)
             {
                 // Get the two states
-                auto previousState = trajectoryStates->at(i);
-                auto nextState = trajectoryStates->at(i + 1);
+                auto previousState = trajectoryPoints->at(i);
+                auto nextState = trajectoryPoints->at(i + 1);
 
                 // Check if the time is between the two states
-                if (t >= previousState.time && t <= nextState.time)
+                if (t >= previousState.t && t <= nextState.t)
                 {
                     // Calculate the interpolation time
-                    double deltaTime = nextState.time - previousState.time;
-                    double timeBetween = t - previousState.time;
+                    double deltaTime = nextState.t - previousState.t;
+                    double timeBetween = t - previousState.t;
                     double interpolationTime = timeBetween / deltaTime;
 
                     // Interpolate between the two states
@@ -85,7 +83,7 @@ namespace devils
             }
 
             // Default to the final state
-            return trajectoryStates->back();
+            return trajectoryPoints->back();
         }
 
     protected:
@@ -96,19 +94,18 @@ namespace devils
          * @param t The time to interpolate (0 to 1)
          * @return The interpolated state
          */
-        State lerpStates(const State a, const State b, const double t) const
+        Point lerpStates(const Point a, const Point b, const double t) const
         {
-            State state;
-            state.time = t;
+            Point state;
+            state.t = t;
+            state.pose = Pose::lerp(a.pose, b.pose, t);
             state.velocity = std::lerp(a.velocity, b.velocity, t);
             state.angularVelocity = std::lerp(a.angularVelocity, b.angularVelocity, t);
             state.acceleration = std::lerp(a.acceleration, b.acceleration, t);
-            state.angularAcceleration = std::lerp(a.angularAcceleration, b.angularAcceleration, t);
-            state.pose = Pose::lerp(a.pose, b.pose, t);
             return state;
         }
 
     private:
-        std::unique_ptr<std::vector<State>> trajectoryStates;
+        std::unique_ptr<std::vector<Point>> trajectoryPoints;
     };
 }

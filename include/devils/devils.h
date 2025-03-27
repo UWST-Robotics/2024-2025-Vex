@@ -47,6 +47,8 @@
 
 // Trajectory
 #include "trajectory/trajectory.hpp"
+#include "trajectory/trajectoryGenerator.hpp"
+#include "trajectory/trajectoryConstraints.hpp"
 
 // AutoSteps
 #include "autoSteps/autoBuilder.hpp"
@@ -60,14 +62,13 @@
 #include "autoSteps/steps/autoJumpToStep.hpp"
 #include "autoSteps/steps/autoBranchStep.hpp"
 #include "autoSteps/steps/autoPurePursuitStep.hpp"
+#include "autoSteps/steps/autoRamseteStep.hpp"
 #include "autoSteps/transformer/mirrorTransform.hpp"
 
 // Display
 #include "display/eyesRenderer.hpp"
 
-// VEXBridge Extensions
-#include "vexbridge/vbOdom.hpp"
-#include "vexbridge/vbPath.hpp"
-
 // VEXBridge
 #include "../vexbridge/vexbridge.h"
+#include "vexbridge/vbOdom.hpp"
+#include "vexbridge/vbPath.hpp"

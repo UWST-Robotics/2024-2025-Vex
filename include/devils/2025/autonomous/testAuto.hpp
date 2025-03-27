@@ -43,8 +43,16 @@ namespace devils
             AutoBuilder pjRoutine = AutoBuilder(chassis, odometry);
             pjRoutine.setPose(-48, -36, 0)->run();
             pjRoutine.pause(1000)->run();
-            pjRoutine.driveTo(-10, -44, -30)->run();
-            chassis.stop();
+
+            // Dummy Trajectory
+            auto trajectoryGenerator = TrajectoryGenerator(
+                TrajectoryConstraints{36, 36},
+                TrajectoryGenerator::PathInfo{0, 0});
+            auto trajectory = trajectoryGenerator.calc(testPath);
+
+            // Ramsete Step
+            auto ramseteStep = std::make_unique<AutoRamseteStep>(chassis, odometry, trajectory);
+            ramseteStep->run();
         }
     };
 }
