@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <cmath>
+#include <iostream>
 #include "trajectory.hpp"
 #include "trajectoryConstraints.hpp"
 #include "../path/path.hpp"
@@ -156,6 +157,7 @@ namespace devils
                 // Update point
                 point.t = previousPoint.t + deltaTime;
                 point.acceleration = acceleration;
+                point.angularVelocity = angularVelocity;
 
                 // Update previous point
                 previousPoint = point;

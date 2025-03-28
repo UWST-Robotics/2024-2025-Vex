@@ -98,7 +98,7 @@ namespace devils
         {
             Point state;
             state.t = t;
-            state.pose = Pose::lerp(a.pose, b.pose, t);
+            state.pose = Lerp::linearPoints(a.pose, b.pose, t);
             state.velocity = std::lerp(a.velocity, b.velocity, t);
             state.angularVelocity = std::lerp(a.angularVelocity, b.angularVelocity, t);
             state.acceleration = std::lerp(a.acceleration, b.acceleration, t);

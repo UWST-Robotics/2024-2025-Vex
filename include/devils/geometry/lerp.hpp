@@ -25,7 +25,7 @@ namespace devils
          * @param b The maximum value in radians.
          * @param t The ratio between a and b. Values between 0 and 1.
          */
-        static double rotation(double a, double b, double t)
+        static double rotation(const double a, const double b, const double t)
         {
             double aMod = std::fmod(a, 2 * M_PI);
             double bMod = std::fmod(b, 2 * M_PI);
@@ -51,7 +51,7 @@ namespace devils
          * @param t The ratio between a and b. Values between 0 and 1.
          * @return The interpolated point.
          */
-        static Pose linearPoints(Pose &a, Pose &b, double t)
+        static Pose linearPoints(const Pose &a, const Pose &b, const double t)
         {
             return Pose(
                 lerp(a.x, b.x, t),

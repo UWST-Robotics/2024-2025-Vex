@@ -39,6 +39,12 @@ namespace devils
             SplinePath testPath = SplinePath::makeArc(Pose(-48, -36, 0), Pose(-10, -44, Units::degToRad(-30)));
             VBPath::sync("testPath", testPath);
 
+            for (double i = 0; i < testPath.getLength(); i += 0.1)
+            {
+                auto pose = testPath.getPoseAt(i);
+                std::cout << pose.x << ", " << pose.y << ", " << Units::radToDeg(pose.rotation) << std::endl;
+            }
+
             // Initialize
             AutoBuilder pjRoutine = AutoBuilder(chassis, odometry);
             pjRoutine.setPose(-48, -36, 0)->run();
@@ -46,7 +52,7 @@ namespace devils
 
             // Dummy Trajectory
             auto trajectoryGenerator = TrajectoryGenerator(
-                TrajectoryConstraints{36, 36},
+                TrajectoryConstraints{18, 36},
                 TrajectoryGenerator::PathInfo{0, 0});
             auto trajectory = trajectoryGenerator.calc(testPath);
 

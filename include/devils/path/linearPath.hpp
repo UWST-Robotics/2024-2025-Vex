@@ -36,7 +36,7 @@ namespace devils
 
             // Interpolate between the two poses
             double t = index - (int)index;
-            return Pose::lerp(prevPose, nextPose, t);
+            return Lerp::linearPoints(prevPose, nextPose, t);
         }
 
         double getLength() override
