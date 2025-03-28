@@ -9,24 +9,33 @@ namespace devils
     public:
         EyesRenderer() : Runnable(50)
         {
-            root = lv_obj_create(NULL);
-            lv_scr_load(root);
+            // root = lv_obj_create(NULL);
+            // lv_scr_load(root);
 
-            eyesGroup = lv_obj_create(root);
-            lv_obj_set_size(eyesGroup, 340, 200);
-            lv_obj_align(eyesGroup, LV_ALIGN_CENTER, 0, 0);
-            lv_obj_set_pos(eyesGroup, 0, 0);
-            lv_obj_set_style_radius(eyesGroup, 0, 0);
-            lv_obj_set_style_border_width(eyesGroup, 0, 0);
-            lv_obj_set_style_bg_color(eyesGroup, lv_color_make(3, 36, 53), 0);
-            lv_obj_set_scrollbar_mode(eyesGroup, LV_SCROLLBAR_MODE_OFF);
+            // eyesGroup = lv_obj_create(root);
+            // lv_obj_set_size(eyesGroup, 340, 200);
+            // lv_obj_align(eyesGroup, LV_ALIGN_CENTER, 0, 0);
+            // lv_obj_set_pos(eyesGroup, 0, 0);
+            // lv_obj_set_style_radius(eyesGroup, 0, 0);
+            // lv_obj_set_style_border_width(eyesGroup, 0, 0);
+            // lv_obj_set_style_bg_color(eyesGroup, lv_color_make(3, 36, 53), 0);
+            // lv_obj_set_scrollbar_mode(eyesGroup, LV_SCROLLBAR_MODE_OFF);
 
-            leftEye = makeEye(-100, 0, 120);
-            rightEye = makeEye(100, 0, 120);
-            leftEyebrow = makeEyebrow(-100, -85, 0, 130);
-            rightEyebrow = makeEyebrow(100, -110, 0, 130);
+            // leftEye = makeEye(-100, 0, 120);
+            // rightEye = makeEye(100, 0, 120);
+            // leftEyebrow = makeEyebrow(-100, -85, 0, 130);
+            // rightEyebrow = makeEyebrow(100, -110, 0, 130);
 
-            lv_obj_set_style_bg_color(root, lv_color_make(3, 36, 53), 0);
+            // lv_obj_set_style_bg_color(root, lv_color_make(3, 36, 53), 0);
+
+            lv_obj_t * btn = lv_btn_create(lv_scr_act());     
+            lv_obj_set_pos(btn, 10, 10);                            
+            lv_obj_set_size(btn, 120, 50);                          
+            lv_obj_add_event_cb(btn, btnEventCallback, LV_EVENT_ALL, NULL);
+
+            lv_obj_t * label = lv_label_create(btn);
+            lv_label_set_text(label, clickCount == 0 ? "Click me!" : std::to_string(clickCount).c_str());
+            lv_obj_center(label);
 
             runAsync();
         }
@@ -44,6 +53,18 @@ namespace devils
                 eyesGroup,
                 std::cos(t * 0.1) * 20,
                 0);
+        }
+
+        static void btnEventCallback(lv_event_t *e)
+        {
+            lv_obj_t *btn = lv_event_get_target(e);
+            lv_event_code_t code = lv_event_get_code(e);
+
+            if (code == LV_EVENT_CLICKED)
+            {
+                lv_obj_set_style_bg_color(btn, lv_color_make(255, 0, 0), 0);
+                lv_obj_set_style_bg_color(btn, lv_color_make(3, 36, 53), 0);
+            }
         }
 
     private:
@@ -89,5 +110,6 @@ namespace devils
         lv_obj_t *rightEye;
         lv_obj_t *leftEyebrow;
         lv_obj_t *rightEyebrow;
+        unsigned int clickCount = 0;
     };
 }
