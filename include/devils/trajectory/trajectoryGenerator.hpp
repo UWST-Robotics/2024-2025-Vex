@@ -9,6 +9,7 @@
 #include "trajectoryConstraints.hpp"
 #include "../path/path.hpp"
 #include "../geometry/units.hpp"
+#include "../utils/math.hpp"
 
 namespace devils
 {
@@ -77,6 +78,19 @@ namespace devils
                 // Clamp velocity
                 velocity = std::min(velocity, constraints.maxVelocity);
 
+                // Calculate dot product to determine if the robot is moving forward or backward
+                double prevDotCurrentPose = cos(previousPoint.pose.rotation) *
+                                                (currentPose.x - previousPoint.pose.x) +
+                                            sin(previousPoint.pose.rotation) *
+                                                (currentPose.y - previousPoint.pose.y);
+
+                // If the dot product is negative, we are moving backwards
+                if (prevDotCurrentPose < 0)
+                {
+                    // Reverse the velocity
+                    velocity = -velocity;
+                }
+
                 // Append to points
                 Trajectory::Point point = {
                     0, // Time is calculated later
@@ -107,8 +121,21 @@ namespace devils
                 // v_f = sqrt(v_i^2 + 2*a*d)
                 double velocity = sqrt(pow(previousPoint.velocity, 2) + 2 * constraints.maxAcceleration * deltaDistance);
 
+                // Calculate dot product to determine if the robot is moving forward or backward
+                double prevDotCurrentPose = cos(point.pose.rotation) *
+                                                (previousPoint.pose.x - point.pose.x) +
+                                            sin(point.pose.rotation) *
+                                                (previousPoint.pose.y - point.pose.y);
+
+                // If the dot product is negative, we are moving backwards
+                if (prevDotCurrentPose < 0)
+                {
+                    // Reverse the velocity
+                    velocity = -velocity;
+                }
+
                 // Clamp velocity to existing point
-                velocity = std::min(velocity, point.velocity);
+                velocity = Math::minMagnitude(velocity, point.velocity);
 
                 // Update previous point
                 point.velocity = velocity;
@@ -138,12 +165,12 @@ namespace devils
                 // 0 = (1/2)at^2 + v_i*t - d
                 // t = (-v_i + sqrt(v_i^2 + 2ad)) / a
                 double deltaTime = std::pow(previousPoint.velocity, 2) + 2 * acceleration * deltaDistance;
-                deltaTime = (-previousPoint.velocity + std::sqrt(deltaTime)) / acceleration;
+                deltaTime = (-std::abs(previousPoint.velocity) + std::sqrt(deltaTime)) / acceleration;
 
                 // If the time is NaN, acceleration is 0
                 // t = d / v
                 if (std::isnan(deltaTime))
-                    deltaTime = deltaDistance / previousPoint.velocity;
+                    deltaTime = deltaDistance / std::abs(previousPoint.velocity);
 
                 // If the time is NaN, set to 0
                 if (std::isnan(deltaTime))
@@ -168,7 +195,7 @@ namespace devils
 
     private:
         /// @brief The step size in path indices
-        static constexpr double DELTA_INDEX = 0.05;
+        static constexpr double DELTA_INDEX = 0.01;
 
         /// @brief Constraints of trajectory generation
         TrajectoryConstraints constraints;

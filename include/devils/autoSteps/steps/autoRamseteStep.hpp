@@ -25,16 +25,16 @@ namespace devils
             double maxSpeed = 1.0;
 
             /// @brief A proportional constant. Must be greater than 0. Larger values will result in more aggressive control.
-            double proportionGain = 0.4;
+            double proportionGain = 0.03;
 
             /// @brief A damping coefficient. Must be between 0 and 1. Larger values will result in increased damping.
-            double dampingCoefficient = 1;
+            double dampingCoefficient = 0.6;
 
             /// @brief Proportion (P in PID) between translational velocity and motor voltage
-            double translationP = 0.29;
+            double translationP = 0.013;
 
             /// @brief Proportion (P in PID) between rotational velocity and motor voltage
-            double rotationP = 0.12;
+            double rotationP = 0.115;
 
             /// @brief The default options for the drive step.
             static Options defaultOptions;
@@ -119,14 +119,22 @@ namespace devils
                                     controllerGain * localError.rotation +
                                     options.proportionGain * setpoint.velocity * sinc * localError.y;
 
+            // Multiply by translation and rotation P values
+            translationOutput *= options.translationP;
+            rotationOutput *= options.rotationP;
+
+            VEXBridge::set("preclampTranslationOutput", translationOutput);
+
             // Clamp outputs
             translationOutput = Math::deadbandClamp(translationOutput, options.minSpeed, options.maxSpeed);
             rotationOutput = std::clamp(rotationOutput, -options.maxSpeed, options.maxSpeed);
 
+            VEXBridge::set("translationOutput", translationOutput);
+            VEXBridge::set("rotationOutput", rotationOutput);
+            VEXBridge::set("error", localError.magnitude());
+
             // Set the chassis output
-            chassis.move(
-                options.translationP * translationOutput,
-                options.rotationP * rotationOutput);
+            chassis.move(translationOutput, rotationOutput);
         }
 
         void onStop() override

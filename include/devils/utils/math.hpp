@@ -70,6 +70,22 @@ namespace devils
         }
 
         /**
+         * Returns the minimum of two values by magnitude.
+         * @param valueA The first value.
+         * @param valueB The second value.
+         * @return The value with the minimum magnitude.
+         */
+        static double minMagnitude(
+            double valueA,
+            double valueB)
+        {
+            if (std::abs(valueA) < std::abs(valueB))
+                return valueA;
+            else
+                return valueB;
+        }
+
+        /**
          * Interpolates a value along a sigmoid curve.
          * @param x The input value.
          * @param kCurve The curve factor. Must be greater than 1.

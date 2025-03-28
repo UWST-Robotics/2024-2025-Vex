@@ -14,51 +14,27 @@ namespace devils
             OdomSource &odometry)
         {
             // PID Params
-            PIDParams drivePID = {0.15, 0.0, 10};
             PIDParams rotatePID = {0.7, 0.0, 50.0};
-            PIDParams drivingRotatePID = {1.5, 0.0, 100.0};
 
             // Default Options
-            AutoDriveToStep::Options::defaultOptions = {
-                drivePID,
-                drivingRotatePID,
-                0.0, // minSpeed
-                0.5, // maxSpeed
-                2.0, // goalDist
-                2.0, // goalSpeed
-            };
-            AutoRotateToStep::Options::defaultOptions = {
-                rotatePID,
-                0.1,  // minSpeed
-                0.5,  // maxSpeed
-                0.05, // goalDist
-                0.5,  // goalSpeed
-            };
-
-            // Create Test Path
-            SplinePath testPath = SplinePath::makeArc(Pose(-48, -36, 0), Pose(-10, -44, Units::degToRad(-30)));
-            VBPath::sync("testPath", testPath);
-
-            for (double i = 0; i < testPath.getLength(); i += 0.1)
-            {
-                auto pose = testPath.getPoseAt(i);
-                std::cout << pose.x << ", " << pose.y << ", " << Units::radToDeg(pose.rotation) << std::endl;
-            }
+            AutoRotateToStep::Options::defaultOptions = {rotatePID};
 
             // Initialize
             AutoBuilder pjRoutine = AutoBuilder(chassis, odometry);
-            pjRoutine.setPose(-48, -36, 0)->run();
+            pjRoutine.setPose(-56, 14, 130)->run();
             pjRoutine.pause(1000)->run();
 
-            // Dummy Trajectory
-            auto trajectoryGenerator = TrajectoryGenerator(
-                TrajectoryConstraints{18, 36},
-                TrajectoryGenerator::PathInfo{0, 0});
-            auto trajectory = trajectoryGenerator.calc(testPath);
-
-            // Ramsete Step
-            auto ramseteStep = std::make_unique<AutoRamseteStep>(chassis, odometry, trajectory);
-            ramseteStep->run();
+            pjRoutine.driveToTrajectory(-38, -20, 100, true)->run();        // Pickup Goal
+            pjRoutine.driveToTrajectory(-60, 0, 110, false, 30, 6)->run();  // Ring 1
+            pjRoutine.driveToTrajectory(-44, 48, 60, false, 30, 18)->run(); // Ring 2
+            pjRoutine.driveToTrajectory(-24, 48, -60, false, 20)->run();    // Ring 3
+            pjRoutine.driveToTrajectory(-48, 24, 150, false, 20, 24)->run();
+            pjRoutine.driveToTrajectory(-50, 50, 135, false, 10)->run();
+            pjRoutine.driveToTrajectory(-60, 60, 135, false)->run(); // Corner
+            pjRoutine.pause(1000)->run();
+            pjRoutine.driveToTrajectory(-50, 50, 135, true)->run();
+            pjRoutine.rotateTo(315)->run();
+            pjRoutine.driveToTrajectory(-60, 60, 315, true)->run(); // Corner
         }
     };
 }

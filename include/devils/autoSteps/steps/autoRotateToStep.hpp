@@ -24,7 +24,7 @@ namespace devils
             double minSpeed = 0.1;
 
             /// @brief The maximum speed in %
-            double maxSpeed = 0.3;
+            double maxSpeed = 0.6;
 
             /// @brief The distance to the goal in radians
             double goalDist = 0.015;
