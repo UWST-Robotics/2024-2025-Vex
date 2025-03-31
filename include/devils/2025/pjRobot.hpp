@@ -169,7 +169,9 @@ namespace devils
         // Auto
         VBOdom vbOdom = VBOdom("PJ", odometry);
 
+        // Auto Options
+        RobotAutoOptions autoOptions = RobotAutoOptions();
         // Renderer
-        EyesRenderer eyes = EyesRenderer();
+        OptionsRenderer optionsRenderer = OptionsRenderer({"Hello", "World", "This", "Is", "A", "Test", "Of", "The", "OptionsRenderer"}, &autoOptions);
     };
 }

@@ -193,7 +193,10 @@ namespace devils
         // AutoStepList *autoRoutine = AutoFactory::createPJMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, goalRushSystem, false);
         // AutoStepList *startMacro = AutoFactory::createBlazeStartMacro(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
 
+    
+        // Auto Options
+        RobotAutoOptions autoOptions = RobotAutoOptions();
         // Renderer
-        EyesRenderer eyes = EyesRenderer();
+        OptionsRenderer optionsRenderer = OptionsRenderer({"Hello", "World", "This", "Is", "A", "Test", "Of", "The", "OptionsRenderer"}, &autoOptions);
     };
 }
