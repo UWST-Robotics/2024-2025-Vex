@@ -9,12 +9,12 @@ namespace devils
 {
     struct TestAuto
     {
-        static void run(
+        static void runA(
             ChassisBase &chassis,
             OdomSource &odometry)
         {
             // PID Params
-            PIDParams rotatePID = {0.7, 0.0, 50.0};
+            PIDController::Options rotatePID = {0.7, 0.0, 50.0};
 
             // Default Options
             AutoRotateToStep::Options::defaultOptions = {rotatePID};
@@ -30,11 +30,23 @@ namespace devils
             pjRoutine.driveToTrajectory(-24, 48, -60, false, 20)->run();    // Ring 3
             pjRoutine.driveToTrajectory(-48, 24, 150, false, 20, 24)->run();
             pjRoutine.driveToTrajectory(-50, 50, 135, false, 10)->run();
-            pjRoutine.driveToTrajectory(-60, 60, 135, false)->run(); // Corner
+            pjRoutine.driveToTrajectory(-60, 60, 135, false)->run(); // 2 Rings in Corner
+            pjRoutine.pause(1000)->run();                            // Wait to pickup rings
+            pjRoutine.driveToTrajectory(-50, 50, 135, true)->run();  // Exit Corner
+            pjRoutine.rotateTo(315)->run();                          // Turn Around
+            pjRoutine.driveToTrajectory(-60, 60, 315, true)->run();  // Mogo in Corner
+        }
+
+        static void runB(
+            ChassisBase &chassis,
+            OdomSource &odometry)
+        {
+            AutoBuilder pjRoutine = AutoBuilder(chassis, odometry);
+            pjRoutine.setPose(-50, -36, 180)->run();
             pjRoutine.pause(1000)->run();
-            pjRoutine.driveToTrajectory(-50, 50, 135, true)->run();
-            pjRoutine.rotateTo(315)->run();
-            pjRoutine.driveToTrajectory(-60, 60, 315, true)->run(); // Corner
+
+            pjRoutine.driveToTrajectory(-10, -40, 135, true, 10)->run(); // Pickup Goal
+            pjRoutine.driveToTrajectory(-24, -48, 220)->run();
         }
     };
 }

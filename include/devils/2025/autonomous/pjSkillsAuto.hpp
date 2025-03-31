@@ -17,9 +17,9 @@ namespace devils
             MogoGrabSystem &mogoGrabber)
         {
             // PID Params
-            PIDParams drivePID = {0.15, 0.0, 10};
-            PIDParams rotatePID = {0.7, 0.0, 50.0};
-            PIDParams drivingRotatePID = {1.5, 0.0, 100.0};
+            PIDController::Options drivePID = {0.15, 0.0, 10};
+            PIDController::Options rotatePID = {0.7, 0.0, 50.0};
+            PIDController::Options drivingRotatePID = {1.5, 0.0, 100.0};
 
             // Default Options
             AutoDriveToStep::Options::defaultOptions = {

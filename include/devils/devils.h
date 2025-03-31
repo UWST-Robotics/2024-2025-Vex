@@ -50,6 +50,13 @@
 #include "trajectory/trajectoryGenerator.hpp"
 #include "trajectory/trajectoryConstraints.hpp"
 
+// Controller
+#include "controller/controllerBase.h"
+#include "controller/pidController.hpp"
+#include "controller/armFeedforward.hpp"
+#include "controller/elevatorFeedforward.hpp"
+#include "controller/motorFeedforward.hpp"
+
 // AutoSteps
 #include "autoSteps/autoBuilder.hpp"
 #include "autoSteps/steps/autoTimeoutStep.hpp"

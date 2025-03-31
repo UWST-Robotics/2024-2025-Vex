@@ -30,7 +30,7 @@ namespace devils
 
         void opcontrol() override
         {
-            TestAuto::run(chassis, odometry);
+            TestAuto::runB(chassis, odometry);
         }
 
         void disabled() override

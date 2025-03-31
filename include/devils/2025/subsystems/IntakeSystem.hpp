@@ -115,7 +115,7 @@ namespace devils
          * Sets the parameters for the arm PID controller.
          * @param params The parameters to set.
          */
-        void setArmPID(PIDParams params)
+        void setArmPID(PIDController::Options params)
         {
             armPID = PIDController(params);
         }

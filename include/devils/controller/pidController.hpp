@@ -1,25 +1,29 @@
 #pragma once
 
 #include "pros/rtos.hpp"
+#include "devils/controller/controllerBase.h"
 
 namespace devils
 {
     /**
-     * Represents the parameters of a PID controller.
-     */
-    struct PIDParams
-    {
-        double p;
-        double i;
-        double d;
-    };
-
-    /**
      * Represents a feedback controller that uses a PID algorithm.
      */
-    class PIDController
+    class PIDController : public ControllerBase
     {
     public:
+        /// @brief The options for the PID controller.
+        struct Options
+        {
+            /// @brief Proportional gain (p * error)
+            double pGain = 0.0;
+
+            /// @brief Integral gain (i * integral)
+            double iGain = 0.0;
+
+            /// @brief Derivative gain (d * derivative)
+            double dGain = 0.0;
+        };
+
         /**
          * Creates a new PID controller.
          * @param pGain The proportional gain of the controller (p * error)
@@ -36,10 +40,14 @@ namespace devils
         {
         }
 
-        PIDController(PIDParams params)
-            : pGain(params.p),
-              iGain(params.i),
-              dGain(params.d)
+        /**
+         * Creates a new PID controller with the given options.
+         * @param options The options for the PID controller.
+         */
+        PIDController(Options options)
+            : pGain(options.pGain),
+              iGain(options.iGain),
+              dGain(options.dGain)
         {
         }
 
@@ -63,14 +71,8 @@ namespace devils
          * @param currentError The current error value.
          * @return The current output value of the PID controller.
          */
-        double update(double currentError)
+        double update(double currentError) override
         {
-            // Logger::info("{E=" + std::to_string(currentError) + ", P=" + std::to_string(currentError) + ", I=" + std::to_string(currentIntegral) + ", D=" + std::to_string(currentDerivative) + "}");
-
-            // Don't update if the error is the same
-            // if (currentError == this->currentError)
-            //     return getValue();
-
             // Get Delta Time
             double dt = pros::millis() - lastUpdateTimestamp;
             lastUpdateTimestamp = pros::millis();
@@ -91,8 +93,8 @@ namespace devils
         }
 
         /**
-         * Gets the current output value of the PID controller.
-         * @return The current output value of the PID controller.
+         * Gets the last output value of the PID controller without updating it.
+         * @return The last output value of the PID controller.
          */
         double getValue()
         {
