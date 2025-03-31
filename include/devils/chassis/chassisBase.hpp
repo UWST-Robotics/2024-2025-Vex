@@ -17,7 +17,7 @@ namespace devils
         virtual void move(double forward, double turn, double strafe = 0) = 0;
 
         /**
-         * Stops the robot.
+     * Stops the robot.
          */
         virtual void stop()
         {

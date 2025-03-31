@@ -29,7 +29,9 @@ namespace devils
         // AutoStepList *blazeRoutine = AutoFactory::createTestAuto(dummyChassis);
         VBOdom vbOdom = VBOdom("DummyOdom", dummyChassis);
 
-        // Renderer
-        EyesRenderer eyes = EyesRenderer();
+       // Auto Options
+       RobotAutoOptions autoOptions = RobotAutoOptions();
+       // Renderer
+       OptionsRenderer optionsRenderer = OptionsRenderer({"Hello", "World", "This", "Is", "A", "Test", "Of", "The", "OptionsRenderer"}, &autoOptions);
     };
 }

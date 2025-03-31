@@ -36,6 +36,9 @@
 // Robot
 #include "utils/robot.hpp"
 
+// robotAutoOptions
+#include "utils/robotAutoOptions.hpp"
+
 // Utils
 #include "utils/joystickCurve.hpp"
 #include "utils/timer.hpp"
@@ -66,6 +69,7 @@
 #include "autoSteps/transformer/mirrorTransform.hpp"
 
 // Display
+#include "display/optionsRenderer.hpp"
 #include "display/eyesRenderer.hpp"
 
 // VEXBridge

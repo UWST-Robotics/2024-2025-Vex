@@ -57,7 +57,9 @@ namespace devils
         // NT
         VBOdom vbOdom = VBOdom("TankOdom", odometry);
 
+        // Auto Options
+        RobotAutoOptions autoOptions = RobotAutoOptions();
         // Renderer
-        EyesRenderer eyes = EyesRenderer();
+        OptionsRenderer optionsRenderer = OptionsRenderer({"Match 1", "Match 2", "Skills 1", "Skills 2"}, &autoOptions);
     };
 }
