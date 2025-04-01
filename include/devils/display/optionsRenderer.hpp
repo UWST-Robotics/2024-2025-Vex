@@ -1,6 +1,8 @@
 #pragma once 
 
 #include "liblvgl/lvgl.h"
+#include "./components/radio.hpp"
+
 
 namespace devils
 {
@@ -18,11 +20,11 @@ namespace devils
     class OptionsRenderer : Runnable
     {
     public:
-        OptionsRenderer(const std::vector<std::string>& routine_names, RobotAutoOptions *options) : Runnable(50)
+        OptionsRenderer(const char* bot_name, const std::vector<std::string>& routine_names, RobotAutoOptions *options) : Runnable(50)
         {
             OptionsRenderer::options = options;
             initializeRoot();
-            createOptionsDisplayContainer(routine_names);
+            createOptionsDisplayContainer(bot_name, routine_names);
         }
 
         ~OptionsRenderer()
@@ -39,10 +41,26 @@ namespace devils
             lv_scr_load(root);
         }
 
-        void createOptionsDisplayContainer(const std::vector<std::string>& routine_names)
+        void createOptionsDisplayContainer(const char* bot_name, const std::vector<std::string>& routine_names)
         {
-            auto options_display_container = lv_obj_create(root);
-            lv_obj_set_size(options_display_container, lv_pct(100), lv_pct(100));
+            auto fullscreen_container = lv_obj_create(root);
+            lv_obj_set_size(fullscreen_container, lv_pct(100), lv_pct(100));
+            lv_obj_set_layout(fullscreen_container, LV_LAYOUT_FLEX);
+            lv_obj_set_flex_flow(fullscreen_container, LV_FLEX_FLOW_COLUMN);
+            // center
+            lv_obj_set_flex_align(fullscreen_container, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+
+            lv_obj_t *title = lv_label_create(fullscreen_container);
+            lv_label_set_text(title, bot_name);
+            lv_obj_set_style_text_align(title, LV_TEXT_ALIGN_CENTER, 0);
+            lv_obj_set_style_text_color(title, lv_color_make(255, 255, 255), 0);
+            lv_obj_set_style_text_font(title, &lv_font_unscii_16, 0);
+
+            auto options_display_container = lv_obj_create(fullscreen_container);
+            lv_obj_set_style_pad_all(options_display_container, 0, 0);
+            lv_obj_set_flex_grow(options_display_container, 1);
+            lv_obj_set_style_border_width(options_display_container, 0, 0);
+            lv_obj_set_width(options_display_container, lv_pct(100));
             lv_obj_clear_flag(options_display_container, LV_OBJ_FLAG_SCROLLABLE);
             lv_obj_set_layout(options_display_container, LV_LAYOUT_FLEX);
             lv_obj_set_flex_flow(options_display_container, LV_FLEX_FLOW_ROW);
@@ -83,6 +101,7 @@ namespace devils
             lv_obj_set_size(routine_container, lv_pct(70), lv_pct(100));
             lv_obj_set_layout(routine_container, LV_LAYOUT_FLEX);
             lv_obj_set_flex_flow(routine_container, LV_FLEX_FLOW_COLUMN);
+
             // title
             lv_obj_t *routine_title = lv_label_create(routine_container);
             lv_label_set_text(routine_title, "Select Routine");
@@ -91,16 +110,13 @@ namespace devils
             lv_obj_set_style_text_font(routine_title, &lv_font_montserrat_16, 0);
 
 
-            for (const auto& label : routine_names)
-            {
-                // create checkbox
-                auto checkbox = lv_checkbox_create(routine_container);
-                // checkbo radius full
-                lv_obj_set_style_radius(checkbox, LV_RADIUS_CIRCLE, 0);
-                // add label
-                lv_checkbox_set_text(checkbox, label.c_str());
-                
-            }
+            RadioGroup *radio_group = new RadioGroup(routine_container, routine_names, options->routine);
+            lv_obj_t *radio_group_obj = radio_group->getRadioGroup();
+            lv_obj_set_width(radio_group_obj, lv_pct(100));
+            lv_obj_set_flex_grow(radio_group_obj, 1);
+            lv_obj_set_style_pad_all(radio_group_obj, 0, 0);
+            lv_obj_set_style_border_width(radio_group_obj, 0, 0);
+        
         }
 
         void addButton(lv_obj_t *container, const char *label, lv_color_t color = lv_color_make(255, 0, 0), lv_event_cb_t event_cb = nullptr)
@@ -134,20 +150,13 @@ namespace devils
             }
         }
 
-        void handleRoutineChange(lv_event_t *e)
+        static void handleRoutineChange(std::string selected_routine)
         {
-            lv_obj_t *btn = lv_event_get_target(e);
-            lv_obj_t *label = lv_obj_get_child(btn, NULL);
-            if (label != NULL)
-            {
-                const char *text = lv_label_get_text(label);
-                options->routine = text;
-            }
-            // deselect all other checkboxes
-            lv_obj_t *parent = lv_obj_get_parent(btn);
-            lv_obj_t *child = lv_obj_get_child(parent, NULL);
+            options->routine = selected_routine;
         }
 
+    
+        
         static AllianceColor getCurrentAllianceColor(const char *text)
         {
             for (const auto& pair : color_name_map)

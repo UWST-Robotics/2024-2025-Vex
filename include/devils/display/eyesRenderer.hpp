@@ -7,30 +7,26 @@ namespace devils
     class EyesRenderer : Runnable
     {
     public:
-        EyesRenderer() : Runnable(50)
+        EyesRenderer(lv_obj_t *parent) : Runnable(50)
         {
-            // root = lv_obj_create(NULL);
-            // lv_scr_load(root);
 
-            // eyesGroup = lv_obj_create(root);
-            // lv_obj_set_size(eyesGroup, 340, 200);
-            // lv_obj_align(eyesGroup, LV_ALIGN_CENTER, 0, 0);
-            // lv_obj_set_pos(eyesGroup, 0, 0);
-            // lv_obj_set_style_radius(eyesGroup, 0, 0);
-            // lv_obj_set_style_border_width(eyesGroup, 0, 0);
-            // lv_obj_set_style_bg_color(eyesGroup, lv_color_make(3, 36, 53), 0);
-            // lv_obj_set_scrollbar_mode(eyesGroup, LV_SCROLLBAR_MODE_OFF);
+            eyesGroup = lv_obj_create(parent);
+            lv_obj_set_size(eyesGroup, 340, 200);
+            lv_obj_align(eyesGroup, LV_ALIGN_CENTER, 0, 0);
+            lv_obj_set_pos(eyesGroup, 0, 0);
+            lv_obj_set_style_radius(eyesGroup, 0, 0);
+            lv_obj_set_style_border_width(eyesGroup, 0, 0);
+            lv_obj_set_style_bg_color(eyesGroup, lv_color_make(3, 36, 53), 0);
+            lv_obj_set_scrollbar_mode(eyesGroup, LV_SCROLLBAR_MODE_OFF);
 
-            // leftEye = makeEye(-100, 0, 120);
-            // rightEye = makeEye(100, 0, 120);
-            // leftEyebrow = makeEyebrow(-100, -85, 0, 130);
-            // rightEyebrow = makeEyebrow(100, -110, 0, 130);
+            leftEye = makeEye(-100, 0, 120);
+            rightEye = makeEye(100, 0, 120);
+            leftEyebrow = makeEyebrow(-100, -85, 0, 130);
+            rightEyebrow = makeEyebrow(100, -110, 0, 130);
 
-            // lv_obj_set_style_bg_color(root, lv_color_make(3, 36, 53), 0);
-        }
-        ~EyesRenderer()
-        {
-            lv_obj_del(root);
+            lv_obj_set_style_bg_color(parent, lv_color_make(3, 36, 53), 0);
+
+            runAsync();
         }
 
         void onUpdate() override
@@ -81,17 +77,11 @@ namespace devils
             return eyebrow;
         }
 
-        lv_obj_t *root;
         lv_obj_t *eyesGroup;
         lv_obj_t *leftEye;
         lv_obj_t *rightEye;
         lv_obj_t *leftEyebrow;
         lv_obj_t *rightEyebrow;
-        lv_obj_t *btn;
-        lv_obj_t *btn2;
-        lv_obj_t *flex_container;
-        lv_obj_t *label;
-        lv_obj_t *label2;
-        unsigned int clickCount = 0;
+
     };
 }

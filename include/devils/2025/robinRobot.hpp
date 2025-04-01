@@ -38,7 +38,7 @@ namespace devils
         }
 
         // VEXBridge
-        VEXBridge bridge = VEXBridge(0);
+        // VEXBridge bridge = VEXBridge(0);
 
         // Hardware
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-6, 7, -8, 9, -10});
@@ -60,6 +60,6 @@ namespace devils
         // Auto Options
         RobotAutoOptions autoOptions = RobotAutoOptions();
         // Renderer
-        OptionsRenderer optionsRenderer = OptionsRenderer({"Match 1", "Match 2", "Skills 1", "Skills 2"}, &autoOptions);
+        OptionsRenderer optionsRenderer = OptionsRenderer("Robin", {"Match 1", "Match 2", "Skills 1", "Skills 2"}, &autoOptions);
     };
 }

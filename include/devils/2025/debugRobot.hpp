@@ -32,6 +32,6 @@ namespace devils
        // Auto Options
        RobotAutoOptions autoOptions = RobotAutoOptions();
        // Renderer
-       OptionsRenderer optionsRenderer = OptionsRenderer({"Hello", "World", "This", "Is", "A", "Test", "Of", "The", "OptionsRenderer"}, &autoOptions);
+       OptionsRenderer optionsRenderer = OptionsRenderer("Debug",{"Hello", "World", "This", "Is", "A", "Test", "Of", "The", "OptionsRenderer"}, &autoOptions);
     };
 }
