@@ -177,15 +177,11 @@ namespace devils
                     break;
                 }
             }
-            std::cout << "Routine: " << new_routine.displayName << std::endl;
             options->routine = new_routine;
         }
 
         static void handleScreenSaverToggle(lv_event_t *e)
         {
-            std::cout << options->routine.requiresAllianceColor << std::endl;
-            std::cout << options->routine.displayName << std::endl;
-            std::cout << "Screen Saver Toggled" << std::endl;
             if (options->routine.requiresAllianceColor && options->allianceColor == NONE_ALLIANCE)
             {
                 // show error message
