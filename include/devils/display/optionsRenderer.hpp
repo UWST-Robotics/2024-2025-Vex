@@ -24,6 +24,7 @@ namespace devils
         OptionsRenderer(const char* bot_name, const std::vector<Routine>& routines, RobotAutoOptions *options) : Runnable(50)
         {
             OptionsRenderer::options = options;
+            OptionsRenderer::routines = routines;
             options->routine = routines[0];
             initializeRoot();
             createOptionsDisplayContainer(bot_name, routines);
@@ -176,6 +177,7 @@ namespace devils
                     break;
                 }
             }
+            std::cout << "Routine: " << new_routine.displayName << std::endl;
             options->routine = new_routine;
         }
 

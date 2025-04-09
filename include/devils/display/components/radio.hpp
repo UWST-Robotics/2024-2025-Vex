@@ -26,6 +26,7 @@ namespace devils
         {
             // create radio button
             radio = lv_checkbox_create(parent);
+            
             lv_checkbox_set_text(radio, label);
             if (event_cb != nullptr)
             {
@@ -95,16 +96,17 @@ namespace devils
 
             instance->selected_index = lv_obj_get_index(act_cb);
 
-            lv_obj_t * label = lv_obj_get_child(act_cb, NULL);
-            if (label != NULL)
+            const char *text = lv_checkbox_get_text(act_cb);
+            
+            
+            if (instance->event_cb != nullptr)
             {
-                const char *text = lv_label_get_text(label);
-                std::string selected_routine = text;
-                if (instance->event_cb != nullptr)
-                {
-                    std::cout << "Changing routine to: " << selected_routine << std::endl;
-                    instance->event_cb(selected_routine); 
-                }
+                instance->event_cb(text); // call the event callback with the selected radio button text
+            }
+            else
+            {
+                // default action: print the selected radio button text
+                printf("Selected radio button: %s\n", text);
             }
         }
     };
