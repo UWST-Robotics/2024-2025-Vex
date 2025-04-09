@@ -48,11 +48,11 @@ namespace devils
     class RadioGroup
     {
     public:
-        RadioGroup(lv_obj_t *parent, const std::vector<std::string> &labels, std::string &selected_label)
+        RadioGroup(lv_obj_t *parent, const std::vector<std::string> &labels, void (*event_cb)(std::string) = nullptr)
         {
-            this->selected_label = selected_label;
             // create radio group
             radio_group = lv_obj_create(parent);
+            this->event_cb = event_cb;
             lv_obj_set_layout(radio_group, LV_LAYOUT_FLEX);
             lv_obj_set_flex_flow(radio_group, LV_FLEX_FLOW_COLUMN);
 
@@ -62,6 +62,9 @@ namespace devils
             {
                 auto radio = Radio(radio_group, label.c_str(), nullptr, true);
             }
+            // set the first radio button as checked
+            lv_obj_t *first_radio = lv_obj_get_child(radio_group, 0);
+            lv_obj_add_state(first_radio, LV_STATE_CHECKED); 
 
             lv_obj_add_event_cb(
                 radio_group, 
@@ -75,7 +78,7 @@ namespace devils
 
     private:
         lv_obj_t *radio_group;
-        std::string selected_label;
+        void (*event_cb)(std::string) = nullptr;
         uint32_t selected_index = 0;
 
         static void handleCheck(lv_event_t *e) {
@@ -96,7 +99,12 @@ namespace devils
             if (label != NULL)
             {
                 const char *text = lv_label_get_text(label);
-                instance->selected_label = text;
+                std::string selected_routine = text;
+                if (instance->event_cb != nullptr)
+                {
+                    std::cout << "Changing routine to: " << selected_routine << std::endl;
+                    instance->event_cb(selected_routine); 
+                }
             }
         }
     };

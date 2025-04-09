@@ -2,6 +2,7 @@
 
 #include "liblvgl/lvgl.h"
 #include "./components/radio.hpp"
+#include "./eyesRenderer.hpp"
 
 
 namespace devils
@@ -20,11 +21,12 @@ namespace devils
     class OptionsRenderer : Runnable
     {
     public:
-        OptionsRenderer(const char* bot_name, const std::vector<std::string>& routine_names, RobotAutoOptions *options) : Runnable(50)
+        OptionsRenderer(const char* bot_name, const std::vector<Routine>& routines, RobotAutoOptions *options) : Runnable(50)
         {
             OptionsRenderer::options = options;
+            options->routine = routines[0];
             initializeRoot();
-            createOptionsDisplayContainer(bot_name, routine_names);
+            createOptionsDisplayContainer(bot_name, routines);
         }
 
         ~OptionsRenderer()
@@ -33,15 +35,16 @@ namespace devils
         }
     
     private:
-        lv_obj_t *root;
+        static lv_obj_t *root;
 
         void initializeRoot()
         {
             root = lv_obj_create(NULL);
+            eyesRenderer = new EyesRenderer(root);
             lv_scr_load(root);
         }
 
-        void createOptionsDisplayContainer(const char* bot_name, const std::vector<std::string>& routine_names)
+        void createOptionsDisplayContainer(const char* bot_name, const std::vector<Routine>& routines)
         {
             auto fullscreen_container = lv_obj_create(root);
             lv_obj_set_size(fullscreen_container, lv_pct(100), lv_pct(100));
@@ -67,7 +70,7 @@ namespace devils
             lv_obj_set_style_pad_row(options_display_container, 0, 0);
 
             createAllianceColorContainer(options_display_container);
-            createRoutineContainer(options_display_container, routine_names);
+            createRoutineContainer(options_display_container, routines);
         }
 
         void createAllianceColorContainer(lv_obj_t *parent)
@@ -95,12 +98,20 @@ namespace devils
             lv_obj_center(alliance_color_label);
         }
 
-        void createRoutineContainer(lv_obj_t *parent, const std::vector<std::string>& routine_names)
+        void createRoutineContainer(lv_obj_t *parent, const std::vector<Routine>& routines)
         {
-            auto routine_container = lv_obj_create(parent);
+            auto right_container = lv_obj_create(parent);
+            lv_obj_set_size(right_container, lv_pct(70), lv_pct(100));
+            lv_obj_set_layout(right_container, LV_LAYOUT_FLEX);
+            lv_obj_set_flex_flow(right_container, LV_FLEX_FLOW_ROW);
+            lv_obj_clear_flag(right_container, LV_OBJ_FLAG_SCROLLABLE);
+
+            auto routine_container = lv_obj_create(right_container);
             lv_obj_set_size(routine_container, lv_pct(70), lv_pct(100));
             lv_obj_set_layout(routine_container, LV_LAYOUT_FLEX);
             lv_obj_set_flex_flow(routine_container, LV_FLEX_FLOW_COLUMN);
+            lv_obj_set_style_border_width(routine_container, 0, 0);
+            lv_obj_set_style_pad_all(routine_container, 0, 0);
 
             // title
             lv_obj_t *routine_title = lv_label_create(routine_container);
@@ -109,29 +120,33 @@ namespace devils
             lv_obj_set_style_text_color(routine_title, lv_color_make(255, 255, 255), 0);
             lv_obj_set_style_text_font(routine_title, &lv_font_montserrat_16, 0);
 
+            std::vector<std::string> routine_names;
+            for (const auto& routine : routines)
+            {
+                routine_names.push_back(routine.displayName);
+            }
 
-            RadioGroup *radio_group = new RadioGroup(routine_container, routine_names, options->routine);
+            RadioGroup *radio_group = new RadioGroup(routine_container, routine_names, handleRoutineChange);
             lv_obj_t *radio_group_obj = radio_group->getRadioGroup();
             lv_obj_set_width(radio_group_obj, lv_pct(100));
             lv_obj_set_flex_grow(radio_group_obj, 1);
             lv_obj_set_style_pad_all(radio_group_obj, 0, 0);
             lv_obj_set_style_border_width(radio_group_obj, 0, 0);
-        
-        }
 
-        void addButton(lv_obj_t *container, const char *label, lv_color_t color = lv_color_make(255, 0, 0), lv_event_cb_t event_cb = nullptr)
-        {
-            lv_obj_t *btn = lv_btn_create(container);
-            if (event_cb != nullptr)
-            {
-                lv_obj_add_event_cb(btn, event_cb, LV_EVENT_CLICKED, NULL);
-            }
-
-            lv_obj_set_style_bg_color(btn, color, 0);
-
-            lv_obj_t *label_obj = lv_label_create(btn);
-            lv_label_set_text(label_obj, label);
-            lv_obj_center(label_obj);
+            auto screen_saver_toggle_container = lv_obj_create(right_container);
+            lv_obj_set_size(screen_saver_toggle_container, lv_pct(30), lv_pct(100));
+            lv_obj_set_layout(screen_saver_toggle_container, LV_LAYOUT_FLEX);
+            lv_obj_set_flex_flow(screen_saver_toggle_container, LV_FLEX_FLOW_COLUMN);
+            lv_obj_set_flex_align(screen_saver_toggle_container, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_END);
+            lv_obj_set_style_pad_all(screen_saver_toggle_container, 0, 0);
+            lv_obj_set_style_border_width(screen_saver_toggle_container, 0, 0);
+            
+            auto screen_saver_toggle_button = lv_btn_create(screen_saver_toggle_container);
+            lv_obj_set_size(screen_saver_toggle_button, lv_pct(100), 50);
+            auto screen_saver_toggle_label = lv_label_create(screen_saver_toggle_button);
+            lv_label_set_text(screen_saver_toggle_label, "Save");  
+            lv_obj_center(screen_saver_toggle_label);
+            lv_obj_add_event_cb(screen_saver_toggle_button, handleScreenSaverToggle, LV_EVENT_CLICKED, NULL);      
         }
 
         static void handleAllianceColorChange(lv_event_t *e)
@@ -152,7 +167,40 @@ namespace devils
 
         static void handleRoutineChange(std::string selected_routine)
         {
-            options->routine = selected_routine;
+            Routine new_routine;
+            for (const auto& routine : routines)
+            {
+                if (routine.displayName == selected_routine)
+                {
+                    new_routine = routine;
+                    break;
+                }
+            }
+            options->routine = new_routine;
+        }
+
+        static void handleScreenSaverToggle(lv_event_t *e)
+        {
+            std::cout << options->routine.requiresAllianceColor << std::endl;
+            std::cout << options->routine.displayName << std::endl;
+            std::cout << "Screen Saver Toggled" << std::endl;
+            if (options->routine.requiresAllianceColor && options->allianceColor == NONE_ALLIANCE)
+            {
+                // show error message
+                lv_obj_t *message_box = lv_msgbox_create(root, "Error", "Selected routine can't be used when Alliance is set to 'None'.", {}, true);
+                // center the message box
+                // shadow
+                lv_obj_set_style_shadow_color(message_box, lv_color_make(0, 0, 0), 0);
+                lv_obj_set_style_shadow_width(message_box, 10, 0);
+                lv_obj_set_style_shadow_opa(message_box, LV_OPA_COVER, 0);
+                lv_obj_set_style_shadow_ofs_x(message_box, 4, 0);
+                lv_obj_set_style_shadow_ofs_y(message_box, 4, 0);
+                // border
+
+                lv_obj_center(message_box);
+                return;
+            }
+            eyesRenderer->render();
         }
 
     
@@ -181,7 +229,14 @@ namespace devils
         }
 
         static RobotAutoOptions *options;
+        static std::vector<Routine> routines;
+        static EyesRenderer *eyesRenderer;
+        static bool isScreenSaverEnabled;
     };
 
     RobotAutoOptions *OptionsRenderer::options = nullptr;
+    EyesRenderer *OptionsRenderer::eyesRenderer = nullptr;
+    bool OptionsRenderer::isScreenSaverEnabled = false;
+    std::vector<Routine> OptionsRenderer::routines = {};
+    lv_obj_t *OptionsRenderer::root = nullptr;
 }

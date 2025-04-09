@@ -29,9 +29,14 @@ namespace devils
         // AutoStepList *blazeRoutine = AutoFactory::createTestAuto(dummyChassis);
         VBOdom vbOdom = VBOdom("DummyOdom", dummyChassis);
 
-       // Auto Options
-       RobotAutoOptions autoOptions = RobotAutoOptions();
-       // Renderer
-       OptionsRenderer optionsRenderer = OptionsRenderer("Debug",{"Hello", "World", "This", "Is", "A", "Test", "Of", "The", "OptionsRenderer"}, &autoOptions);
+        RobotAutoOptions autoOptions = RobotAutoOptions();
+        std::vector<Routine> routines = {
+            {0, "Match 1", true},
+            {1, "Match 2", true},
+            {2, "Skills 1", false},
+            {3, "Skills 2", false}
+        };
+        // Renderer
+        OptionsRenderer optionsRenderer = OptionsRenderer("Debug", routines, &autoOptions);
     };
 }
