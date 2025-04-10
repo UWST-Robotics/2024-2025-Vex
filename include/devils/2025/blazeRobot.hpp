@@ -12,8 +12,6 @@ namespace devils
     {
         BlazeRobot()
         {
-            intakeSystem.setArmPositions(IntakeSystem::ArmPositionAngles{-0.07, -0.16});
-
             imu.calibrate();
 
             conveyorSensor.setLEDBrightness(100);
@@ -172,7 +170,6 @@ namespace devils
 
         OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 11);
         InertialSensor imu = InertialSensor("IMU", 16);
-        RotationSensor intakeArmSensor = RotationSensor("IntakeArmSensor", 12);
 
         ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 1);
         ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 2);
@@ -183,7 +180,7 @@ namespace devils
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
         ConveyorSystem conveyor = ConveyorSystem(conveyorMotors);
         MogoGrabSystem mogoGrabber = MogoGrabSystem(mogoPneumatic);
-        IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors, intakeArmSensor);
+        IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors);
         GoalRushSystem goalRushSystem = GoalRushSystem(goalRushPneumatic);
         PerpendicularSensorOdometry odometry = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
 
