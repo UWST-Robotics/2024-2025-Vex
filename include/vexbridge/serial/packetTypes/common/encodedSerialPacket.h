@@ -14,6 +14,7 @@ namespace vexbridge::serial
      */
     struct EncodedSerialPacket : SerialPacket
     {
+        /// @brief Raw buffer containing the specific packet data unique to the packet type (the payload)
         Buffer payload;
     };
 }

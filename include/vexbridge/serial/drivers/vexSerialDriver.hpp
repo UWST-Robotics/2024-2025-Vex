@@ -12,6 +12,7 @@ namespace vexbridge::serial
 {
     /**
      * Interface for reading and writing data to a VEX V5 serial port.
+     * \deprecated VEX V5 ports are only half-duplex, so it is incompatible with VEXBridge's asynchronous serial protocol.
      */
     class VEXSerialDriver : public SerialDriver
     {

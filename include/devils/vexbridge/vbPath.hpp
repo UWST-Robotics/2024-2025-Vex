@@ -1,6 +1,9 @@
 #pragma once
-#include "vexbridge/vexbridge.h"
 #include "../path/path.hpp"
+#include "vexbridge/vbValue.hpp"
+#include "vexbridge/vbGroup.hpp"
+
+using namespace vexbridge;
 
 namespace devils
 {

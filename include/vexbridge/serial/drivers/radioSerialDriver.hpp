@@ -12,6 +12,7 @@ namespace vexbridge::serial
 {
     /**
      * Interface for reading and writing data to another robot via a VEX V5 radio.
+     * \note Completely untested and may not work as intended.
      */
     class RadioSerialDriver : public SerialDriver
     {

@@ -158,7 +158,7 @@ namespace devils
         static constexpr double REJECT_OFFSET = 13;      // teeth
 
         // Hardware
-        // VEXBridge bridge = VEXBridge(0);
+        VEXBridge bridge = VEXBridge();
 
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 2, -3, 4, -5});
         SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {6, -7, 8, -9, 10});

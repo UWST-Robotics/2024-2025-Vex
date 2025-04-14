@@ -15,7 +15,6 @@
 #include "../packetTypes/updateIntArrayPacket.hpp"
 #include "../packetTypes/updateFloatArrayPacket.hpp"
 #include "../packetTypes/updateDoubleArrayPacket.hpp"
-#include "../packetTypes/fetchValuesPacket.hpp"
 
 namespace vexbridge::serial
 {
@@ -47,7 +46,7 @@ namespace vexbridge::serial
         }
 
         /// @brief Array containing all SerialPacketType objects
-        static SerialPacketType *ALL_PACKET_TYPES[15];
+        static SerialPacketType *ALL_PACKET_TYPES[14];
     };
 }
 
@@ -58,7 +57,6 @@ vexbridge::serial::SerialPacketType *vexbridge::serial::AllPacketTypes::ALL_PACK
     new UpdateFloatPacketType(),
     new UpdateDoublePacketType(),
     new UpdateStringPacketType(),
-    new FetchValuesPacketType(),
     new GenericAckPacketType(),
     new GenericNAckPacketType(),
     new LogPacketType(),

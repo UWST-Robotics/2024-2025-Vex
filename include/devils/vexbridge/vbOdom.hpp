@@ -2,7 +2,10 @@
 #include "../odom/odomSource.hpp"
 #include "../geometry/units.hpp"
 #include "../utils/runnable.hpp"
-#include "vexbridge/vexbridge.h"
+#include "vexbridge/vbValue.hpp"
+#include "vexbridge/vbGroup.hpp"
+
+using namespace vexbridge;
 
 namespace devils
 {

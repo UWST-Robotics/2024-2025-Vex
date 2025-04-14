@@ -38,7 +38,7 @@ namespace devils
         }
 
         // VEXBridge
-        VEXBridge bridge = VEXBridge(0);
+        VEXBridge bridge = VEXBridge();
 
         // Hardware
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-6, 7, -8, 9, -10});

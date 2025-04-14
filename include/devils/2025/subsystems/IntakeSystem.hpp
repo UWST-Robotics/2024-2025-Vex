@@ -20,6 +20,7 @@ namespace devils
             NEUTRAL_STAKE,  // Raises the arm to the taller neutral stakes
         };
 
+        /// @brief Represents the angles of the intake arm for each position.
         struct ArmPositionAngles
         {
             double bottomRing = 0;

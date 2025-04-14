@@ -3,6 +3,7 @@
 #include <map>
 #include <cstdint>
 #include <any>
+#include <stdexcept>
 
 namespace vexbridge::table
 {
@@ -15,7 +16,7 @@ namespace vexbridge::table
          * @param value The value to set.
          */
         template <typename T>
-        void set(const uint16_t id, const T value)
+        static void set(const uint16_t id, const T value)
         {
             idToPath[id] = value;
         }
@@ -25,7 +26,7 @@ namespace vexbridge::table
          * @param id The id of the value to check.
          * @return True if the value is contained, false otherwise.
          */
-        bool contains(const uint16_t id) const
+        static bool contains(const uint16_t id)
         {
             return idToPath.find(id) != idToPath.end();
         }
@@ -36,7 +37,7 @@ namespace vexbridge::table
          * @return True if the value is of the specified type, false otherwise.
          */
         template <typename T>
-        bool isType(const uint16_t id) const
+        static bool isType(const uint16_t id)
         {
             if (!contains(id))
                 return false;
@@ -49,7 +50,7 @@ namespace vexbridge::table
          * @param id The id of the value to get.
          */
         template <typename T>
-        T get(const uint16_t id) const
+        static T get(const uint16_t id)
         {
             if (!contains(id))
                 throw std::runtime_error("Value not found");
@@ -57,6 +58,9 @@ namespace vexbridge::table
         }
 
     private:
-        std::map<uint16_t, std::any> idToPath;
+        static std::map<uint16_t, std::any> idToPath;
     };
 }
+
+// Initialize the static member variable
+std::map<uint16_t, std::any> vexbridge::table::ValueTable::idToPath = std::map<uint16_t, std::any>();

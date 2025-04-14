@@ -18,7 +18,7 @@ namespace vexbridge::table
          * @param label The label to search for.
          * @return The ID of the label or -1 if not found.
          */
-        int32_t get(const std::string &label)
+        static int32_t get(const std::string &label)
         {
             if (!contains(label))
                 return -1;
@@ -31,7 +31,7 @@ namespace vexbridge::table
          * @param label The label to search for.
          * @return True if the label is contained, false otherwise.
          */
-        bool contains(const std::string &label)
+        static bool contains(const std::string &label)
         {
             return labelToID.find(label) != labelToID.end();
         }
@@ -41,7 +41,7 @@ namespace vexbridge::table
          * @param label The label to assign an ID.
          * @return The new ID assigned.
          */
-        uint16_t create(const std::string &label)
+        static uint16_t create(const std::string &label)
         {
             // Avoid race conditions
             mutex.take(0);
@@ -62,7 +62,11 @@ namespace vexbridge::table
         // The offset to start assigning IDs at
         static constexpr uint16_t ID_OFFSET = 0;
 
-        pros::Mutex mutex;
-        std::unordered_map<std::string, uint16_t> labelToID;
+        static pros::Mutex mutex;
+        static std::unordered_map<std::string, uint16_t> labelToID;
     };
 }
+
+// Initialize static members
+pros::Mutex vexbridge::table::LabelTable::mutex;
+std::unordered_map<std::string, uint16_t> vexbridge::table::LabelTable::labelToID = std::unordered_map<std::string, uint16_t>();
