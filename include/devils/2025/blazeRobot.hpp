@@ -188,9 +188,14 @@ namespace devils
         // AutoStepList *autoRoutine = AutoFactory::createPJMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, goalRushSystem, false);
         // AutoStepList *startMacro = AutoFactory::createBlazeStartMacro(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
 
-        // Auto Options
         RobotAutoOptions autoOptions = RobotAutoOptions();
+        std::vector<Routine> routines = {
+            {0, "Match 1", true},
+            {1, "Match 2", true},
+            {2, "Skills 1", false},
+            {3, "Skills 2", false}
+        };
         // Renderer
-        OptionsRenderer optionsRenderer = OptionsRenderer({"No Autons Yet", "Come back later"}, &autoOptions);
+        OptionsRenderer optionsRenderer = OptionsRenderer("Blaze", routines, &autoOptions);
     };
 }
