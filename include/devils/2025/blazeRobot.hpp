@@ -28,7 +28,6 @@ namespace devils
             // Default State
             intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
             mogoGrabber.setMogoGrabbed(false);
-            conveyor.setPickupRing(true); // Always allow the conveyor to pick up rings
 
             // Calibrate IMU
             // imu.calibrate();
@@ -129,7 +128,6 @@ namespace devils
 
                 // Conveyor
                 conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
-                conveyor.setPickupRing(true); // Always allow the conveyor to pick up rings
                 conveyor.setRingSorting(RingType::NONE);
                 conveyor.setArmLowered(intakeSystem.getArmPosition() == IntakeSystem::ArmPosition::BOTTOM_RING); // Always allow the conveyor to move
                 conveyor.moveAutomatic(pickupInput ? 1.0 : rightY);
@@ -161,7 +159,7 @@ namespace devils
         VEXBridge bridge = VEXBridge();
 
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 2, -3, 4, -5});
-        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {6, -7, 8, -9, 10});
+        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {21, -7, 8, -9, 10});
         SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {-19, 20});
         SmartMotorGroup intakeArmMotors = SmartMotorGroup("IntakeArmMotors", {17, -18});
 
@@ -190,10 +188,9 @@ namespace devils
         // AutoStepList *autoRoutine = AutoFactory::createPJMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, goalRushSystem, false);
         // AutoStepList *startMacro = AutoFactory::createBlazeStartMacro(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
 
-    
         // Auto Options
         RobotAutoOptions autoOptions = RobotAutoOptions();
         // Renderer
-        OptionsRenderer optionsRenderer = OptionsRenderer({"Hello", "World", "This", "Is", "A", "Test", "Of", "The", "OptionsRenderer"}, &autoOptions);
+        OptionsRenderer optionsRenderer = OptionsRenderer({"No Autons Yet", "Come back later"}, &autoOptions);
     };
 }

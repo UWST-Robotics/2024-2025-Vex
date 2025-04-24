@@ -35,6 +35,18 @@ namespace devils
         {
         }
 
+        void runAfterDelay(uint32_t delay, const std::function<void()> &callback)
+        {
+            // Create PROS task to run the callback after the delay
+            pros::Task([delay, callback]()
+                       {
+                           //
+                           pros::delay(delay);
+                           callback();
+                           //
+                       });
+        }
+
         /**
          * Sets the pose of the robot
          * @param pose The pose to set the robot to
@@ -87,7 +99,7 @@ namespace devils
          * @param isReversed Whether to drive in reverse or not
          * @param finalVelocity The final velocity to drive at in inches per second. Speed is carried over from the previous step.
          * @param strength The strength of the bezier curve (inches)
-         * @param options The options for the drive step
+         * @param constraints The constraints for the trajectory
          * @returns A pointer to the created step
          */
         AutoStepPtr driveToTrajectory(
@@ -97,13 +109,13 @@ namespace devils
             bool isReversed = false,
             double finalVelocity = 0,
             double strength = 10.0,
-            AutoRamseteStep::Options options = AutoRamseteStep::Options::defaultOptions)
+            TrajectoryConstraints constraints = {36, 48})
         {
             // Create a new pose
             Pose targetPose = Pose(x, y, Units::degToRad(rotation));
 
             // Return a new `AutoRamseteStep` with the given pose
-            return driveToTrajectoryPose(targetPose, isReversed, finalVelocity, strength, options);
+            return driveToTrajectoryPose(targetPose, isReversed, finalVelocity, strength, constraints);
         }
 
         /**
@@ -112,7 +124,7 @@ namespace devils
          * @param isReversed Whether to drive in reverse or not
          * @param finalVelocity The final velocity to drive at in inches per second. Speed is carried over from the previous step.
          * @param strength The strength of the bezier curve (inches)
-         * @param options The options for the drive step
+         * @param constraints The constraints for the trajectory
          * @returns A pointer to the created step
          */
         AutoStepPtr driveToTrajectoryPose(
@@ -120,7 +132,7 @@ namespace devils
             bool isReversed = false,
             double finalVelocity = 0,
             double strength = 10.0,
-            AutoRamseteStep::Options options = AutoRamseteStep::Options::defaultOptions)
+            TrajectoryConstraints constraints = {36, 54})
         {
             // Transform the pose
             Pose fromPose = tryTransformPose(this->pose);
@@ -136,7 +148,7 @@ namespace devils
 
             // Generate Trajectory
             auto trajectoryGenerator = TrajectoryGenerator(
-                TrajectoryConstraints{48, 92},
+                constraints,
                 TrajectoryGenerator::PathInfo{velocity, finalVelocity});
             auto trajectory = trajectoryGenerator.calc(path);
 
@@ -145,7 +157,7 @@ namespace devils
             velocity = finalVelocity;
 
             // Make a new `AutoRamseteStep` with the given trajectory
-            return std::make_unique<AutoRamseteStep>(chassis, odom, trajectory, options);
+            return std::make_unique<AutoRamseteStep>(chassis, odom, trajectory);
         }
 
         /**
@@ -211,6 +223,26 @@ namespace devils
             // Return a new `AutoRotateToStep` with the given heading
             return rotateTo(newHeading, timeout, options);
         }
+
+        /**
+         * Drives the robot a given distance in closed loop
+         * @param distance The distance to drive in inches
+         * @param timeout The timeout in milliseconds
+         * @param options The options for the drive step
+         */
+        // AutoStepPtr drive(
+        //     double distance,
+        //     uint32_t timeout = 2000,
+        //     AutoDriveStep::Options options = AutoDriveStep::Options::defaultOptions)
+        // {
+        //     // Create a new pose
+        //     Pose targetPose = Pose(pose.x + distance * std::cos(pose.rotation),
+        //                            pose.y + distance * std::sin(pose.rotation),
+        //                            pose.rotation);
+
+        //     // Return a new `AutoDriveStep` with the given pose
+        //     return std::make_unique<AutoTimeoutStep>(std::make_unique<AutoDriveStep>(chassis, odom, targetPose, options), timeout);
+        // }
 
         /**
          * Rotates the robot to a given heading

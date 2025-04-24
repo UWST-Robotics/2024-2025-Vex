@@ -42,6 +42,6 @@ namespace devils
         }
 
     private:
-        static constexpr double DELTA_INDEX = 0.1;
+        static constexpr double DELTA_INDEX = 0.01;
     };
 }

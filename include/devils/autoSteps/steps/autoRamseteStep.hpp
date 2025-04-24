@@ -25,16 +25,19 @@ namespace devils
             double maxSpeed = 1.0;
 
             /// @brief A proportional constant. Must be greater than 0. Larger values will result in more aggressive control.
-            double proportionGain = 0.03;
+            double proportionGain = 0.01;
 
             /// @brief A damping coefficient. Must be between 0 and 1. Larger values will result in increased damping.
-            double dampingCoefficient = 0.6;
+            double dampingCoefficient = 0.55;
 
             /// @brief Proportion (P in PID) between translational velocity and motor voltage
-            double translationP = 0.013;
+            double translationP = 0.012;
 
             /// @brief Proportion (P in PID) between rotational velocity and motor voltage
-            double rotationP = 0.115;
+            double rotationP = 0.1;
+
+            /// @brief Time in seconds of odometry latency. This is the time it takes for the odometry to update after the robot moves.
+            double sensorLatency = 0.2;
 
             /// @brief The default options for the drive step.
             static Options defaultOptions;
@@ -73,16 +76,13 @@ namespace devils
 
             // Get current setpoint
             auto setpoint = trajectory->getStateAt(t);
-
-            VEXBridge::set("setpoint/velocity", setpoint.velocity);
-            VEXBridge::set("setpoint/angularVelocity", setpoint.angularVelocity);
-            VEXBridge::set("setpoint/acceleration", setpoint.acceleration);
+            auto feedbackSetpoint = trajectory->getStateAt(t - options.sensorLatency);
 
             // Get current position
             auto currentPosition = odomSource.getPose();
 
             // Calculate error to setpoint
-            auto error = setpoint.pose - currentPosition;
+            auto error = feedbackSetpoint.pose - currentPosition;
 
             // Calculate local error
             // This is the error relative to the robot's current rotation
@@ -91,11 +91,7 @@ namespace devils
             auto localError = Pose(
                 error.x * cos(currentPosition.rotation) + error.y * sin(currentPosition.rotation),
                 -error.x * sin(currentPosition.rotation) + error.y * cos(currentPosition.rotation),
-                Units::diffRad(setpoint.pose.rotation, currentPosition.rotation));
-
-            VEXBridge::set("_poses/setpoint/x", setpoint.pose.x);
-            VEXBridge::set("_poses/setpoint/y", setpoint.pose.y);
-            VEXBridge::set("_poses/setpoint/rotation", Units::radToDeg(setpoint.pose.rotation));
+                Units::diffRad(feedbackSetpoint.pose.rotation, currentPosition.rotation));
 
             // Calculate controller gain
             // k = 2 * zeta * sqrt(w^2 + b * v^2)
@@ -123,15 +119,9 @@ namespace devils
             translationOutput *= options.translationP;
             rotationOutput *= options.rotationP;
 
-            VEXBridge::set("preclampTranslationOutput", translationOutput);
-
             // Clamp outputs
             translationOutput = Math::deadbandClamp(translationOutput, options.minSpeed, options.maxSpeed);
             rotationOutput = std::clamp(rotationOutput, -options.maxSpeed, options.maxSpeed);
-
-            VEXBridge::set("translationOutput", translationOutput);
-            VEXBridge::set("rotationOutput", rotationOutput);
-            VEXBridge::set("error", localError.magnitude());
 
             // Set the chassis output
             chassis.move(translationOutput, rotationOutput);

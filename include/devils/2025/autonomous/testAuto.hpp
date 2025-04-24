@@ -42,11 +42,8 @@ namespace devils
             OdomSource &odometry)
         {
             AutoBuilder pjRoutine = AutoBuilder(chassis, odometry);
-            pjRoutine.setPose(-50, -36, 180)->run();
-            pjRoutine.pause(1000)->run();
-
-            pjRoutine.driveToTrajectory(-10, -40, 135, true, 10)->run(); // Pickup Goal
-            pjRoutine.driveToTrajectory(-24, -48, 220)->run();
+            pjRoutine.setPose(0, 0, 0)->run();
+            pjRoutine.driveToTrajectory(48, 48, 90, false, 12)->run();
         }
     };
 }

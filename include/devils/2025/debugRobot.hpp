@@ -19,6 +19,14 @@ namespace devils
 
         void opcontrol() override
         {
+            VEXBridge::set<double>("TestValue", 0.0);
+            while (true)
+            {
+                auto value = VEXBridge::get<double>("TestValue", 0.0);
+                printf("TestValue: %f\n", value);
+
+                pros::delay(1000);
+            }
         }
 
         // Network Tables
@@ -27,11 +35,11 @@ namespace devils
         // Dummy Chassis
         DummyChassis dummyChassis = DummyChassis();
         // AutoStepList *blazeRoutine = AutoFactory::createTestAuto(dummyChassis);
-        VBOdom vbOdom = VBOdom("DummyOdom", dummyChassis);
+        // VBOdom vbOdom = VBOdom("DummyOdom", dummyChassis);
 
-       // Auto Options
-       RobotAutoOptions autoOptions = RobotAutoOptions();
-       // Renderer
-       OptionsRenderer optionsRenderer = OptionsRenderer({"Hello", "World", "This", "Is", "A", "Test", "Of", "The", "OptionsRenderer"}, &autoOptions);
+        // Auto Options
+        RobotAutoOptions autoOptions = RobotAutoOptions();
+        // Renderer
+        OptionsRenderer optionsRenderer = OptionsRenderer({"Hello", "World"}, &autoOptions);
     };
 }
