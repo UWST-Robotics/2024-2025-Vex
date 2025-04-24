@@ -19,15 +19,23 @@ namespace devils
 
         void opcontrol() override
         {
+            VEXBridge::set<double>("TestValue", 0.0);
+            while (true)
+            {
+                auto value = VEXBridge::get<double>("TestValue", 0.0);
+                printf("TestValue: %f\n", value);
+
+                pros::delay(1000);
+            }
         }
 
         // Network Tables
-        VEXBridge bridge = VEXBridge(0);
+        VEXBridge bridge = VEXBridge();
 
         // Dummy Chassis
         DummyChassis dummyChassis = DummyChassis();
         // AutoStepList *blazeRoutine = AutoFactory::createTestAuto(dummyChassis);
-        VBOdom vbOdom = VBOdom("DummyOdom", dummyChassis);
+        // VBOdom vbOdom = VBOdom("DummyOdom", dummyChassis);
 
         RobotAutoOptions autoOptions = RobotAutoOptions();
         std::vector<Routine> routines = {

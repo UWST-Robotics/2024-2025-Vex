@@ -124,36 +124,6 @@ namespace devils
         }
 
         /**
-         * Linearly interpolates between two poses
-         * Starts with the current pose and interpolates to the end pose
-         * @param endPose The end pose
-         * @param t The time to interpolate to. 0 is the current pose, 1 is the end pose.
-         * @return The interpolated pose
-         */
-        Pose lerp(const Pose endPose, const double t) const
-        {
-            return lerp(*this, endPose, t);
-        }
-
-        /**
-         * Linearly interpolates between two poses
-         * @param startPose The start pose
-         * @param endPose The end pose
-         * @param t The time to interpolate to. 0 is the start pose, 1 is the end pose.
-         * @return The interpolated pose
-         */
-        static Pose lerp(const Pose startPose, const Pose endPose, const double t)
-        {
-            // Calculate the interpolated pose
-            Pose interpolatedPose;
-            interpolatedPose.x = std::lerp(startPose.x, endPose.x, t);
-            interpolatedPose.y = std::lerp(startPose.y, endPose.y, t);
-            interpolatedPose.rotation = std::lerp(startPose.rotation, endPose.rotation, t);
-
-            return interpolatedPose;
-        }
-
-        /**
          * Prints the pose to a string
          * @return The pose as a string
          */

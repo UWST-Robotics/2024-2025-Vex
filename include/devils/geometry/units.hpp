@@ -89,7 +89,7 @@ namespace devils
          * @param radians The angle in radians to normalize.
          * @return The normalized angle in radians.
          */
-        static double normalizeRadians(double radians)
+        static double normalizeRadians(const double radians)
         {
             return mod(radians, 2 * M_PI);
         }

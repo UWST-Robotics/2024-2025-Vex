@@ -1,12 +1,11 @@
 #pragma once
 
 #include <cstring>
-#include "table/valueTable.hpp"
-#include "table/labelTable.hpp"
-#include "serial/serialWriter.hpp"
-#include "serial/serialSocket.hpp"
+#include "table/ValueTable.hpp"
+#include "table/LabelTable.hpp"
 #include "serial/drivers/usbSerialDriver.hpp"
-#include "serial/drivers/vexSerialDriver.hpp"
+#include "serial/serialSocket.hpp"
+#include "serial/serialWriter.hpp"
 
 using namespace vexbridge::table;
 using namespace vexbridge::serial;
@@ -22,16 +21,10 @@ namespace vexbridge
         /**
          * Opens a new socket connection to the VEXBridge.
          * Once instantiated, all calls to `VEXBridge` can be made statically.
-         * @param port The port to connect to. `0` for USB, `1 - 21` for VEX V5 ports.
          */
-        VEXBridge(uint8_t port)
+        VEXBridge()
+            : socket(std::make_unique<SerialSocket>(std::make_unique<USBSerialDriver>()))
         {
-            if (port == 0)
-                socket = std::make_unique<SerialSocket>(std::make_unique<USBSerialDriver>());
-            else if (port >= 1 && port <= 21)
-                socket = std::make_unique<SerialSocket>(std::make_unique<VEXSerialDriver>(port));
-            else
-                throw std::runtime_error("Invalid port number: " + std::to_string(port));
         }
 
         /**
@@ -44,9 +37,9 @@ namespace vexbridge
         static T get(const std::string label, const T defaultValue)
         {
             // Get the ID of the value
-            if (!labelTable.contains(label))
+            if (!LabelTable::contains(label))
                 return defaultValue;
-            int16_t id = labelTable.get(label);
+            int16_t id = LabelTable::get(label);
 
             // Get the value
             return getByID<T>(id, defaultValue);
@@ -72,12 +65,12 @@ namespace vexbridge
          */
         static uint16_t getOrAssignID(const std::string label)
         {
-            if (!labelTable.contains(label))
+            if (!LabelTable::contains(label))
             {
-                auto id = labelTable.create(label);
+                auto id = LabelTable::create(label);
                 SerialWriter::assignLabel(id, label);
             }
-            return labelTable.get(label);
+            return LabelTable::get(label);
         }
 
         /**
@@ -90,15 +83,15 @@ namespace vexbridge
         static T getByID(const uint16_t id, const T defaultValue)
         {
             // Check the type
-            if (!valueTable.isType<T>(id))
+            if (!ValueTable::isType<T>(id))
                 throw std::runtime_error("Type mismatch for value " + std::to_string(id));
 
             // Check if the value exists
-            if (!valueTable.contains(id))
+            if (!ValueTable::contains(id))
                 return defaultValue;
 
             // Get the value
-            return valueTable.get<T>(id);
+            return ValueTable::get<T>(id);
         }
 
         /**
@@ -110,11 +103,11 @@ namespace vexbridge
         template <typename T>
         static void setByID(const uint16_t id, const T value)
         {
-            if (valueTable.contains(id) &&
-                valueTable.get<T>(id) == value)
+            if (ValueTable::contains(id) &&
+                ValueTable::get<T>(id) == value)
                 return;
 
-            valueTable.set(id, value);
+            ValueTable::set(id, value);
             updateValue<T>(id, value);
         }
 
@@ -127,9 +120,6 @@ namespace vexbridge
         }
 
     private:
-        static ValueTable valueTable;
-        static LabelTable labelTable;
-
         std::unique_ptr<SerialSocket> socket;
     };
 }
@@ -180,7 +170,3 @@ void vexbridge::VEXBridge::updateValue<std::vector<double>>(const uint16_t id, c
 {
     SerialWriter::updateDoubleArray(id, value);
 }
-
-// Initialize static members
-ValueTable vexbridge::VEXBridge::valueTable;
-LabelTable vexbridge::VEXBridge::labelTable;

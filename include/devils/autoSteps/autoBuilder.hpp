@@ -3,6 +3,7 @@
 #include "../geometry/units.hpp"
 #include "../odom/odomSource.hpp"
 #include "../chassis/chassisBase.hpp"
+#include "../vexbridge/vbPath.hpp"
 #include "./steps/autoJumpToStep.hpp"
 #include "./steps/autoDriveStep.hpp"
 #include "./steps/autoDriveToStep.hpp"
@@ -12,6 +13,7 @@
 #include "./steps/autoPauseStep.hpp"
 #include "./steps/autoPurePursuitStep.hpp"
 #include "./steps/autoBoomerangStep.hpp"
+#include "./steps/autoRamseteStep.hpp"
 #include "./transformer/poseTransform.h"
 
 namespace devils
@@ -31,6 +33,18 @@ namespace devils
             : chassis(chassis),
               odom(odom)
         {
+        }
+
+        void runAfterDelay(uint32_t delay, const std::function<void()> &callback)
+        {
+            // Create PROS task to run the callback after the delay
+            pros::Task([delay, callback]()
+                       {
+                           //
+                           pros::delay(delay);
+                           callback();
+                           //
+                       });
         }
 
         /**
@@ -73,7 +87,77 @@ namespace devils
          */
         AutoStepPtr pause(uint32_t duration)
         {
+            velocity = 0.0;
             return std::make_unique<AutoPauseStep>(duration);
+        }
+
+        /**
+         * Drives the robot to a given pose using a bezier curve, trajectory generation, and ramsete control.
+         * @param x The x position to drive to in inches
+         * @param y The y position to drive to in inches
+         * @param rotation The rotation to drive to in degrees
+         * @param isReversed Whether to drive in reverse or not
+         * @param finalVelocity The final velocity to drive at in inches per second. Speed is carried over from the previous step.
+         * @param strength The strength of the bezier curve (inches)
+         * @param constraints The constraints for the trajectory
+         * @returns A pointer to the created step
+         */
+        AutoStepPtr driveToTrajectory(
+            double x,
+            double y,
+            double rotation,
+            bool isReversed = false,
+            double finalVelocity = 0,
+            double strength = 10.0,
+            TrajectoryConstraints constraints = {48, 64})
+        {
+            // Create a new pose
+            Pose targetPose = Pose(x, y, Units::degToRad(rotation));
+
+            // Return a new `AutoRamseteStep` with the given pose
+            return driveToTrajectoryPose(targetPose, isReversed, finalVelocity, strength, constraints);
+        }
+
+        /**
+         * Drives the robot to a given pose using a bezier curve, trajectory generation, and ramsete control.
+         * @param pose The pose to drive to
+         * @param isReversed Whether to drive in reverse or not
+         * @param finalVelocity The final velocity to drive at in inches per second. Speed is carried over from the previous step.
+         * @param strength The strength of the bezier curve (inches)
+         * @param constraints The constraints for the trajectory
+         * @returns A pointer to the created step
+         */
+        AutoStepPtr driveToTrajectoryPose(
+            Pose pose,
+            bool isReversed = false,
+            double finalVelocity = 0,
+            double strength = 10.0,
+            TrajectoryConstraints constraints = {48, 64})
+        {
+            // Transform the pose
+            Pose fromPose = tryTransformPose(this->pose);
+            Pose toPose = tryTransformPose(pose);
+
+            // Create a new path
+            SplinePath path = SplinePath::makeArc(fromPose, toPose, strength, isReversed);
+            VBPath::sync("AutoBuilderPath", path);
+
+            // Flip final velocity if the path is reversed
+            if (isReversed)
+                finalVelocity *= -1;
+
+            // Generate Trajectory
+            auto trajectoryGenerator = TrajectoryGenerator(
+                constraints,
+                TrajectoryGenerator::PathInfo{velocity, finalVelocity});
+            auto trajectory = trajectoryGenerator.calc(path);
+
+            // Set the current pose
+            this->pose = pose;
+            velocity = finalVelocity;
+
+            // Make a new `AutoRamseteStep` with the given trajectory
+            return std::make_unique<AutoRamseteStep>(chassis, odom, trajectory);
         }
 
         /**
@@ -113,6 +197,7 @@ namespace devils
         {
             // Set the current pose
             this->pose = pose;
+            velocity = 0.0;
 
             // Transform the pose
             Pose transformedPose = tryTransformPose(pose);
@@ -140,6 +225,26 @@ namespace devils
         }
 
         /**
+         * Drives the robot a given distance in closed loop
+         * @param distance The distance to drive in inches
+         * @param timeout The timeout in milliseconds
+         * @param options The options for the drive step
+         */
+        // AutoStepPtr drive(
+        //     double distance,
+        //     uint32_t timeout = 2000,
+        //     AutoDriveStep::Options options = AutoDriveStep::Options::defaultOptions)
+        // {
+        //     // Create a new pose
+        //     Pose targetPose = Pose(pose.x + distance * std::cos(pose.rotation),
+        //                            pose.y + distance * std::sin(pose.rotation),
+        //                            pose.rotation);
+
+        //     // Return a new `AutoDriveStep` with the given pose
+        //     return std::make_unique<AutoTimeoutStep>(std::make_unique<AutoDriveStep>(chassis, odom, targetPose, options), timeout);
+        // }
+
+        /**
          * Rotates the robot to a given heading
          * @param heading The heading to rotate to in degrees
          * @param timeout The timeout in milliseconds
@@ -152,6 +257,7 @@ namespace devils
         {
             // Convert & apply the heading to the current pose
             pose.rotation = Units::degToRad(heading);
+            velocity = 0.0;
 
             // Transform the pose
             Pose transformedPose = tryTransformPose(pose);
@@ -188,6 +294,9 @@ namespace devils
     private:
         /// @brief The current robot pose (pre-transform)
         Pose pose;
+
+        /// @brief The current velocity of the robot in inches per second
+        double velocity = 0.0;
 
         /// @brief The active transformer used to transform poses
         std::unique_ptr<PoseTransform> transformer = nullptr;

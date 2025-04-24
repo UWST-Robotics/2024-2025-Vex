@@ -4,7 +4,8 @@
 #include "subsystems/ConveyorSystem.hpp"
 #include "subsystems/IntakeSystem.hpp"
 #include "subsystems/MogoGrabSystem.hpp"
-#include "autonomous/pjSkillsAuto.hpp"
+#include "autonomous/pjMatchAuto.hpp"
+#include "autonomous/testAuto.hpp"
 
 namespace devils
 {
@@ -18,6 +19,7 @@ namespace devils
             conveyor.useSensor(&conveyorSensor);
 
             odometry.useIMU(&imu);
+            odometry.setSensorOffsets(verticalSensorOffset, horizontalSensorOffset);
             odometry.runAsync();
         }
 
@@ -26,14 +28,14 @@ namespace devils
             // Default State
             intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
             mogoGrabber.setMogoGrabbed(false);
-            conveyor.setPickupRing(true); // Always allow the conveyor to pick up rings
 
             // Calibrate IMU
-            // imu.calibrate();
             imu.waitUntilCalibrated();
 
             // Run Autonomous
-            PJSkillsAuto::runSkills(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
+            // TestAuto::runB(chassis, odometry);
+            PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
+            // PJSkillsAuto::runSkills(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
         }
 
         void opcontrol() override
@@ -79,14 +81,9 @@ namespace devils
                     intakeSystem.setArmPosition(IntakeSystem::ALLIANCE_STAKE);
                 else if (highArmInput)
                     intakeSystem.setArmPosition(IntakeSystem::NEUTRAL_STAKE);
-                else if (mogoArmInput)
-                    intakeSystem.setArmPosition(IntakeSystem::MOGO);
-                else if (neutralStakeDownInput)
-                    intakeSystem.setArmPosition(IntakeSystem::NEUTRAL_STAKE_DOWN);
                 else
                     intakeSystem.setArmPosition(IntakeSystem::INTAKE);
                 intakeSystem.moveArmToPosition();
-                intakeSystem.disableSpeedClamp(lowArmInput);
 
                 // Intake Claw
                 if (clawInput)
@@ -112,8 +109,8 @@ namespace devils
 
                 // Conveyor
                 conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
-                conveyor.setPickupRing(true);
                 conveyor.setArmLowered(false);
+                conveyor.setPaused(false);
                 conveyor.moveAutomatic(rightY);
                 conveyor.setRingSorting(RingType::NONE);
 
@@ -135,35 +132,36 @@ namespace devils
         }
 
         // Constants
-        static constexpr double DEAD_WHEEL_RADIUS = 1.0; // in
-        static constexpr double CONVEYOR_LENGTH = 84.0;  // teeth
-        static constexpr double HOOK_INTERVAL = 21.0;    // teeth
-        static constexpr double REJECT_OFFSET = 13;      // teeth
+        static constexpr double DEAD_WHEEL_RADIUS = 0.991; // in (slightly smaller to account for roller play)
+        static constexpr double CONVEYOR_LENGTH = 84.0;    // teeth
+        static constexpr double HOOK_INTERVAL = 21.0;      // teeth
+        static constexpr double REJECT_OFFSET = 13;        // teeth
+
+        Vector2 verticalSensorOffset = Vector2(-0.5, 0);
+        Vector2 horizontalSensorOffset = Vector2(0, 1);
 
         // Hardware
-        // VEXBridge bridge = VEXBridge(0);
+        // VEXBridge bridge = VEXBridge();
 
-        SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 2, -3, 4, -5});
-        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {6, -7, 8, -9, 10});
-        SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {19, -20});
-        SmartMotorGroup intakeArmMotors = SmartMotorGroup("IntakeArmMotors", {17, -18});
+        SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 3, -6, 2, -7});
+        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {10, -9, 5, -8, 21});
+        SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {-19, 20});
+        SmartMotorGroup intakeArmMotors = SmartMotorGroup("IntakeArmMotors", {-17, 18});
 
         RotationSensor verticalSensor = RotationSensor("VerticalOdom", 13);
-        RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 14);
+        RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 16);
 
-        OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 12);
-        InertialSensor imu = InertialSensor("IMU", 16);
-        RotationSensor intakeArmSensor = RotationSensor("IntakeArmSensor", 11);
+        OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 11);
+        InertialSensor imu = InertialSensor("IMU", 15);
 
         ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 1);
         ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 2);
-        ADIDigitalInput mogoLimitSwitch = ADIDigitalInput("MogoLimitSwitch", 3);
 
         // Subsystems
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
         ConveyorSystem conveyor = ConveyorSystem(conveyorMotors);
         MogoGrabSystem mogoGrabber = MogoGrabSystem(mogoPneumatic);
-        IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors, intakeArmSensor);
+        IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors);
         PerpendicularSensorOdometry odometry = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
 
         // Auto

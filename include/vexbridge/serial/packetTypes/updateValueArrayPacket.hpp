@@ -14,11 +14,7 @@ using namespace vexbridge::utils;
 namespace vexbridge::serial
 {
     template <typename T>
-    struct UpdateValueArrayPacket : public SerialPacket
-    {
-        uint16_t valueID;
-        std::vector<T> newValue;
-    };
+    using UpdateValueArrayPacket = vexbridge::serial::UpdateValuePacket<std::vector<T>>;
 
     template <typename T>
     struct UpdateValueArrayPacketType : public SerialPacketType

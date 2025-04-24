@@ -5,7 +5,7 @@
 #include "../../utils/math.hpp"
 #include "../../odom/odomSource.hpp"
 #include "../../chassis/chassisBase.hpp"
-#include "../../utils/pidController.hpp"
+#include "../../controller/pidController.hpp"
 #include "../../utils/timer.hpp"
 
 namespace devils
@@ -20,10 +20,10 @@ namespace devils
         struct Options
         {
             /// @brief The PID parameters for translation. Uses delta inches as the error.
-            PIDParams translationPID = PIDParams{0.1, 0.0, 0.0};
+            PIDController::Options translationPID = {0.1, 0.0, 0.0};
 
             /// @brief The PID parameters for rotation. Uses delta radians as the error.
-            PIDParams rotationPID = PIDParams{0.05, 0.0, 0.0};
+            PIDController::Options rotationPID = {0.05, 0.0, 0.0};
 
             /// @brief THe minimum speed in %
             double minSpeed = 0.0;

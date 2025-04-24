@@ -4,7 +4,7 @@
 #include "../../odom/odomSource.hpp"
 #include "../../chassis/chassisBase.hpp"
 #include "../../utils/math.hpp"
-#include "../../utils/pidController.hpp"
+#include "../../controller/pidController.hpp"
 #include "../../odom/poseVelocityCalculator.hpp"
 
 namespace devils
@@ -18,13 +18,13 @@ namespace devils
         struct Options
         {
             /// @brief The PID parameters to snap to an angle. Uses delta radians as the error.
-            PIDParams pidParams = PIDParams{0.1, 0.0, 0.0};
+            PIDController::Options pidParams = {0.1, 0.0, 0.0};
 
             /// @brief The minimum speed in %
             double minSpeed = 0.1;
 
             /// @brief The maximum speed in %
-            double maxSpeed = 0.3;
+            double maxSpeed = 0.6;
 
             /// @brief The distance to the goal in radians
             double goalDist = 0.015;

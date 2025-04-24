@@ -12,8 +12,6 @@ namespace devils
     {
         BlazeRobot()
         {
-            intakeSystem.setArmPositions(IntakeSystem::ArmPositionAngles{-0.07, -0.16});
-
             imu.calibrate();
 
             conveyorSensor.setLEDBrightness(100);
@@ -30,7 +28,6 @@ namespace devils
             // Default State
             intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
             mogoGrabber.setMogoGrabbed(false);
-            conveyor.setPickupRing(true); // Always allow the conveyor to pick up rings
 
             // Calibrate IMU
             // imu.calibrate();
@@ -131,7 +128,6 @@ namespace devils
 
                 // Conveyor
                 conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
-                conveyor.setPickupRing(true); // Always allow the conveyor to pick up rings
                 conveyor.setRingSorting(RingType::NONE);
                 conveyor.setArmLowered(intakeSystem.getArmPosition() == IntakeSystem::ArmPosition::BOTTOM_RING); // Always allow the conveyor to move
                 conveyor.moveAutomatic(pickupInput ? 1.0 : rightY);
@@ -160,10 +156,10 @@ namespace devils
         static constexpr double REJECT_OFFSET = 13;      // teeth
 
         // Hardware
-        // VEXBridge bridge = VEXBridge(0);
+        VEXBridge bridge = VEXBridge();
 
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 2, -3, 4, -5});
-        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {6, -7, 8, -9, 10});
+        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {21, -7, 8, -9, 10});
         SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {-19, 20});
         SmartMotorGroup intakeArmMotors = SmartMotorGroup("IntakeArmMotors", {17, -18});
 
@@ -172,7 +168,6 @@ namespace devils
 
         OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 11);
         InertialSensor imu = InertialSensor("IMU", 16);
-        RotationSensor intakeArmSensor = RotationSensor("IntakeArmSensor", 12);
 
         ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 1);
         ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 2);
@@ -183,7 +178,7 @@ namespace devils
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
         ConveyorSystem conveyor = ConveyorSystem(conveyorMotors);
         MogoGrabSystem mogoGrabber = MogoGrabSystem(mogoPneumatic);
-        IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors, intakeArmSensor);
+        IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors);
         GoalRushSystem goalRushSystem = GoalRushSystem(goalRushPneumatic);
         PerpendicularSensorOdometry odometry = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
 
@@ -193,7 +188,6 @@ namespace devils
         // AutoStepList *autoRoutine = AutoFactory::createPJMatchAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, goalRushSystem, false);
         // AutoStepList *startMacro = AutoFactory::createBlazeStartMacro(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
 
-    
         RobotAutoOptions autoOptions = RobotAutoOptions();
         std::vector<Routine> routines = {
             {0, "Match 1", true},

@@ -19,9 +19,9 @@ namespace devils
         {
             imu.setHeadingScale(1.013);
 
-            // odometry.useIMU(&imu);
-            // odometry.setTicksPerRevolution(300);
-            // odometry.runAsync();
+            odometry.useIMU(&imu);
+            odometry.setTicksPerRevolution(300);
+            odometry.runAsync();
         }
 
         void autonomous() override
@@ -30,7 +30,6 @@ namespace devils
 
         void opcontrol() override
         {
-            TestAuto::run(chassis, odometry);
         }
 
         void disabled() override
@@ -38,21 +37,21 @@ namespace devils
         }
 
         // VEXBridge
-        // VEXBridge bridge = VEXBridge(0);
+        VEXBridge bridge = VEXBridge();
+
 
         // Hardware
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-6, 7, -8, 9, -10});
         SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {16, -17, 18, -19, 20});
-        SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {1, -2});
         InertialSensor imu = InertialSensor("IMU", 15);
 
         // Subsystems
-        // TankChassis chassis = TankChassis(leftMotors, rightMotors);
-        DummyChassis chassis = DummyChassis();
+        TankChassis chassis = TankChassis(leftMotors, rightMotors);
+        // DummyChassis chassis = DummyChassis();
 
         // Auto
-        // TankChassisOdom odometry = TankChassisOdom(chassis, 1.375, 11);
-        OdomSource &odometry = chassis;
+        TankChassisOdom odometry = TankChassisOdom(chassis, 1.375, 11);
+        // OdomSource &odometry = chassis;
 
         // NT
         VBOdom vbOdom = VBOdom("TankOdom", odometry);

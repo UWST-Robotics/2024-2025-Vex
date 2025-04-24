@@ -24,7 +24,7 @@ namespace vexbridge::serial
             // Find the packet type
             SerialPacketType *packetType = AllPacketTypes::get(packet.type);
             if (packetType == nullptr)
-                throw std::runtime_error("Unknown packet type " + std::to_string((uint8_t)packet.type));
+                throw std::runtime_error("Unknown packet type while encoding: " + std::to_string((uint8_t)packet.type));
 
             // Serialize the packet
             auto encodedPacket = packetType->serialize(packet);
