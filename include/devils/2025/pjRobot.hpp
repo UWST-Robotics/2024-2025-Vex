@@ -34,7 +34,17 @@ namespace devils
 
             // Run Autonomous
             // TestAuto::runB(chassis, odometry);
-            PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
+            bool isBlue = autoOptions.allianceColor == AllianceColor::BLUE_ALLIANCE;
+            switch (autoOptions.routine.id)
+            {
+                case 0:
+                    PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, isBlue, true);
+                    break;
+                case 1:
+                    PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, isBlue, false);
+                    break;
+            }
+            // PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
             // PJSkillsAuto::runSkills(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
         }
 
@@ -169,10 +179,8 @@ namespace devils
 
         RobotAutoOptions autoOptions = RobotAutoOptions();
         std::vector<Routine> routines = {
-            {0, "Match 1", true},
-            {1, "Match 2", true},
-            {2, "Skills 1", false},
-            {3, "Skills 2", false}
+            {0, "Match (end center)", true},
+            {1, "Match (end side)", true},
         };
         // Renderer
         OptionsRenderer optionsRenderer = OptionsRenderer("PepperJack", routines, &autoOptions);
