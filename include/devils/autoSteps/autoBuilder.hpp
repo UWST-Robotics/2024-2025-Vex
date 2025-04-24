@@ -109,7 +109,7 @@ namespace devils
             bool isReversed = false,
             double finalVelocity = 0,
             double strength = 10.0,
-            TrajectoryConstraints constraints = {36, 48})
+            TrajectoryConstraints constraints = {48, 64})
         {
             // Create a new pose
             Pose targetPose = Pose(x, y, Units::degToRad(rotation));
@@ -132,7 +132,7 @@ namespace devils
             bool isReversed = false,
             double finalVelocity = 0,
             double strength = 10.0,
-            TrajectoryConstraints constraints = {36, 54})
+            TrajectoryConstraints constraints = {48, 64})
         {
             // Transform the pose
             Pose fromPose = tryTransformPose(this->pose);

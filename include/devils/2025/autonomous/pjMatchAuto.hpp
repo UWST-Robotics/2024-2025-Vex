@@ -17,7 +17,8 @@ namespace devils
             IntakeSystem &intake,
             ConveyorSystem &conveyor,
             MogoGrabSystem &mogoGrabber,
-            bool isBlue = false)
+            bool isBlue = false,
+            bool endCenter = false)
         {
             // PID Params
             PIDController::Options drivePID = {0.15, 0.0, 10};
@@ -35,11 +36,11 @@ namespace devils
             AutoRotateToStep::Options::defaultOptions = {
                 rotatePID,
                 0.15, // minSpeed
-                0.4,  // maxSpeed
-                0.05, // goalDist
+                0.6,  // maxSpeed
+                0.2,  // goalDist
             };
             TrajectoryConstraints slowConstraints = {24, 48};
-            TrajectoryConstraints fastConstraints = {48, 92};
+            TrajectoryConstraints fastConstraints = {64, 92};
 
             // Async Steps
             auto intakeStep = std::make_unique<AsyncIntakeStep>(intake);
@@ -55,28 +56,28 @@ namespace devils
             conveyor.setRingSorting(RingType::BLUE);
 
             // Mogo
-            pjRoutine.setPose(-55, 12, 124)->run();
-            pjRoutine.driveToTrajectory(-52, 0, 112.5, true, 0, 4)->run();
+            pjRoutine.setPose(-53, 12, 124)->run();
+            pjRoutine.driveToTrajectory(-50, 0, 112.5, true, 0, 1)->run();
             mogoGrabber.setMogoGrabbed(true);
 
             // Wall Stake Ring
-            pjRoutine.rotateTo(190)->run();
+            pjRoutine.rotateTo(200)->run();
             conveyor.setPaused(true);
-            pjRoutine.driveToTrajectory(-66, 2, 190, false, 0, 1, slowConstraints)->run();
+            pjRoutine.driveToTrajectory(-62, -2, 200, false, 0, 1, slowConstraints)->run();
             conveyor.setPaused(false);
-            pjRoutine.pause(200)->run();
-            pjRoutine.driveToTrajectory(-56, 0, 190, true, 0, 1, slowConstraints)->run();
+            pjRoutine.pause(300)->run();
+            pjRoutine.driveToTrajectory(-56, 0, 200, true, 0, 1, slowConstraints)->run();
             pjRoutine.rotateTo(90)->run();
 
             // Left Ring
             conveyor.setPaused(true);
-            pjRoutine.driveToTrajectory(-52, 48, 70, false, 0, 6)->run();
+            pjRoutine.driveToTrajectory(-49, 52, 70, false, 0, 6)->run();
             conveyor.setPaused(false);
-            pjRoutine.pause(500)->run();
+            pjRoutine.pause(300)->run();
 
             // Edge Ring
             conveyor.setPaused(true);
-            pjRoutine.driveToTrajectory(-18, 60, 0, false, 0, 8)->run();
+            pjRoutine.driveToTrajectory(-18, 62, 0, false, 0, 8)->run();
 
             if (isBlue)
             {
@@ -92,26 +93,29 @@ namespace devils
             intake.setClawGrabbed(false);
 
             pjRoutine.rotateTo(0)->run();
-            pjRoutine.driveToTrajectory(-8, 60, 0, false, 0, 3, slowConstraints)->run();
+            pjRoutine.driveToTrajectory(-5, 62, 0, false, 0, 3, slowConstraints)->run();
             intake.setClawGrabbed(true);
-            pjRoutine.driveToTrajectory(-20, 60, 0, true, 0, 3, slowConstraints)->run();
+            pjRoutine.driveToTrajectory(-18, 62, 0, true, 0, 3, slowConstraints)->run();
             intake.setClawGrabbed(false);
             intake.setArmPosition(IntakeSystem::ArmPosition::INTAKE);
             conveyor.setArmLowered(false);
-            pjRoutine.driveToTrajectory(-12, 60, 0, false, 0, 3, slowConstraints)->run();
+            pjRoutine.driveToTrajectory(-12, 62, 0, false, 0, 3, slowConstraints)->run();
             conveyor.setPaused(false);
             pjRoutine.pause(300)->run();
 
             // Right Ring
             pjRoutine.rotateTo(210)->run();
+            conveyor.setPaused(true);
             pjRoutine.driveToTrajectory(-28, 36, 202, false, 0, 10)->run();
+            conveyor.setPaused(false);
+            pjRoutine.pause(300)->run();
 
             // Corner
             intake.setArmPosition(IntakeSystem::ArmPosition::ALLIANCE_STAKE);
             pjRoutine.driveToTrajectory(-56, 56, 135, false, 0, 10)->run();
             conveyorStep->setTargetSpeed(0.6);
             conveyor.setPaused(true);
-            pjRoutine.driveToTrajectory(-64, 64, 135, false, 0, 2)->run();
+            pjRoutine.driveToTrajectory(-66, 66, 135, false, 0, 2)->run();
             conveyor.setPaused(false);
             pjRoutine.pause(4000)->run();
             conveyorStep->setTargetSpeed(1.0);
@@ -122,13 +126,21 @@ namespace devils
             pjRoutine.rotateTo(315)->run();
             pjRoutine.driveToTrajectory(-60, 60, 315, true, 0, 3)->run();
             mogoGrabber.setMogoGrabbed(false);
+            pjRoutine.driveToTrajectory(-50, 50, 315, false, 0, 3)->run();
 
             // End
-            intake.setArmPosition(IntakeSystem::ArmPosition::NEUTRAL_STAKE);
-            pjRoutine.driveToTrajectory(-18, 24, 315, false, 10, 10, fastConstraints)->run();
+            if (endCenter)
+            {
+                pjRoutine.rotateTo(135)->run();
+                pjRoutine.driveToTrajectory(-10, 10, 135, true, 0, 10)->run();
+            }
+            else
+            {
+                pjRoutine.rotateTo(180)->run();
+                pjRoutine.driveToTrajectory(-10, 50, 180, true, 0, 10)->run();
+            }
 
             // Stop
-            intake.setArmPosition(IntakeSystem::ArmPosition::ALLIANCE_STAKE);
             pjRoutine.pause(2000)->run();
         }
     };

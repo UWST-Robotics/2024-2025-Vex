@@ -43,6 +43,12 @@ namespace devils
         /**
          * Calculates the trajectory from a path.
          * This is a resource-intensive operation and should be called sparingly.
+         *
+         * @details This function steps through each point and uses `TrajectoryConstraints`
+         *          to constrain the acceleration and velocity of the robot. Then, it runs another pass backwards
+         *          to constrain the deceleration and velocity of the robot. Finally, it calculates the time,
+         *          actual acceleration, and angular velocity for each point.
+         *
          * @param path The path to generate the trajectory from
          * @return The generated trajectory
          */
@@ -118,8 +124,10 @@ namespace devils
                 double deltaDistance = point.pose.distanceTo(previousPoint.pose);
 
                 // Calculate velocity
+                // Note: Uses deceleration instead of acceleration since
+                // we are stepping from the end of the path to the beginning
                 // v_f = sqrt(v_i^2 + 2*a*d)
-                double velocity = sqrt(pow(previousPoint.velocity, 2) + 2 * constraints.maxAcceleration * deltaDistance);
+                double velocity = sqrt(pow(previousPoint.velocity, 2) + 2 * constraints.maxDeceleration * deltaDistance);
 
                 // Calculate dot product to determine if the robot is moving forward or backward
                 double prevDotCurrentPose = cos(point.pose.rotation) *
@@ -129,10 +137,7 @@ namespace devils
 
                 // If the dot product is negative, we are moving backwards
                 if (prevDotCurrentPose < 0)
-                {
-                    // Reverse the velocity
                     velocity = -velocity;
-                }
 
                 // Clamp velocity to existing point
                 velocity = Math::minMagnitude(velocity, point.velocity);
@@ -155,7 +160,7 @@ namespace devils
                 // Calculate distance
                 double deltaDistance = point.pose.distanceTo(previousPoint.pose);
 
-                // Calculate acceleration
+                // Calculate actual acceleration
                 // a = (v_f^2 - v_i^2) / (2 * d)
                 double acceleration = (pow(point.velocity, 2) - pow(previousPoint.velocity, 2)) / (2 * deltaDistance);
                 if (std::isnan(acceleration))
