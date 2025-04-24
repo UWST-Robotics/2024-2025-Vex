@@ -12,7 +12,7 @@ namespace devils
     };
 
     struct Routine{
-        unsigned int id;
+        uint8_t id;
         std::string displayName;
         bool requiresAllianceColor = false;
     };
