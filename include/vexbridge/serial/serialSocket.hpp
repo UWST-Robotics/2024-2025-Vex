@@ -45,12 +45,19 @@ namespace vexbridge::serial
          */
         void writePacket(std::shared_ptr<SerialPacket> packet)
         {
-            // Check if the packet is nullptr
-            if (!packet)
-                throw std::runtime_error("Cannot write a nullptr packet.");
+            try
+            {
+                // Check if the packet is nullptr
+                if (!packet)
+                    throw std::runtime_error("Cannot write a nullptr packet.");
 
-            // Write the packet to the serial port
-            serialWriter->sendPacket(packet);
+                // Write the packet to the serial port
+                serialWriter->sendPacket(packet);
+            }
+            catch (std::exception &e)
+            {
+                // Do nothing
+            }
         }
 
         /**

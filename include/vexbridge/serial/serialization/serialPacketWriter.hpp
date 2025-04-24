@@ -96,7 +96,7 @@ namespace vexbridge::serial
                     sentPackets.erase(it);
 
                     // Log the failure
-                    printf("Packet %d failed to send after %d retries.\n", sentPacket.packet->id, MAX_RETRIES);
+                    // printf("Packet %d failed to send after %d retries.\n", sentPacket.packet->id, MAX_RETRIES);
 
                     // Decrement the index to account for the removed packet and continue
                     i--;
@@ -104,7 +104,7 @@ namespace vexbridge::serial
                 }
 
                 // Log the retry attempt
-                printf("Resending packet %d (attempt %d)\n", sentPacket.packet->id, sentPacket.retries + 1);
+                // printf("Resending packet %d (attempt %d)\n", sentPacket.packet->id, sentPacket.retries + 1);
 
                 // Resend the packet
                 writePacketToSerial(sentPacket.packet);

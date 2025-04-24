@@ -15,6 +15,7 @@
 #include "../packetTypes/updateIntArrayPacket.hpp"
 #include "../packetTypes/updateFloatArrayPacket.hpp"
 #include "../packetTypes/updateDoubleArrayPacket.hpp"
+#include "../packetTypes/updateFloatArrayPacket.hpp"
 
 namespace vexbridge::serial
 {

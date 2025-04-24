@@ -59,7 +59,7 @@ namespace vexbridge::serial
                 catch (std::exception &e)
                 {
                     // Log the error
-                    printf("Failed to handle packet: %s\n", e.what());
+                    // printf("Failed to handle packet: %s\n", e.what());
                 }
             }
         }

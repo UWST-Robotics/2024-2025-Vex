@@ -38,7 +38,7 @@ namespace vexbridge::serial
             // Check if the checksum is valid
             uint8_t calculatedChecksum = Checksum::calc(decodedBuffer, payloadSize + 4);
             if (checksum != calculatedChecksum)
-                throw std::runtime_error("Invalid checksum for packet " + std::to_string(id));
+                throw std::runtime_error("Invalid checksum while decoding packet: " + std::to_string(id));
 
             // Create Temporary Packet to store payload
             EncodedSerialPacket tempPacket;
@@ -49,7 +49,7 @@ namespace vexbridge::serial
             // Find the packet type
             SerialPacketType *packetType = AllPacketTypes::get(tempPacket.type);
             if (packetType == nullptr)
-                throw std::runtime_error("Unknown packet type " + std::to_string(type));
+                throw std::runtime_error("Unknown packet type while decoding: " + std::to_string(type));
 
             // Deserialize the packet
             return packetType->deserialize(tempPacket);
