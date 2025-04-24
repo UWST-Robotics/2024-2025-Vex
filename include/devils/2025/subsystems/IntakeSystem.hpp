@@ -23,10 +23,10 @@ namespace devils
         /// @brief Represents the angles of the intake arm for each position.
         struct ArmPositionAngles
         {
-            double bottomRing = 0;
-            double intake = 90;
+            double bottomRing = 50;
+            double intake = 130;
             double fourthRing = 400;
-            double allianceStake = 500;
+            double allianceStake = 650;
             double neutralStake = 1000;
         };
 
@@ -171,12 +171,9 @@ namespace devils
             // Get the current position of the motor
             double currentPosition = motor->getPosition();
             double error = angle - currentPosition;
-            VEXBridge::set("CurrentPos", currentPosition);
-            VEXBridge::set("TargetPos", angle);
 
             // PID Control
             double speed = armPID.update(error);
-            VEXBridge::set("IntakeSpeed", speed);
 
             // Clamp speed to avoid slamming
             if (!isSpeedClampDisabled)

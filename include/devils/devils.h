@@ -21,6 +21,7 @@
 #include "hardware/adiPneumatic.hpp"
 #include "hardware/adiDigitalInput.hpp"
 #include "hardware/adiPneumaticGroup.hpp"
+#include "hardware/chainLoop.hpp"
 
 // Odom
 #include "odom/odomSource.hpp"
