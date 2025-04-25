@@ -56,7 +56,7 @@ namespace devils
             conveyor.setRingSorting(RingType::BLUE);
 
             // Mogo
-            pjRoutine.setPose(-53, 12, 124)->run();
+            pjRoutine.setPose(-52, 12, 124)->run();
             pjRoutine.driveToTrajectory(-50, 0, 112.5, true, 0, 1)->run();
             mogoGrabber.setMogoGrabbed(true);
 
@@ -77,7 +77,7 @@ namespace devils
 
             // Edge Ring
             conveyor.setPaused(true);
-            pjRoutine.driveToTrajectory(-18, 62, 0, false, 0, 8)->run();
+            pjRoutine.driveToTrajectory(-18, 64, 0, false, 0, 8)->run();
 
             if (isBlue)
             {

@@ -37,12 +37,12 @@ namespace devils
             bool isBlue = autoOptions.allianceColor == AllianceColor::BLUE_ALLIANCE;
             switch (autoOptions.routine.id)
             {
-                case 0:
-                    PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, isBlue, true);
-                    break;
-                case 1:
-                    PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, isBlue, false);
-                    break;
+            case 0:
+                PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, isBlue, true);
+                break;
+            case 1:
+                PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, isBlue, false);
+                break;
             }
             // PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
             // PJSkillsAuto::runSkills(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
@@ -56,6 +56,9 @@ namespace devils
 
             // Stop autonomous
             AutoStep::stopAll();
+
+            // PTO
+            bool isPTOEnabled = false;
 
             // Loop
             while (true)
@@ -74,6 +77,8 @@ namespace devils
 
                 bool clawInput = mainController.get_digital_new_press(DIGITAL_R1) || mainController.get_digital_new_press(DIGITAL_R2);
                 bool mogoInput = mainController.get_digital_new_press(DIGITAL_L2) || mainController.get_digital_new_press(DIGITAL_L1);
+
+                bool togglePTOInput = mainController.get_digital_new_press(DIGITAL_UP);
 
                 // Curve Joystick Inputs for improved control
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1, 0.15);
@@ -117,6 +122,16 @@ namespace devils
                         mainController.rumble(".");
                 }
 
+                // PTO
+                if (togglePTOInput)
+                {
+                    // Toggle PTO
+                    isPTOEnabled = !isPTOEnabled;
+                    symmetricControl.resetOffsets();
+                    if (isPTOEnabled)
+                        mainController.rumble("-");
+                }
+
                 // Conveyor
                 conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
                 conveyor.setArmLowered(false);
@@ -125,7 +140,10 @@ namespace devils
                 conveyor.setRingSorting(RingType::NONE);
 
                 // Move Chassis
-                chassis.move(leftY, leftX);
+                if (!isPTOEnabled)
+                    chassis.move(leftY, leftX);
+                else
+                    symmetricControl.drive(leftY);
 
                 // Delay to prevent the CPU from being overloaded
                 pros::delay(20);
@@ -151,7 +169,7 @@ namespace devils
         Vector2 horizontalSensorOffset = Vector2(0, 1);
 
         // Hardware
-        // VEXBridge bridge = VEXBridge();
+        VEXBridge bridge = VEXBridge();
 
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 3, -6, 2, -7});
         SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {10, -9, 5, -8, 21});
@@ -173,6 +191,7 @@ namespace devils
         MogoGrabSystem mogoGrabber = MogoGrabSystem(mogoPneumatic);
         IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors);
         PerpendicularSensorOdometry odometry = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
+        SymmetricControl symmetricControl = SymmetricControl(leftMotors, rightMotors);
 
         // Auto
         VBOdom vbOdom = VBOdom("PJ", odometry);
