@@ -131,6 +131,7 @@ namespace devils
                     if (isPTOEnabled)
                         mainController.rumble("-");
                 }
+                ptoPneumatic.setExtended(isPTOEnabled);
 
                 // Conveyor
                 conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
@@ -140,10 +141,12 @@ namespace devils
                 conveyor.setRingSorting(RingType::NONE);
 
                 // Move Chassis
-                if (!isPTOEnabled)
-                    chassis.move(leftY, leftX);
-                else
+                if (isPTOEnabled)
+                    // Drive symmetrically
                     symmetricControl.drive(leftY);
+                else
+                    // Drive normally
+                    chassis.move(leftY, leftX);
 
                 // Delay to prevent the CPU from being overloaded
                 pros::delay(20);
@@ -182,8 +185,11 @@ namespace devils
         OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 11);
         InertialSensor imu = InertialSensor("IMU", 15);
 
-        ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 1);
-        ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 2);
+        ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 1);
+        ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 2);
+        ADIPneumatic ptoPneumatic = ADIPneumatic("PTOPneumatic", 3);
+
+        ADIDigitalInput ringSensor = ADIDigitalInput("RingSensor", -4);
 
         // Subsystems
         TankChassis chassis = TankChassis(leftMotors, rightMotors);

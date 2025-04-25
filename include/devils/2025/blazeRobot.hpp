@@ -17,7 +17,7 @@ namespace devils
             conveyorSensor.setLEDBrightness(100);
             conveyor.useSensor(&conveyorSensor);
 
-            mogoGrabber.useSensor(&mogoSensor);
+            mogoGrabber.useSensor(&mogoRushSensor);
 
             odometry.useIMU(&imu);
             odometry.runAsync();
@@ -45,6 +45,9 @@ namespace devils
             // Stop autonomous
             AutoStep::stopAll();
 
+            // PTO
+            bool isPTOEnabled = false;
+
             // Loop
             while (true)
             {
@@ -65,6 +68,7 @@ namespace devils
                 bool slowInput = false; // mainController.get_digital(DIGITAL_L1);
 
                 bool goalRushInput = mainController.get_digital_new_press(DIGITAL_LEFT);
+                bool togglePTOInput = mainController.get_digital_new_press(DIGITAL_UP);
 
                 // Curve Joystick Inputs
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1, 0.15);
@@ -123,6 +127,17 @@ namespace devils
                         mainController.rumble("...");
                 }
 
+                // PTO
+                if (togglePTOInput)
+                {
+                    // Toggle PTO
+                    isPTOEnabled = !isPTOEnabled;
+                    symmetricControl.resetOffsets();
+                    if (isPTOEnabled)
+                        mainController.rumble("-");
+                }
+                ptoPneumatic.setExtended(isPTOEnabled);
+
                 // Slow Mode
                 double speedMultiplier = slowInput ? 0.5 : 1.0;
 
@@ -133,7 +148,12 @@ namespace devils
                 conveyor.moveAutomatic(pickupInput ? 1.0 : rightY);
 
                 // Move Chassis
-                chassis.move(leftY * speedMultiplier, combinedX * speedMultiplier);
+                if (isPTOEnabled)
+                    // Drive symmetrically
+                    symmetricControl.drive(leftY);
+                else
+                    // Drive normally
+                    chassis.move(leftY * speedMultiplier, combinedX * speedMultiplier);
 
                 // Delay to prevent the CPU from being overloaded
                 pros::delay(20);
@@ -171,8 +191,11 @@ namespace devils
 
         ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 1);
         ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 2);
-        ADIDigitalInput mogoSensor = ADIDigitalInput("MogoSensor", -3);
-        ADIPneumatic goalRushPneumatic = ADIPneumatic("GoalRushPneumatic", 4);
+        ADIPneumatic goalRushPneumatic = ADIPneumatic("GoalRushPneumatic", 3);
+        ADIPneumatic ptoPneumatic = ADIPneumatic("PTOPneumatic", 4);
+
+        ADIDigitalInput mogoRushSensor = ADIDigitalInput("MogoRushSensor", -5);
+        ADIDigitalInput ringSensor = ADIDigitalInput("RingSensor", -6);
 
         // Subsystems
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
@@ -181,6 +204,7 @@ namespace devils
         IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors);
         GoalRushSystem goalRushSystem = GoalRushSystem(goalRushPneumatic);
         PerpendicularSensorOdometry odometry = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
+        SymmetricControl symmetricControl = SymmetricControl(leftMotors, rightMotors);
 
         // Auto
         VBOdom vbOdom = VBOdom("Blaze", odometry);
@@ -193,8 +217,7 @@ namespace devils
             {0, "Match 1", true},
             {1, "Match 2", true},
             {2, "Skills 1", false},
-            {3, "Skills 2", false}
-        };
+            {3, "Skills 2", false}};
         // Renderer
         OptionsRenderer optionsRenderer = OptionsRenderer("Blaze", routines, &autoOptions);
     };
