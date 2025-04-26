@@ -5,6 +5,7 @@
 #include "subsystems/IntakeSystem.hpp"
 #include "subsystems/GoalRushSystem.hpp"
 #include "subsystems/MogoGrabSystem.hpp"
+#include "subsystems/HornLEDSystem.hpp"
 
 namespace devils
 {
@@ -197,6 +198,9 @@ namespace devils
         ADIDigitalInput mogoRushSensor = ADIDigitalInput("MogoRushSensor", -5);
         ADIDigitalInput ringSensor = ADIDigitalInput("RingSensor", -6);
 
+        LED leftHornLED = LED("LeftHornLED", 7);
+        LED rightHornLED = LED("RightHornLED", 8);
+
         // Subsystems
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
         ConveyorSystem conveyor = ConveyorSystem(conveyorMotors);
@@ -205,6 +209,7 @@ namespace devils
         GoalRushSystem goalRushSystem = GoalRushSystem(goalRushPneumatic);
         PerpendicularSensorOdometry odometry = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
         SymmetricControl symmetricControl = SymmetricControl(leftMotors, rightMotors);
+        HornLEDSystem hornLEDSystem = HornLEDSystem(leftHornLED, rightHornLED);
 
         // Auto
         VBOdom vbOdom = VBOdom("Blaze", odometry);

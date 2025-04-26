@@ -15,6 +15,7 @@ namespace devils
         {
             BOTTOM_RING,    // Grabs rings off the ground
             INTAKE,         // Slightly elevated to allow for intake
+            SECOND_RING,    // Grabs the 2nd ring off a stack, used for autonomous
             FOURTH_RING,    // Grabs the 4th ring off a stack, used for autonomous
             ALLIANCE_STAKE, // Raises the arm to the shorter alliance (red/blue) stakes
             NEUTRAL_STAKE,  // Raises the arm to the taller neutral stakes
@@ -25,6 +26,7 @@ namespace devils
         {
             double bottomRing = 50;
             double intake = 130;
+            double secondRing = 200;
             double fourthRing = 400;
             double allianceStake = 650;
             double neutralStake = 1000;
@@ -139,6 +141,8 @@ namespace devils
                 return armPositionAngles.bottomRing;
             case INTAKE:
                 return armPositionAngles.intake;
+            case SECOND_RING:
+                return armPositionAngles.secondRing;
             case FOURTH_RING:
                 return armPositionAngles.fourthRing;
             case ALLIANCE_STAKE:

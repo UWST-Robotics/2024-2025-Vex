@@ -23,6 +23,7 @@
 #include "hardware/adiPneumaticGroup.hpp"
 #include "hardware/chainLoop.hpp"
 #include "hardware/symmetricControl.hpp"
+#include "hardware/led.hpp"
 
 // Odom
 #include "odom/odomSource.hpp"

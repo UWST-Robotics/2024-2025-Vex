@@ -185,11 +185,14 @@ namespace devils
         OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 11);
         InertialSensor imu = InertialSensor("IMU", 15);
 
-        ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 1);
-        ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 2);
+        ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 1);
+        ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 2);
         ADIPneumatic ptoPneumatic = ADIPneumatic("PTOPneumatic", 3);
 
         ADIDigitalInput ringSensor = ADIDigitalInput("RingSensor", -4);
+
+        LED leftHornLED = LED("LeftHornLED", 7);
+        LED rightHornLED = LED("RightHornLED", 8);
 
         // Subsystems
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
@@ -198,6 +201,7 @@ namespace devils
         IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors);
         PerpendicularSensorOdometry odometry = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
         SymmetricControl symmetricControl = SymmetricControl(leftMotors, rightMotors);
+        HornLEDSystem hornLEDSystem = HornLEDSystem(leftHornLED, rightHornLED);
 
         // Auto
         VBOdom vbOdom = VBOdom("PJ", odometry);
