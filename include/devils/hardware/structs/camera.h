@@ -9,48 +9,26 @@ namespace devils
      */
     struct ICamera
     {
-        /// @brief The physical parameters of the camera.
-        struct Parameters
-        {
-            /// @brief The width of the image in pixels.
-            double imageWidth;
-
-            /// @brief The height of the image in pixels.
-            double imageHeight;
-
-            /// @brief The horizontal field of view of the camera in radians.
-            double xFOV;
-
-            /// @brief The vertical field of view of the camera in radians.
-            double yFOV;
-        };
-
         /// @brief Represents an object detected by the camera.
         struct VisionObject
         {
-            /// @brief The x position of the object in pixels.
-            int32_t x;
+            /// @brief The x position of the object measured in the camera's frame. Represented as a percentage of the camera's width from -1 to 1.
+            double x;
 
-            /// @brief The y position of the object in pixels.
-            int32_t y;
-
-            /// @brief The width of the object in pixels.
-            int32_t width;
-
-            /// @brief The height of the object in pixels.
-            int32_t height;
+            /// @brief The y position of the object measured in the camera's frame. Represented as a percentage of the camera's height from -1 to 1.
+            double y;
         };
 
         /**
-         * Gets the camera's physical parameters.
-         * @return The camera's physical parameters.
+         * Gets the closest vision object
+         * @returns The closest vision object
          */
-        virtual const Parameters getParameters() = 0;
+        virtual VisionObject getClosestTarget() = 0;
 
         /**
-         * Gets a list of all objects in the camera's field of view.
-         * @return A list of all objects in the camera's field of view.
+         * Returns true if the camera has detected any targets.
+         * @return True if the camera has detected any targets, false otherwise.
          */
-        virtual std::vector<VisionObject> getObjectsInView() = 0;
+        virtual bool hasTargets() = 0;
     };
 }

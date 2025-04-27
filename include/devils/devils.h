@@ -17,13 +17,14 @@
 #include "hardware/inertialSensor.hpp"
 #include "hardware/inertialSensorGroup.hpp"
 #include "hardware/opticalSensor.hpp"
-#include "hardware/visionSensor.hpp"
+#include "hardware/legacyVisionSensor.hpp"
 #include "hardware/adiPneumatic.hpp"
 #include "hardware/adiDigitalInput.hpp"
 #include "hardware/adiPneumaticGroup.hpp"
 #include "hardware/chainLoop.hpp"
 #include "hardware/symmetricControl.hpp"
 #include "hardware/led.hpp"
+#include "hardware/devilCV.hpp"
 
 // Odom
 #include "odom/odomSource.hpp"
@@ -31,6 +32,8 @@
 #include "odom/tankChassisOdom.hpp"
 #include "odom/perpendicularSensorOdom.hpp"
 #include "odom/parallelSensorOdom.hpp"
+#include "odom/delayedOdom.hpp"
+#include "odom/visionTargetOdom.hpp"
 
 // Pros
 #include "api.h"

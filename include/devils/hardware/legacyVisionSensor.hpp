@@ -1,17 +1,19 @@
 #pragma once
 #include "pros/motors.hpp"
 #include "pros/vision.hpp"
+#include "pros/error.h"
 #include "../utils/logger.hpp"
 #include "structs/hardwareBase.hpp"
 #include "structs/camera.h"
+#include "../geometry/units.hpp"
 #include <string>
 
 namespace devils
 {
     /**
-     * Represents a vision sensor object. All events are logged.
+     * Represents a VEX legacy vision sensor object.
      */
-    class VisionSensor : private HardwareBase, public ICamera
+    class LegacyVisionSensor : private HardwareBase, public ICamera
     {
     public:
         // Thank you James Pearman for these measurements
@@ -26,7 +28,7 @@ namespace devils
          * @param name The name of the motor (for logging purposes)
          * @param port The port of the motor (from 1 to 21)
          */
-        VisionSensor(std::string name, uint8_t port)
+        LegacyVisionSensor(std::string name, uint8_t port)
             : HardwareBase(name, "VisionSensor", port),
               sensor(port, pros::E_VISION_ZERO_CENTER)
         {
@@ -56,29 +58,21 @@ namespace devils
                 reportFault("Failed to reset LED color");
         }
 
-        const ICamera::Parameters getParameters() override
+        bool hasTargets() override
         {
-            return ICamera::Parameters{
-                VISION_WIDTH_PX,
-                VISION_HEIGHT_PX,
-                Units::degToRad(VISION_WIDTH_FOV),
-                Units::degToRad(VISION_HEIGHT_FOV)};
+            int32_t objectCount = sensor.get_object_count();
+            return objectCount > 0;
         }
 
-        std::vector<ICamera::VisionObject> getObjectsInView() override
+        ICamera::VisionObject getClosestTarget() override
         {
-            std::vector<ICamera::VisionObject> objects;
-            int32_t objectCount = sensor.get_object_count();
-            for (int32_t i = 0; i < objectCount; i++)
-            {
-                auto object = sensor.get_by_size(i);
-                objects.push_back(ICamera::VisionObject{
-                    object.x_middle_coord,
-                    object.y_middle_coord,
-                    object.width,
-                    object.height});
-            }
-            return objects;
+            // Get the biggest object in view
+            auto object = sensor.get_by_size(0);
+
+            // Return the object as a VisionObject
+            return ICamera::VisionObject{
+                (double)object.x_middle_coord / VISION_WIDTH_PX,
+                (double)object.y_middle_coord / VISION_HEIGHT_PX};
         }
 
     private:
