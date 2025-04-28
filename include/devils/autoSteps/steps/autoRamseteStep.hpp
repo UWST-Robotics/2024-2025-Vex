@@ -28,7 +28,7 @@ namespace devils
             double proportionGain = 0.01;
 
             /// @brief A damping coefficient. Must be between 0 and 1. Larger values will result in increased damping.
-            double dampingCoefficient = 0.55;
+            double dampingCoefficient = 0.75;
 
             /// @brief Proportion (P in PID) between translational velocity and motor voltage
             double translationP = 0.012;

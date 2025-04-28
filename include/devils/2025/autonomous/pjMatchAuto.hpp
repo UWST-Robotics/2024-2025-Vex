@@ -21,18 +21,9 @@ namespace devils
             bool endCenter = false)
         {
             // PID Params
-            PIDController::Options drivePID = {0.15, 0.0, 10};
             PIDController::Options rotatePID = {0.7, 0.0, 50.0};
-            PIDController::Options drivingRotatePID = {1.5, 0.0, 100.0};
 
             // Default Options
-            AutoDriveToStep::Options::defaultOptions = {
-                drivePID,
-                drivingRotatePID,
-                0.0, // minSpeed
-                0.3, // maxSpeed
-                2.0, // goalDist
-            };
             AutoRotateToStep::Options::defaultOptions = {
                 rotatePID,
                 0.15, // minSpeed
@@ -138,7 +129,7 @@ namespace devils
             }
 
             // Stop
-            pjRoutine.pause(2000)->run();
+            pjRoutine.pause(999999)->run();
         }
     };
 }

@@ -5,6 +5,7 @@
 #include "subsystems/IntakeSystem.hpp"
 #include "subsystems/MogoGrabSystem.hpp"
 #include "autonomous/pjMatchAuto.hpp"
+#include "autonomous/pjSkillsAuto.hpp"
 #include "autonomous/testAuto.hpp"
 
 namespace devils
@@ -38,9 +39,12 @@ namespace devils
             switch (autoOptions.routine.id)
             {
             case 0:
-                PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, isBlue, true);
+                PJSkillsAuto::runSkills(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
                 break;
             case 1:
+                PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, isBlue, true);
+                break;
+            case 2:
                 PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, isBlue, false);
                 break;
             }
@@ -208,8 +212,9 @@ namespace devils
 
         RobotAutoOptions autoOptions = RobotAutoOptions();
         std::vector<Routine> routines = {
-            {0, "Match (end center)", true},
-            {1, "Match (end side)", true},
+            {0, "Skills", false},
+            {1, "Match (end center)", true},
+            {2, "Match (end side)", true},
         };
         // Renderer
         OptionsRenderer optionsRenderer = OptionsRenderer("PepperJack", routines, &autoOptions);

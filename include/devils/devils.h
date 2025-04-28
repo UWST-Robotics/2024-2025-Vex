@@ -24,7 +24,7 @@
 #include "hardware/chainLoop.hpp"
 #include "hardware/symmetricControl.hpp"
 #include "hardware/led.hpp"
-#include "hardware/devilCV.hpp"
+// #include "hardware/devilCV.hpp"
 
 // Odom
 #include "odom/odomSource.hpp"

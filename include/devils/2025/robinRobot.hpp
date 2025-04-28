@@ -53,16 +53,16 @@ namespace devils
         // OdomSource &odometry = chassis;
 
         // Vision
-        DevilCV camera = DevilCV();
-        VisionTargetOdom ringOdom = VisionTargetOdom(
-            odometry,
-            std::make_shared<ICamera>(camera),
-            DevilCV::VISION_WIDTH_FOV,
-            100);
+        // DevilCV camera = DevilCV("red");
+        // VisionTargetOdom ringOdom = VisionTargetOdom(
+        //     odometry,
+        //     std::make_shared<ICamera>(camera),
+        //     DevilCV::VISION_WIDTH_FOV,
+        //     100);
 
         // NT
-        VBOdom vbOdom = VBOdom("TankOdom", odometry);
-        VBOdom vbOdom = VBOdom("RingOdom", ringOdom);
+        VBOdom tankOdom = VBOdom("TankOdom", odometry);
+        // VBOdom ringOdom = VBOdom("RingOdom", ringOdom);
 
         // Auto Options
         RobotAutoOptions autoOptions = RobotAutoOptions();

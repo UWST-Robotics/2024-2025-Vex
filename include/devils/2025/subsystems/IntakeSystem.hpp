@@ -25,7 +25,7 @@ namespace devils
         struct ArmPositionAngles
         {
             double bottomRing = 50;
-            double intake = 130;
+            double intake = 120;
             double secondRing = 200;
             double fourthRing = 400;
             double allianceStake = 650;
@@ -187,13 +187,13 @@ namespace devils
         }
 
     private:
-        static constexpr double MAX_SPEED = 0.8;  // %
+        static constexpr double MAX_SPEED = 1.0;  // %
         static constexpr double MIN_SPEED = -0.6; // %
 
         // State
         ArmPositionAngles armPositionAngles = ArmPositionAngles();
         ArmPosition targetPosition = BOTTOM_RING;
-        PIDController armPID = PIDController(0.003, 0, 0);
+        PIDController armPID = PIDController(0.006, 0, 0.1);
         bool isSpeedClampDisabled = false;
 
         // Hardware

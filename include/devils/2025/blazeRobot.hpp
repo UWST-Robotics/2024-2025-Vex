@@ -106,25 +106,31 @@ namespace devils
                         mainController.rumble("..");
                 }
 
-                // Mogo
+                // Mogo Grab
                 if (mogoInput)
                 {
-                    // Toggle Mogo Grabber
-                    bool shouldGrabGoal = !mogoGrabber.isMogoGrabbed();
-                    mogoGrabber.setMogoGrabbed(shouldGrabGoal);
+                    // Goal-Rush Mode
+                    if (goalRushSystem.getExtended())
+                    {
+                        goalRushSystem.setClamped(!goalRushSystem.getClamped());
+                        if (goalRushSystem.getClamped())
+                            mainController.rumble(".");
+                    }
 
-                    if (!shouldGrabGoal)
-                        mainController.rumble(".");
+                    // Rear-Mogo Mode
+                    else
+                    {
+                        mogoGrabber.setMogoGrabbed(!mogoGrabber.isMogoGrabbed());
+                        if (mogoGrabber.isMogoGrabbed())
+                            mainController.rumble(".");
+                    }
                 }
 
                 // Goal Rush
                 if (goalRushInput)
                 {
-                    // Toggle Goal Rush
-                    bool shouldRush = !goalRushSystem.isGoalRushExtended();
-                    goalRushSystem.setGoalRushExtended(shouldRush);
-
-                    if (shouldRush)
+                    goalRushSystem.setExtended(!goalRushSystem.getExtended());
+                    if (goalRushSystem.getExtended())
                         mainController.rumble("...");
                 }
 
@@ -180,24 +186,22 @@ namespace devils
         VEXBridge bridge = VEXBridge();
 
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 2, -3, 4, -5});
-        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {21, -7, 8, -9, 10});
-        SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {-19, 20});
-        SmartMotorGroup intakeArmMotors = SmartMotorGroup("IntakeArmMotors", {17, -18});
+        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {6, -7, 8, -9, 10});
+        SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {17, -18});
+        SmartMotorGroup intakeArmMotors = SmartMotorGroup("IntakeArmMotors", {11, -12});
 
-        RotationSensor verticalSensor = RotationSensor("VerticalOdom", 13);
+        RotationSensor verticalSensor = RotationSensor("VerticalOdom", 15);
         RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 14);
 
-        OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 11);
-        InertialSensor imu = InertialSensor("IMU", 16);
+        OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 19);
+        InertialSensor imu = InertialSensor("IMU", 20);
 
         ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 1);
-        ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 2);
-        ADIPneumatic goalRushPneumatic = ADIPneumatic("GoalRushPneumatic", 3);
+        ADIPneumatic goalRushDeployPneumatic = ADIPneumatic("GoalRushDeployPneumatic", 2);
+        ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 3);
         ADIPneumatic ptoPneumatic = ADIPneumatic("PTOPneumatic", 4);
-
         ADIDigitalInput mogoRushSensor = ADIDigitalInput("MogoRushSensor", -5);
-        ADIDigitalInput ringSensor = ADIDigitalInput("RingSensor", -6);
-
+        ADIPneumatic goalRushClampPneumatic = ADIPneumatic("GoalRushClampPneumatic", 6);
         LED leftHornLED = LED("LeftHornLED", 7);
         LED rightHornLED = LED("RightHornLED", 8);
 
@@ -206,7 +210,7 @@ namespace devils
         ConveyorSystem conveyor = ConveyorSystem(conveyorMotors);
         MogoGrabSystem mogoGrabber = MogoGrabSystem(mogoPneumatic);
         IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors);
-        GoalRushSystem goalRushSystem = GoalRushSystem(goalRushPneumatic);
+        GoalRushSystem goalRushSystem = GoalRushSystem(goalRushDeployPneumatic, goalRushClampPneumatic, mogoRushSensor);
         PerpendicularSensorOdometry odometry = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
         SymmetricControl symmetricControl = SymmetricControl(leftMotors, rightMotors);
         HornLEDSystem hornLEDSystem = HornLEDSystem(leftHornLED, rightHornLED);
