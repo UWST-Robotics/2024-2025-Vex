@@ -40,7 +40,7 @@ namespace devils
         void opcontrol() override
         {
             // Default State
-            intakeSystem.setArmPosition(IntakeSystem::INTAKE);
+            intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
             mogoGrabber.setMogoGrabbed(false);
 
             // Stop autonomous
@@ -60,28 +60,24 @@ namespace devils
 
                 bool lowArmInput = mainController.get_digital(DIGITAL_B);
                 bool midArmInput = mainController.get_digital(DIGITAL_A) || mainController.get_digital(DIGITAL_Y);
-                bool highArmInput = mainController.get_digital(DIGITAL_X) || mainController.get_digital(DIGITAL_L1);
+                bool highArmInput = mainController.get_digital(DIGITAL_X);
+                bool mogoArmInput = mainController.get_digital(DIGITAL_DOWN);
+                bool neutralStakeDownInput = mainController.get_digital(DIGITAL_RIGHT);
 
-                bool pickupInput = mainController.get_digital(DIGITAL_R2);
-
-                bool clawInput = mainController.get_digital_new_press(DIGITAL_R1);
-                bool mogoInput = mainController.get_digital_new_press(DIGITAL_L2);
-                bool slowInput = false; // mainController.get_digital(DIGITAL_L1);
+                bool clawInput = mainController.get_digital_new_press(DIGITAL_R1) || mainController.get_digital_new_press(DIGITAL_R2);
+                bool mogoInput = mainController.get_digital_new_press(DIGITAL_L2) || mainController.get_digital_new_press(DIGITAL_L1);
 
                 bool goalRushInput = mainController.get_digital_new_press(DIGITAL_LEFT);
                 bool togglePTOInput = mainController.get_digital_new_press(DIGITAL_UP);
 
-                // Curve Joystick Inputs
+                // Curve Joystick Inputs for improved control
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1, 0.15);
                 leftX = JoystickCurve::curve(leftX, 3.0, 0.05, 0.2);
-                rightX = JoystickCurve::curve(rightX, 3.0, 0.1, 0.2);
-                rightY = JoystickCurve::curve(rightY, 3.0, 0.1, 0.15, 0.8);
+                rightX = JoystickCurve::curve(rightX, 3.0, 0.05, 0.2);
+                rightY = JoystickCurve::curve(rightY, 3.0, 0.1, 0.15);
 
                 // Decrease turning speed for improved control
-                rightX *= 0.5;
-
-                // Combine Left and Right X Joystick Inputs
-                double combinedX = JoystickCurve::combine(leftX, rightX);
+                rightX *= 0.7;
 
                 // Intake Arm
                 if (lowArmInput)
@@ -93,7 +89,6 @@ namespace devils
                 else
                     intakeSystem.setArmPosition(IntakeSystem::INTAKE);
                 intakeSystem.moveArmToPosition();
-                intakeSystem.disableSpeedClamp(lowArmInput);
 
                 // Intake Claw
                 if (clawInput)
@@ -145,14 +140,12 @@ namespace devils
                 }
                 ptoPneumatic.setExtended(isPTOEnabled);
 
-                // Slow Mode
-                double speedMultiplier = slowInput ? 0.5 : 1.0;
-
                 // Conveyor
                 conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
+                conveyor.setArmLowered(false);
+                conveyor.setPaused(false);
+                conveyor.moveAutomatic(rightY);
                 conveyor.setRingSorting(RingType::NONE);
-                conveyor.setArmLowered(intakeSystem.getArmPosition() == IntakeSystem::ArmPosition::BOTTOM_RING); // Always allow the conveyor to move
-                conveyor.moveAutomatic(pickupInput ? 1.0 : rightY);
 
                 // Move Chassis
                 if (isPTOEnabled)
@@ -160,7 +153,7 @@ namespace devils
                     symmetricControl.drive(leftY);
                 else
                     // Drive normally
-                    chassis.move(leftY * speedMultiplier, combinedX * speedMultiplier);
+                    chassis.move(leftY, leftX);
 
                 // Delay to prevent the CPU from being overloaded
                 pros::delay(20);
@@ -202,8 +195,6 @@ namespace devils
         ADIPneumatic ptoPneumatic = ADIPneumatic("PTOPneumatic", 4);
         ADIDigitalInput mogoRushSensor = ADIDigitalInput("MogoRushSensor", -5);
         ADIPneumatic goalRushClampPneumatic = ADIPneumatic("GoalRushClampPneumatic", 6);
-        LED leftHornLED = LED("LeftHornLED", 7);
-        LED rightHornLED = LED("RightHornLED", 8);
 
         // Subsystems
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
@@ -213,7 +204,6 @@ namespace devils
         GoalRushSystem goalRushSystem = GoalRushSystem(goalRushDeployPneumatic, goalRushClampPneumatic, mogoRushSensor);
         PerpendicularSensorOdometry odometry = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
         SymmetricControl symmetricControl = SymmetricControl(leftMotors, rightMotors);
-        HornLEDSystem hornLEDSystem = HornLEDSystem(leftHornLED, rightHornLED);
 
         // Auto
         VBOdom vbOdom = VBOdom("Blaze", odometry);
