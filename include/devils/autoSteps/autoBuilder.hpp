@@ -100,6 +100,7 @@ namespace devils
          * @param finalVelocity The final velocity to drive at in inches per second. Speed is carried over from the previous step.
          * @param strength The strength of the bezier curve (inches)
          * @param constraints The constraints for the trajectory
+         * @param options The options for the drive step
          * @returns A pointer to the created step
          */
         AutoStepPtr driveToTrajectory(
@@ -109,13 +110,14 @@ namespace devils
             bool isReversed = false,
             double finalVelocity = 0,
             double strength = 10.0,
-            TrajectoryConstraints constraints = {48, 64})
+            TrajectoryConstraints constraints = {56, 64},
+            AutoRamseteStep::Options options = AutoRamseteStep::Options::defaultOptions)
         {
             // Create a new pose
             Pose targetPose = Pose(x, y, Units::degToRad(rotation));
 
             // Return a new `AutoRamseteStep` with the given pose
-            return driveToTrajectoryPose(targetPose, isReversed, finalVelocity, strength, constraints);
+            return driveToTrajectoryPose(targetPose, isReversed, finalVelocity, strength, constraints, options);
         }
 
         /**
@@ -125,6 +127,7 @@ namespace devils
          * @param finalVelocity The final velocity to drive at in inches per second. Speed is carried over from the previous step.
          * @param strength The strength of the bezier curve (inches)
          * @param constraints The constraints for the trajectory
+         * @param options The options for the drive step
          * @returns A pointer to the created step
          */
         AutoStepPtr driveToTrajectoryPose(
@@ -132,7 +135,8 @@ namespace devils
             bool isReversed = false,
             double finalVelocity = 0,
             double strength = 10.0,
-            TrajectoryConstraints constraints = {48, 64})
+            TrajectoryConstraints constraints = {48, 64},
+            AutoRamseteStep::Options options = AutoRamseteStep::Options::defaultOptions)
         {
             // Transform the pose
             Pose fromPose = tryTransformPose(this->pose);
@@ -157,7 +161,7 @@ namespace devils
             velocity = finalVelocity;
 
             // Make a new `AutoRamseteStep` with the given trajectory
-            return std::make_unique<AutoRamseteStep>(chassis, odom, trajectory);
+            return std::make_unique<AutoRamseteStep>(chassis, odom, trajectory, options);
         }
 
         /**

@@ -6,6 +6,7 @@
 #include "subsystems/MogoGrabSystem.hpp"
 #include "autonomous/pjMatchAuto.hpp"
 #include "autonomous/pjSkillsAuto.hpp"
+#include "autonomous/pjSkillsStartAuto.hpp"
 #include "autonomous/testAuto.hpp"
 
 namespace devils
@@ -58,11 +59,18 @@ namespace devils
             intakeSystem.setArmPosition(IntakeSystem::INTAKE);
             mogoGrabber.setMogoGrabbed(false);
 
+            // Skills Startup
+            bool isSkills = autoOptions.routine.id == 0;
+            bool isBlue = autoOptions.allianceColor == AllianceColor::BLUE_ALLIANCE;
+            auto opponentRingType = (isSkills || !isBlue) ? RingType::BLUE : RingType::RED;
+            if (isSkills)
+            {
+                imu.waitUntilCalibrated();
+                PJSkillsStartAuto::runStart(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
+            }
+
             // Stop autonomous
             AutoStep::stopAll();
-
-            // PTO
-            bool isPTOEnabled = false;
 
             // Loop
             while (true)
@@ -136,22 +144,12 @@ namespace devils
 
                 // Conveyor
                 conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
-                conveyor.setRingSorting(colorSortInput ? RingType::BLUE : RingType::NONE);
+                conveyor.setRingSorting((colorSortInput || isSkills) ? opponentRingType : RingType::NONE);
                 conveyor.setArmLowered(intakeSystem.getArmPosition() == IntakeSystem::ArmPosition::BOTTOM_RING); // Always allow the conveyor to move
                 conveyor.moveAutomatic(pickupInput ? 1.0 : rightY);
 
-                // Move Chassis
-                if (isPTOEnabled)
-                {
-                    // Drive symmetrically
-                    symmetricControl.drive(leftY);
-                    symmetricControl.driveHorizontal(leftX, 0.5);
-                }
-                else
-                {
-                    // Drive normally
-                    chassis.move(leftY * speedMultiplier, combinedX * speedMultiplier);
-                }
+                // Drive normally
+                chassis.move(leftY * speedMultiplier, combinedX * speedMultiplier);
 
                 // Delay to prevent the CPU from being overloaded
                 pros::delay(20);

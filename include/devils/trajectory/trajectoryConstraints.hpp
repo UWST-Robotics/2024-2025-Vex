@@ -15,6 +15,6 @@ namespace devils
         double maxAcceleration = 48; // in/s^2
 
         /// @brief The maximum deceleration of the robot in inches per second squared
-        double maxDeceleration = 96; // in/s^2
+        double maxDeceleration = 100; // in/s^2
     };
 }

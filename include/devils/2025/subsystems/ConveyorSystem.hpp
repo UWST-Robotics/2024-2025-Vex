@@ -128,17 +128,17 @@ namespace devils
                 return;
             }
 
-            // Zoom Mode
-            if (zoomTimer.running() && (isForwards || isStopped))
-            {
-                conveyorMotors.moveVoltage(ZOOM_SPEED);
-                return;
-            }
-
             // Blue Ring Rejection
             if (isRejectingRing)
             {
                 conveyorMotors.moveVoltage(PRE_REJECTION_SPEED);
+                return;
+            }
+
+            // Zoom Mode
+            else if (zoomTimer.running() && (isForwards || isStopped))
+            {
+                conveyorMotors.moveVoltage(ZOOM_SPEED);
                 return;
             }
 
@@ -219,7 +219,7 @@ namespace devils
         {
             // Update the mogo actuation time
             bool didChange = hasMogo != this->hasMogo;
-            if (didChange)
+            if (didChange && isMogoDelayEnabled)
                 startCooldown(MOGO_ACTUATION_DELAY);
 
             this->hasMogo = hasMogo;
@@ -269,6 +269,15 @@ namespace devils
         void setPaused(bool isPaused = true)
         {
             this->isPaused = isPaused;
+        }
+
+        /**
+         * Sets mogo delay enabled or disabled.
+         * @param isEnabled True to enable the mogo delay, false to disable it.
+         */
+        void setMogoDelayEnabled(bool isEnabled = true)
+        {
+            this->isMogoDelayEnabled = isEnabled;
         }
 
     private:
@@ -362,6 +371,7 @@ namespace devils
         bool isArmLowered = false;
         bool isRejectingRing = false;
         bool isPaused = false;
+        bool isMogoDelayEnabled = true;
         double cooldownSpeed = 0;
         RingType sortRingColor = RingType::NONE;
 
