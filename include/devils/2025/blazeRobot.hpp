@@ -144,16 +144,20 @@ namespace devils
                 conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
                 conveyor.setArmLowered(false);
                 conveyor.setPaused(false);
-                conveyor.moveAutomatic(rightY);
                 conveyor.setRingSorting(RingType::NONE);
+                conveyor.moveAutomatic(rightY);
 
                 // Move Chassis
                 if (isPTOEnabled)
+                {
                     // Drive symmetrically
-                    symmetricControl.drive(leftY);
+                    symmetricControl.drive(leftY, -leftX);
+                }
                 else
+                {
                     // Drive normally
                     chassis.move(leftY, leftX);
+                }
 
                 // Delay to prevent the CPU from being overloaded
                 pros::delay(20);
