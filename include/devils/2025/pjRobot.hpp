@@ -132,7 +132,7 @@ namespace devils
                 if (mogoInput)
                 {
                     // Toggle Mogo Grabber
-                    bool shouldGrabGoal = !mogoGrabber.isMogoGrabbed();
+                    bool shouldGrabGoal = !mogoGrabber.getMogoGrabbed();
                     mogoGrabber.setMogoGrabbed(shouldGrabGoal);
 
                     if (!shouldGrabGoal)
@@ -143,7 +143,7 @@ namespace devils
                 double speedMultiplier = slowInput ? 0.5 : 1.0;
 
                 // Conveyor
-                conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
+                conveyor.setMogoGrabbed(mogoGrabber.getMogoGrabbed());
                 conveyor.setRingSorting((colorSortInput || isSkills) ? opponentRingType : RingType::NONE);
                 conveyor.setArmLowered(intakeSystem.getArmPosition() == IntakeSystem::ArmPosition::BOTTOM_RING); // Always allow the conveyor to move
                 conveyor.moveAutomatic(pickupInput ? 1.0 : rightY);

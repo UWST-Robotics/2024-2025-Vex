@@ -36,7 +36,7 @@ namespace devils
             AutoRamseteStep::Options sensitiveRamsete = {
                 0.1,  // minSpeed
                 1.0,  // maxSpeed
-                0.02, // proportionGain
+                0.03, // proportionGain
                 0.6   // dampingCoefficient
             };
 
@@ -62,7 +62,7 @@ namespace devils
             pjRoutine.pause(200)->run();
 
             // Mogo
-            pjRoutine.driveToTrajectory(-66.2, -0.5, 0, true, 0, 2, fastConstraints, sensitiveRamsete)->run();
+            pjRoutine.driveToTrajectory(-67, -0.5, 0, true, 0, 2, fastConstraints, sensitiveRamsete)->run();
             chassis.stop();
             pjRoutine.pause(400)->run();
             mogoGrabber.setMogoGrabbed(true);
@@ -77,12 +77,18 @@ namespace devils
             mogoGrabber.setMogoGrabbed(true);
 
             // Ring 3
-            pjRoutine.driveToTrajectory(-54, 48, 135, false, 12, 4)->run();
-            pjRoutine.pause(200)->run();
+            pjRoutine.rotateTo(35)->run();
+            pjRoutine.driveToTrajectory(0, 60, 0, false, 0, 6)->run();
+            pjRoutine.driveToTrajectory(-6, 60, 0, false, 6, 6)->run();
+            chassis.stop();
 
-            // Ring 4
-            pjRoutine.driveToTrajectory(-72, 66, 135, false, 0, 4, fastConstraints)->run();
-            pjRoutine.pause(500)->run();
+            // Ring 3
+            // pjRoutine.driveToTrajectory(-54, 48, 135, false, 12, 4)->run();
+            // pjRoutine.pause(200)->run();
+
+            // // Ring 4
+            // pjRoutine.driveToTrajectory(-68, 66, 135, false, 0, 4, fastConstraints)->run();
+            // pjRoutine.pause(500)->run();
 
             // Revert to Default
             conveyor.setMogoDelayEnabled(true);

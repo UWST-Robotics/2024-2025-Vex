@@ -6,6 +6,7 @@
 #include "subsystems/GoalRushSystem.hpp"
 #include "subsystems/MogoGrabSystem.hpp"
 #include "subsystems/HornLEDSystem.hpp"
+#include "autonomous/BlazeMatchAuto.hpp"
 
 namespace devils
 {
@@ -17,6 +18,7 @@ namespace devils
 
             conveyorSensor.setLEDBrightness(100);
             conveyor.useSensor(&conveyorSensor);
+            conveyor.setHookPositions({0, 57});
 
             mogoGrabber.useSensor(&mogoRushSensor);
 
@@ -34,7 +36,7 @@ namespace devils
             // imu.calibrate();
             imu.waitUntilCalibrated();
 
-            // autoRoutine->run();
+            BlazeMatchAuto::runMatch(chassis, odometry, intakeSystem, conveyor, mogoGrabber, goalRushSystem);
         }
 
         void opcontrol() override
@@ -59,7 +61,7 @@ namespace devils
                 double rightY = mainController.get_analog(ANALOG_RIGHT_Y) / 127.0;
 
                 bool lowArmInput = mainController.get_digital(DIGITAL_B);
-                bool midArmInput = mainController.get_digital(DIGITAL_A) || mainController.get_digital(DIGITAL_Y);
+                bool midArmInput = mainController.get_digital(DIGITAL_Y);
                 bool highArmInput = mainController.get_digital(DIGITAL_X);
                 bool mogoArmInput = mainController.get_digital(DIGITAL_DOWN);
                 bool neutralStakeDownInput = mainController.get_digital(DIGITAL_RIGHT);
@@ -67,7 +69,7 @@ namespace devils
                 bool clawInput = mainController.get_digital_new_press(DIGITAL_R1) || mainController.get_digital_new_press(DIGITAL_R2);
                 bool mogoInput = mainController.get_digital_new_press(DIGITAL_L2) || mainController.get_digital_new_press(DIGITAL_L1);
 
-                bool goalRushInput = mainController.get_digital_new_press(DIGITAL_LEFT);
+                bool goalRushInput = mainController.get_digital_new_press(DIGITAL_A);
                 bool togglePTOInput = mainController.get_digital_new_press(DIGITAL_UP);
 
                 // Curve Joystick Inputs for improved control
@@ -115,8 +117,8 @@ namespace devils
                     // Rear-Mogo Mode
                     else
                     {
-                        mogoGrabber.setMogoGrabbed(!mogoGrabber.isMogoGrabbed());
-                        if (mogoGrabber.isMogoGrabbed())
+                        mogoGrabber.setMogoGrabbed(!mogoGrabber.getMogoGrabbed());
+                        if (mogoGrabber.getMogoGrabbed())
                             mainController.rumble(".");
                     }
                 }
@@ -141,7 +143,7 @@ namespace devils
                 ptoPneumatic.setExtended(isPTOEnabled);
 
                 // Conveyor
-                conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
+                conveyor.setMogoGrabbed(mogoGrabber.getMogoGrabbed());
                 conveyor.setArmLowered(false);
                 conveyor.setPaused(false);
                 conveyor.setRingSorting(RingType::NONE);
@@ -187,8 +189,8 @@ namespace devils
         SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {17, -18});
         SmartMotorGroup intakeArmMotors = SmartMotorGroup("IntakeArmMotors", {11, -12});
 
-        RotationSensor verticalSensor = RotationSensor("VerticalOdom", 15);
-        RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 14);
+        RotationSensor verticalSensor = RotationSensor("VerticalOdom", 14);
+        RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 15);
 
         OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 19);
         InertialSensor imu = InertialSensor("IMU", 20);
@@ -197,7 +199,7 @@ namespace devils
         ADIPneumatic goalRushDeployPneumatic = ADIPneumatic("GoalRushDeployPneumatic", 2);
         ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 3);
         ADIPneumatic ptoPneumatic = ADIPneumatic("PTOPneumatic", 4);
-        ADIDigitalInput mogoRushSensor = ADIDigitalInput("MogoRushSensor", -5);
+        ADIDigitalInput mogoRushSensor = ADIDigitalInput("MogoRushSensor", 7);
         ADIPneumatic goalRushClampPneumatic = ADIPneumatic("GoalRushClampPneumatic", 6);
 
         // Subsystems

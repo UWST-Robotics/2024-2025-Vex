@@ -16,7 +16,7 @@ namespace devils
         void onUpdate() override
         {
             conveyor.moveAutomatic(targetSpeed);
-            conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
+            conveyor.setMogoGrabbed(mogoGrabber.getMogoGrabbed());
         }
 
         /**

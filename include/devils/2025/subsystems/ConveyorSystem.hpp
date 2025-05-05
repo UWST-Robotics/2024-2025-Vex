@@ -242,14 +242,11 @@ namespace devils
          */
         bool getHookAtPosition(double position, double maxDistance = HOOK_MAX_DISTANCE)
         {
-            // Get all the hook positions
-            int hookCount = sizeof(HOOK_POSITIONS) / sizeof(HOOK_POSITIONS[0]);
-
             // Iterate through all the hook positions
-            for (int i = 0; i < hookCount; i++)
+            for (int i = 0; i < hookPositions.size(); i++)
             {
                 // Get the current hook position
-                double hookPosition = HOOK_POSITIONS[i];
+                double hookPosition = hookPositions[i];
 
                 // Check if the hook is within range of the target position
                 double distance = conveyorChain.getDistanceToPosition(hookPosition + position);
@@ -259,6 +256,15 @@ namespace devils
 
             // If no hook is within range, return false
             return false;
+        }
+
+        /**
+         * Sets the positions of the hooks in chain links.
+         * @param hookPositions The positions of the hooks in chain links.
+         */
+        void setHookPositions(std::vector<double> hookPositions)
+        {
+            this->hookPositions = hookPositions;
         }
 
         /**
@@ -289,7 +295,7 @@ namespace devils
         //      MOGO ACTUATION OPTIONS
 
         /// @brief The speed of the conveyor system when a mogo is not grabbed. Slower to prevent rings from overshooting the optical sensor.
-        static constexpr double NO_MOGO_CONVEYOR_SPEED = 0.5;
+        static constexpr double NO_MOGO_CONVEYOR_SPEED = 0.65;
 
         /// @brief The speed of the conveyor system when a mogo is grabbed. Faster to push rings into the mogo.
         static constexpr double MOGO_CONVEYOR_SPEED = 0.8;
@@ -360,9 +366,6 @@ namespace devils
 
         //      HOOK OPTIONS
 
-        /// @brief The distance between each hook in teeth.
-        static constexpr double HOOK_POSITIONS[] = {0, 51};
-
         /// @brief The max distance between a hook and a position to be considered in range.
         static constexpr double HOOK_MAX_DISTANCE = 4.0;
 
@@ -374,6 +377,7 @@ namespace devils
         bool isMogoDelayEnabled = true;
         double cooldownSpeed = 0;
         RingType sortRingColor = RingType::NONE;
+        std::vector<double> hookPositions = {0, 51};
 
         // Timers
         Timer cooldownTimer = Timer(0);

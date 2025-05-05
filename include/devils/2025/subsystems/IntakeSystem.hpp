@@ -26,10 +26,10 @@ namespace devils
         struct ArmPositionAngles
         {
             double bottomRing = 50;
-            double intake = 120;
-            double secondRing = 200;
+            double intake = 119;
+            double secondRing = 150;
             double fourthRing = 400;
-            double allianceStake = 650;
+            double allianceStake = 640;
             double neutralStake = 1000;
             double aboveNeutralStake = 1050;
         };

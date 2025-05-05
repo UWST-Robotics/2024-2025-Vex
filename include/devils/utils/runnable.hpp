@@ -87,6 +87,15 @@ namespace devils
             onStop();
         }
 
+        /**
+         * Joins the async task.
+         */
+        void joinAsync()
+        {
+            if (currentTask)
+                currentTask->join();
+        }
+
     private:
         std::unique_ptr<pros::Task> currentTask = nullptr;
         int updateInterval = 20;

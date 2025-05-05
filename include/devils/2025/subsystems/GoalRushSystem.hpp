@@ -26,7 +26,7 @@ namespace devils
          */
         bool hasMogo()
         {
-            return goalRushSensor.getValue() == 0;
+            return goalRushSensor.getValue();
         }
 
         /**
