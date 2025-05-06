@@ -93,7 +93,10 @@ namespace devils
         void joinAsync()
         {
             if (currentTask)
+            {
                 currentTask->join();
+                currentTask = nullptr;
+            }
         }
 
     private:

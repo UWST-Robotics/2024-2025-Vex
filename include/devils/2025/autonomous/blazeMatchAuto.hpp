@@ -53,7 +53,7 @@ namespace devils
             pjRoutine.setPose(-48, -61, 189)->run();
 
             // Mogo Rush
-            auto mogoRushStep = pjRoutine.driveToTrajectory(-14, -52, 189, true, 0, 2, fastConstraints);
+            auto mogoRushStep = pjRoutine.driveToTrajectory(isBlue ? -20 : -14, isBlue ? -46 : -52, isBlue ? 220 : 189, true, 0, 2, fastConstraints);
             mogoRushStep->runAsync();
 
             // Release String Mech
@@ -78,10 +78,10 @@ namespace devils
             {
                 // Drive to Center Goal
                 pjRoutine.rotateTo(270)->run();
-                pjRoutine.driveToTrajectory(-24, -14, 215, true, 0, 8)->run();
+                pjRoutine.driveToTrajectory(-24, -14, isBlue ? 235 : 215, true, 0, 8)->run();
                 goalRushSystem.setExtended(true);
                 goalRushSystem.setClamped(false);
-                pjRoutine.driveToTrajectory(-12, -8, 210, true, 0, 1)->run();
+                pjRoutine.driveToTrajectory(-12, -8, isBlue ? 230 : 210, true, 0, 1)->run();
 
                 // Pull
                 goalRushSystem.setClamped(true);
@@ -95,7 +95,7 @@ namespace devils
                 goalRushSystem.setExtended(false);
 
                 // Grab Mogo
-                pjRoutine.driveToTrajectory(-16, -2, 230, true, 0, 2, slowConstraints)->run();
+                pjRoutine.driveToTrajectory(-16, isBlue ? -12 : -2, isBlue ? 210 : 230, true, 0, 2, slowConstraints)->run();
                 mogoGrabber.setMogoGrabbed(true);
 
                 // Ring 1
@@ -119,7 +119,7 @@ namespace devils
                 // Grab Mogo
                 goalRushSystem.setExtended(false);
                 pjRoutine.pause(2500)->run(); // <-- Wait for mogo to stop oscillating
-                pjRoutine.driveToTrajectory(-12, -50, 189, true, 0, 4, slowConstraints)->run();
+                pjRoutine.driveToTrajectory(-12, isBlue ? -54 : -50, 189, true, 0, 4, slowConstraints)->run();
                 mogoGrabber.setMogoGrabbed(true);
 
                 // Ring 1

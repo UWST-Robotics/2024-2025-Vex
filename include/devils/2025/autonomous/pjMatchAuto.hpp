@@ -45,7 +45,7 @@ namespace devils
             pjRoutine.useTransformer(isBlue ? std::make_unique<MirrorTransformX>() : nullptr);
             intake.setArmPosition(IntakeSystem::INTAKE);
             mogoGrabber.setMogoGrabbed(false);
-            conveyor.setRingSorting(RingType::BLUE);
+            conveyor.setRingSorting(isBlue ? RingType::RED : RingType::BLUE);
 
             // Mogo
             pjRoutine.setPose(-52, 12, 124)->run();
@@ -96,10 +96,10 @@ namespace devils
 
             // Corner
             intake.setArmPosition(IntakeSystem::ArmPosition::ALLIANCE_STAKE);
-            pjRoutine.driveToTrajectory(-54, 56, 135, false, 0, 10)->run();
+            pjRoutine.driveToTrajectory(-53, 56, 135, false, 0, 10)->run();
             conveyorStep->setTargetSpeed(0.6);
             conveyor.setPaused(true);
-            pjRoutine.driveToTrajectory(-64, 66, 135, false, 0, 2)->run();
+            pjRoutine.driveToTrajectory(-63, 66, 135, false, 0, 2)->run();
             conveyor.setPaused(false);
             pjRoutine.pause(4000)->run();
             conveyorStep->setTargetSpeed(1.0);
@@ -108,8 +108,10 @@ namespace devils
             pjRoutine.driveToTrajectory(-50, 50, 135, true, 0, 3)->run();
             intake.setArmPosition(IntakeSystem::ArmPosition::INTAKE);
             pjRoutine.rotateTo(315)->run();
-            pjRoutine.driveToTrajectory(-60, 60, 315, true, 0, 3)->run();
             mogoGrabber.setMogoGrabbed(false);
+            pjRoutine.driveToTrajectory(-64, 64, 315, true, 0, 3)->run();
+            pjRoutine.driveToTrajectory(-56, 56, 315, false, 0, 1)->run();
+            pjRoutine.driveToTrajectory(-64, 64, 315, true, 0, 1)->run();
             pjRoutine.driveToTrajectory(-50, 50, 315, false, 0, 3)->run();
 
             // End

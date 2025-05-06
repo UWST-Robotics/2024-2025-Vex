@@ -86,6 +86,7 @@ namespace devils
                 bool highArmInput = mainController.get_digital(DIGITAL_X) || mainController.get_digital(DIGITAL_L1);
                 bool climbInput = mainController.get_digital_new_press(DIGITAL_UP);
 
+                bool goalRushInput = mainController.get_digital_new_press(DIGITAL_LEFT);
                 bool pickupInput = mainController.get_digital(DIGITAL_R2);
 
                 bool clawInput = mainController.get_digital_new_press(DIGITAL_R1);
@@ -135,15 +136,32 @@ namespace devils
                         mainController.rumble("..");
                 }
 
-                // Mogo
+                // Mogo Grab
                 if (mogoInput)
                 {
-                    // Toggle Mogo Grabber
-                    bool shouldGrabGoal = !mogoGrabber.getMogoGrabbed();
-                    mogoGrabber.setMogoGrabbed(shouldGrabGoal);
+                    // Goal-Rush Mode
+                    if (goalRushSystem.getExtended())
+                    {
+                        goalRushSystem.setClamped(!goalRushSystem.getClamped());
+                        if (goalRushSystem.getClamped())
+                            mainController.rumble(".");
+                    }
 
-                    if (!shouldGrabGoal)
-                        mainController.rumble(".");
+                    // Rear-Mogo Mode
+                    else
+                    {
+                        mogoGrabber.setMogoGrabbed(!mogoGrabber.getMogoGrabbed());
+                        if (mogoGrabber.getMogoGrabbed())
+                            mainController.rumble(".");
+                    }
+                }
+
+                // Goal Rush
+                if (goalRushInput)
+                {
+                    goalRushSystem.setExtended(!goalRushSystem.getExtended());
+                    if (goalRushSystem.getExtended())
+                        mainController.rumble("...");
                 }
 
                 // Slow Mode
@@ -154,6 +172,7 @@ namespace devils
                 conveyor.setRingSorting((colorSortInput || isSkills) ? opponentRingType : RingType::NONE);
                 conveyor.setArmLowered(intakeSystem.getArmPosition() == IntakeSystem::ArmPosition::BOTTOM_RING); // Always allow the conveyor to move
                 conveyor.moveAutomatic(pickupInput ? 1.0 : rightY);
+                conveyor.setPaused(false);
 
                 // Drive normally
                 chassis.move(leftY * speedMultiplier, combinedX * speedMultiplier);
@@ -197,8 +216,10 @@ namespace devils
 
         ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 1);
         ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 2);
+        ADIPneumatic goalRushDeployPneumatic = ADIPneumatic("GoalRushDeployPneumatic", 3);
+        ADIPneumatic goalRushClampPneumatic = ADIPneumatic("GoalRushClampPneumatic", 4);
 
-        ADIDigitalInput ringSensor = ADIDigitalInput("RingSensor", -4);
+        ADIDigitalInput mogoRushSensor = ADIDigitalInput("MogoSensor", 8);
 
         // Subsystems
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
@@ -206,6 +227,7 @@ namespace devils
         MogoGrabSystem mogoGrabber = MogoGrabSystem(mogoPneumatic);
         IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors);
         PerpendicularSensorOdometry odometry = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
+        GoalRushSystem goalRushSystem = GoalRushSystem(goalRushDeployPneumatic, goalRushClampPneumatic, mogoRushSensor);
         SymmetricControl symmetricControl = SymmetricControl(leftMotors, rightMotors);
 
         // Auto
