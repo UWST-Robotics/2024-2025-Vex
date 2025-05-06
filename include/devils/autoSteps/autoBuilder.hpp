@@ -61,7 +61,7 @@ namespace devils
             Pose transformedPose = tryTransformPose(pose);
 
             // Return a new `AutoJumpToStep` with the given pose
-            return std::make_unique<AutoJumpToStep>(odom, transformedPose);
+            return std::make_shared<AutoJumpToStep>(odom, transformedPose);
         }
 
         /**
@@ -88,7 +88,7 @@ namespace devils
         AutoStepPtr pause(uint32_t duration)
         {
             velocity = 0.0;
-            return std::make_unique<AutoPauseStep>(duration);
+            return std::make_shared<AutoPauseStep>(duration);
         }
 
         /**
@@ -161,7 +161,7 @@ namespace devils
             velocity = finalVelocity;
 
             // Make a new `AutoRamseteStep` with the given trajectory
-            return std::make_unique<AutoRamseteStep>(chassis, odom, trajectory, options);
+            return std::make_shared<AutoRamseteStep>(chassis, odom, trajectory, options);
         }
 
         /**
@@ -207,7 +207,7 @@ namespace devils
             Pose transformedPose = tryTransformPose(pose);
 
             // Return a new `AutoBoomerangStep` with the given pose
-            return std::make_unique<AutoTimeoutStep>(std::make_unique<AutoBoomerangStep>(chassis, odom, transformedPose, options), timeout);
+            return std::make_shared<AutoTimeoutStep>(std::make_shared<AutoBoomerangStep>(chassis, odom, transformedPose, options), timeout);
         }
 
         /**
@@ -245,7 +245,7 @@ namespace devils
         //                            pose.rotation);
 
         //     // Return a new `AutoDriveStep` with the given pose
-        //     return std::make_unique<AutoTimeoutStep>(std::make_unique<AutoDriveStep>(chassis, odom, targetPose, options), timeout);
+        //     return std::make_shared<AutoTimeoutStep>(std::make_shared<AutoDriveStep>(chassis, odom, targetPose, options), timeout);
         // }
 
         /**
@@ -267,7 +267,7 @@ namespace devils
             Pose transformedPose = tryTransformPose(pose);
 
             // Return a new `AutoRotateToStep` with the given heading
-            return std::make_unique<AutoTimeoutStep>(std::make_unique<AutoRotateToStep>(chassis, odom, transformedPose.rotation, options), timeout);
+            return std::make_shared<AutoTimeoutStep>(std::make_shared<AutoRotateToStep>(chassis, odom, transformedPose.rotation, options), timeout);
         }
 
         /**

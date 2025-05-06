@@ -35,22 +35,19 @@ namespace devils
             imu.waitUntilCalibrated();
 
             // Run Autonomous
-            // TestAuto::runB(chassis, odometry);
             bool isBlue = autoOptions.allianceColor == AllianceColor::BLUE_ALLIANCE;
             switch (autoOptions.routine.id)
             {
             case 0:
-                PJSkillsAuto::runSkills(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
-                break;
-            case 1:
                 PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, isBlue, true);
                 break;
-            case 2:
+            case 1:
                 PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, isBlue, false);
                 break;
+            case 2:
+                PJSkillsAuto::runSkills(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
+                break;
             }
-            // PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
-            // PJSkillsAuto::runSkills(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
         }
 
         void opcontrol() override
@@ -60,7 +57,7 @@ namespace devils
             mogoGrabber.setMogoGrabbed(false);
 
             // Skills Startup
-            bool isSkills = autoOptions.routine.id == 0;
+            bool isSkills = autoOptions.routine.id == 2;
             bool isBlue = autoOptions.allianceColor == AllianceColor::BLUE_ALLIANCE;
             auto opponentRingType = (isSkills || !isBlue) ? RingType::BLUE : RingType::RED;
             if (isSkills)
@@ -71,6 +68,9 @@ namespace devils
 
             // Stop autonomous
             AutoStep::stopAll();
+
+            // Climb
+            bool isClimbing = false;
 
             // Loop
             while (true)
@@ -84,6 +84,7 @@ namespace devils
                 bool lowArmInput = mainController.get_digital(DIGITAL_B);
                 bool midArmInput = mainController.get_digital(DIGITAL_A) || mainController.get_digital(DIGITAL_Y);
                 bool highArmInput = mainController.get_digital(DIGITAL_X) || mainController.get_digital(DIGITAL_L1);
+                bool climbInput = mainController.get_digital_new_press(DIGITAL_UP);
 
                 bool pickupInput = mainController.get_digital(DIGITAL_R2);
 
@@ -105,6 +106,10 @@ namespace devils
                 // Combine Left and Right X Joystick Inputs
                 double combinedX = JoystickCurve::combine(leftX, rightX);
 
+                // Climb
+                if (climbInput)
+                    isClimbing = !isClimbing;
+
                 // Intake Arm
                 if (lowArmInput)
                     intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
@@ -112,6 +117,8 @@ namespace devils
                     intakeSystem.setArmPosition(IntakeSystem::ALLIANCE_STAKE);
                 else if (highArmInput)
                     intakeSystem.setArmPosition(IntakeSystem::NEUTRAL_STAKE);
+                else if (isClimbing)
+                    intakeSystem.setArmPosition(IntakeSystem::UP);
                 else
                     intakeSystem.setArmPosition(IntakeSystem::INTAKE);
                 intakeSystem.moveArmToPosition();
@@ -175,7 +182,7 @@ namespace devils
         Vector2 horizontalSensorOffset = Vector2(0, 1);
 
         // Hardware
-        VEXBridge bridge = VEXBridge();
+        // VEXBridge bridge = VEXBridge();
 
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 3, -6, 2, -7});
         SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {10, -9, 5, -8, 21});
@@ -206,9 +213,9 @@ namespace devils
 
         RobotAutoOptions autoOptions = RobotAutoOptions();
         std::vector<Routine> routines = {
-            {0, "Skills", false},
-            {1, "Match (end center)", true},
-            {2, "Match (end side)", true},
+            {0, "Match (end center)", true},
+            {1, "Match (end side)", true},
+            {2, "Skills", false},
         };
         // Renderer
         OptionsRenderer optionsRenderer = OptionsRenderer("PepperJack", routines, &autoOptions);

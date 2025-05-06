@@ -35,10 +35,10 @@ namespace devils
             TrajectoryConstraints fastConstraints = {120, 120, 120};
 
             // Async Steps
-            auto intakeStep = std::make_unique<AsyncIntakeStep>(intake);
+            auto intakeStep = std::make_shared<AsyncIntakeStep>(intake);
             intakeStep->runAsync();
 
-            auto conveyorStep = std::make_unique<AsyncConveyorStep>(conveyor, mogoGrabber);
+            auto conveyorStep = std::make_shared<AsyncConveyorStep>(conveyor, mogoGrabber);
             conveyorStep->runAsync();
 
             // Initialize
@@ -210,7 +210,7 @@ namespace devils
             pjRoutine.pause(100)->run();
 
             // TODO: Fix Memory Leak Here
-            auto pauseConveyorStep = new AsyncPauseConveyorStep(conveyor, duration);
+            auto pauseConveyorStep = std::make_shared<AsyncPauseConveyorStep>(conveyor, duration);
             pauseConveyorStep->runAsync();
         }
     };

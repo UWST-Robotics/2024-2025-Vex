@@ -37,14 +37,15 @@ namespace devils
             TrajectoryConstraints fastConstraints = {200, 200, 200};
 
             // Async Steps
-            auto intakeStep = std::make_unique<AsyncIntakeStep>(intake);
+            auto intakeStep = std::make_shared<AsyncIntakeStep>(intake);
             intakeStep->runAsync();
 
-            auto conveyorStep = std::make_unique<AsyncConveyorStep>(conveyor, mogoGrabber);
+            auto conveyorStep = std::make_shared<AsyncConveyorStep>(conveyor, mogoGrabber);
             conveyorStep->runAsync();
 
             // Initialize
             AutoBuilder pjRoutine = AutoBuilder(chassis, odometry);
+            pjRoutine.useTransformer(isBlue ? std::make_unique<MirrorTransformX>() : nullptr);
             intake.setArmPosition(IntakeSystem::INTAKE);
             mogoGrabber.setMogoGrabbed(false);
             conveyor.setRingSorting(isBlue ? RingType::RED : RingType::BLUE);

@@ -41,10 +41,10 @@ namespace devils
             };
 
             // Async Steps
-            auto intakeStep = std::make_unique<AsyncIntakeStep>(intake);
+            auto intakeStep = std::make_shared<AsyncIntakeStep>(intake);
             intakeStep->runAsync();
 
-            auto conveyorStep = std::make_unique<AsyncConveyorStep>(conveyor, mogoGrabber);
+            auto conveyorStep = std::make_shared<AsyncConveyorStep>(conveyor, mogoGrabber);
             conveyorStep->runAsync();
 
             // Initialize

@@ -13,13 +13,14 @@ namespace devils
         /// @brief Represents the possible positions of the intake arm.
         enum ArmPosition
         {
-            BOTTOM_RING,        // Grabs rings off the ground
-            INTAKE,             // Slightly elevated to allow for intake
-            SECOND_RING,        // Grabs the 2nd ring off a stack, used for autonomous
-            FOURTH_RING,        // Grabs the 4th ring off a stack, used for autonomous
-            ALLIANCE_STAKE,     // Raises the arm to the shorter alliance (red/blue) stakes
-            NEUTRAL_STAKE,      // Raises the arm to the taller neutral stakes
-            ABOVE_NEUTRAL_STAKE // Raises the arm over the neutral stakes
+            BOTTOM_RING,         // Grabs rings off the ground
+            INTAKE,              // Slightly elevated to allow for intake
+            SECOND_RING,         // Grabs the 2nd ring off a stack, used for autonomous
+            FOURTH_RING,         // Grabs the 4th ring off a stack, used for autonomous
+            ALLIANCE_STAKE,      // Raises the arm to the shorter alliance (red/blue) stakes
+            NEUTRAL_STAKE,       // Raises the arm to the taller neutral stakes
+            ABOVE_NEUTRAL_STAKE, // Raises the arm above the neutral stakes
+            UP
         };
 
         /// @brief Represents the angles of the intake arm for each position.
@@ -32,6 +33,7 @@ namespace devils
             double allianceStake = 640;
             double neutralStake = 1000;
             double aboveNeutralStake = 1050;
+            double up = 1100;
         };
 
         /**
@@ -153,6 +155,8 @@ namespace devils
                 return armPositionAngles.neutralStake;
             case ABOVE_NEUTRAL_STAKE:
                 return armPositionAngles.aboveNeutralStake;
+            case UP:
+                return armPositionAngles.up;
             }
             return 0;
         }

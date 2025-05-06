@@ -22,6 +22,8 @@ namespace devils
 
             mogoGrabber.useSensor(&mogoRushSensor);
 
+            intakeArmMotors.setBrakeMode(true);
+
             odometry.useIMU(&imu);
             odometry.runAsync();
         }
@@ -36,7 +38,14 @@ namespace devils
             // imu.calibrate();
             imu.waitUntilCalibrated();
 
-            BlazeMatchAuto::runMatch(chassis, odometry, intakeSystem, conveyor, mogoGrabber, goalRushSystem);
+            // Run Autonomous
+            bool isBlue = autoOptions.allianceColor == AllianceColor::BLUE_ALLIANCE;
+            switch (autoOptions.routine.id)
+            {
+            case 0:
+                BlazeMatchAuto::runMatch(chassis, odometry, intakeSystem, conveyor, mogoGrabber, goalRushSystem, isBlue);
+                break;
+            }
         }
 
         void opcontrol() override
@@ -49,7 +58,11 @@ namespace devils
             AutoStep::stopAll();
 
             // PTO
+            bool ptoMode = false;
+            bool isPTOSafetyEnabled = true;
             bool isPTOEnabled = false;
+            bool wasTogglePTOInput = false;
+            bool isPTOArmControlEnabled = false;
 
             // Loop
             while (true)
@@ -70,7 +83,7 @@ namespace devils
                 bool mogoInput = mainController.get_digital_new_press(DIGITAL_L2) || mainController.get_digital_new_press(DIGITAL_L1);
 
                 bool goalRushInput = mainController.get_digital_new_press(DIGITAL_A);
-                bool togglePTOInput = mainController.get_digital_new_press(DIGITAL_UP);
+                bool togglePTOInput = mainController.get_digital(DIGITAL_UP);
 
                 // Curve Joystick Inputs for improved control
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1, 0.15);
@@ -89,8 +102,18 @@ namespace devils
                 else if (highArmInput)
                     intakeSystem.setArmPosition(IntakeSystem::NEUTRAL_STAKE);
                 else
-                    intakeSystem.setArmPosition(IntakeSystem::INTAKE);
-                intakeSystem.moveArmToPosition();
+                    intakeSystem.setArmPosition(ptoMode ? IntakeSystem::UP : IntakeSystem::INTAKE);
+
+                // PTO Arm Control
+                if (rightY > 0.5 && ptoMode)
+                    isPTOArmControlEnabled = true;
+
+                if (isPTOArmControlEnabled)
+                    // Move Arm with Joystick
+                    intakeArmMotors.moveVoltage(rightY * 0.6);
+                else
+                    // Move Arm to Target Position
+                    intakeSystem.moveArmToPosition();
 
                 // Intake Claw
                 if (clawInput)
@@ -131,23 +154,39 @@ namespace devils
                         mainController.rumble("...");
                 }
 
-                // PTO
-                if (togglePTOInput)
+                // PTO Safety
+                if (isPTOSafetyEnabled)
+                    togglePTOInput = togglePTOInput && highArmInput;
+
+                // PTO Toggle
+                bool shouldTogglePTO = togglePTOInput && !wasTogglePTOInput;
+                wasTogglePTOInput = togglePTOInput;
+                if (shouldTogglePTO)
                 {
+                    // Switch to PTO Mode
+                    ptoMode = true;
+
                     // Toggle PTO
                     isPTOEnabled = !isPTOEnabled;
+
+                    // Disable Safety
+                    isPTOSafetyEnabled = false;
+
+                    // Reset Symmetric Control Offsets
                     symmetricControl.resetOffsets();
+
+                    // Rumble the controller
                     if (isPTOEnabled)
                         mainController.rumble("-");
                 }
-                ptoPneumatic.setExtended(isPTOEnabled);
+                ptoPneumatic.setExtended(isPTOEnabled); // <-- Set Pneumatic state
 
                 // Conveyor
                 conveyor.setMogoGrabbed(mogoGrabber.getMogoGrabbed());
                 conveyor.setArmLowered(false);
                 conveyor.setPaused(false);
                 conveyor.setRingSorting(RingType::NONE);
-                conveyor.moveAutomatic(rightY);
+                conveyor.moveAutomatic(ptoMode ? JoystickCurve::deadzone(0.5, rightX) : rightY);
 
                 // Move Chassis
                 if (isPTOEnabled)
@@ -219,10 +258,7 @@ namespace devils
 
         RobotAutoOptions autoOptions = RobotAutoOptions();
         std::vector<Routine> routines = {
-            {0, "Match 1", true},
-            {1, "Match 2", true},
-            {2, "Skills 1", false},
-            {3, "Skills 2", false}};
+            {0, "Match", true}};
         // Renderer
         OptionsRenderer optionsRenderer = OptionsRenderer("Blaze", routines, &autoOptions);
     };

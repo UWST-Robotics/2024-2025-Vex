@@ -38,7 +38,7 @@ namespace devils
          * Runs the object asynchronously.
          * @return The PROS task that runs the object.
          */
-        void runAsync()
+        virtual void runAsync()
         {
             // Stop any existing async tasks
             stop();
