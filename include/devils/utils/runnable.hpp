@@ -38,7 +38,7 @@ namespace devils
          * Runs the object asynchronously.
          * @return The PROS task that runs the object.
          */
-        void runAsync()
+        virtual void runAsync()
         {
             // Stop any existing async tasks
             stop();
@@ -85,6 +85,18 @@ namespace devils
 
             // Stop Event
             onStop();
+        }
+
+        /**
+         * Joins the async task.
+         */
+        void joinAsync()
+        {
+            if (currentTask)
+            {
+                currentTask->join();
+                currentTask = nullptr;
+            }
         }
 
     private:

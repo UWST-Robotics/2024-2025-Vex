@@ -5,6 +5,8 @@
 #include "subsystems/IntakeSystem.hpp"
 #include "subsystems/MogoGrabSystem.hpp"
 #include "autonomous/pjMatchAuto.hpp"
+#include "autonomous/pjSkillsAuto.hpp"
+#include "autonomous/pjSkillsStartAuto.hpp"
 #include "autonomous/testAuto.hpp"
 
 namespace devils
@@ -33,29 +35,42 @@ namespace devils
             imu.waitUntilCalibrated();
 
             // Run Autonomous
-            // TestAuto::runB(chassis, odometry);
             bool isBlue = autoOptions.allianceColor == AllianceColor::BLUE_ALLIANCE;
             switch (autoOptions.routine.id)
             {
-                case 0:
-                    PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, isBlue, true);
-                    break;
-                case 1:
-                    PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, isBlue, false);
-                    break;
+            case 0:
+                PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, isBlue, true);
+                break;
+            case 1:
+                PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber, isBlue, false);
+                break;
+            case 2:
+                PJSkillsAuto::runSkills(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
+                break;
             }
-            // PJMatchAuto::southAuto(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
-            // PJSkillsAuto::runSkills(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
         }
 
         void opcontrol() override
         {
             // Default State
-            intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
+            intakeSystem.setArmPosition(IntakeSystem::INTAKE);
             mogoGrabber.setMogoGrabbed(false);
+
+            // Skills Startup
+            bool isSkills = autoOptions.routine.id == 2;
+            bool isBlue = autoOptions.allianceColor == AllianceColor::BLUE_ALLIANCE;
+            auto opponentRingType = (isSkills || !isBlue) ? RingType::BLUE : RingType::RED;
+            if (isSkills)
+            {
+                imu.waitUntilCalibrated();
+                PJSkillsStartAuto::runStart(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
+            }
 
             // Stop autonomous
             AutoStep::stopAll();
+
+            // Climb
+            bool isClimbing = false;
 
             // Loop
             while (true)
@@ -68,21 +83,33 @@ namespace devils
 
                 bool lowArmInput = mainController.get_digital(DIGITAL_B);
                 bool midArmInput = mainController.get_digital(DIGITAL_A) || mainController.get_digital(DIGITAL_Y);
-                bool highArmInput = mainController.get_digital(DIGITAL_X);
-                bool mogoArmInput = mainController.get_digital(DIGITAL_DOWN);
-                bool neutralStakeDownInput = mainController.get_digital(DIGITAL_RIGHT);
+                bool highArmInput = mainController.get_digital(DIGITAL_X) || mainController.get_digital(DIGITAL_L1);
+                bool climbInput = mainController.get_digital_new_press(DIGITAL_UP);
 
-                bool clawInput = mainController.get_digital_new_press(DIGITAL_R1) || mainController.get_digital_new_press(DIGITAL_R2);
-                bool mogoInput = mainController.get_digital_new_press(DIGITAL_L2) || mainController.get_digital_new_press(DIGITAL_L1);
+                bool goalRushInput = mainController.get_digital_new_press(DIGITAL_LEFT);
+                bool pickupInput = mainController.get_digital(DIGITAL_R2);
 
-                // Curve Joystick Inputs for improved control
+                bool clawInput = mainController.get_digital_new_press(DIGITAL_R1);
+                bool mogoInput = mainController.get_digital_new_press(DIGITAL_L2);
+                bool slowInput = false; // mainController.get_digital(DIGITAL_L1);
+
+                bool colorSortInput = mainController.get_digital(DIGITAL_DOWN) || mainController.get_digital(DIGITAL_RIGHT);
+
+                // Curve Joystick Inputs
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1, 0.15);
                 leftX = JoystickCurve::curve(leftX, 3.0, 0.05, 0.2);
-                rightX = JoystickCurve::curve(rightX, 3.0, 0.05, 0.2);
-                rightY = JoystickCurve::curve(rightY, 3.0, 0.1, 0.15);
+                rightX = JoystickCurve::curve(rightX, 3.0, 0.1, 0.2);
+                rightY = JoystickCurve::curve(rightY, 3.0, 0.1, 0.15, 0.8);
 
                 // Decrease turning speed for improved control
-                rightX *= 0.7;
+                rightX *= 0.5;
+
+                // Combine Left and Right X Joystick Inputs
+                double combinedX = JoystickCurve::combine(leftX, rightX);
+
+                // Climb
+                if (climbInput)
+                    isClimbing = !isClimbing;
 
                 // Intake Arm
                 if (lowArmInput)
@@ -91,9 +118,12 @@ namespace devils
                     intakeSystem.setArmPosition(IntakeSystem::ALLIANCE_STAKE);
                 else if (highArmInput)
                     intakeSystem.setArmPosition(IntakeSystem::NEUTRAL_STAKE);
+                else if (isClimbing)
+                    intakeSystem.setArmPosition(IntakeSystem::UP);
                 else
                     intakeSystem.setArmPosition(IntakeSystem::INTAKE);
                 intakeSystem.moveArmToPosition();
+                intakeSystem.disableSpeedClamp(lowArmInput);
 
                 // Intake Claw
                 if (clawInput)
@@ -106,26 +136,46 @@ namespace devils
                         mainController.rumble("..");
                 }
 
-                // Mogo
+                // Mogo Grab
                 if (mogoInput)
                 {
-                    // Toggle Mogo Grabber
-                    bool shouldGrabGoal = !mogoGrabber.isMogoGrabbed();
-                    mogoGrabber.setMogoGrabbed(shouldGrabGoal);
+                    // Goal-Rush Mode
+                    if (goalRushSystem.getExtended())
+                    {
+                        goalRushSystem.setClamped(!goalRushSystem.getClamped());
+                        if (goalRushSystem.getClamped())
+                            mainController.rumble(".");
+                    }
 
-                    if (!shouldGrabGoal)
-                        mainController.rumble(".");
+                    // Rear-Mogo Mode
+                    else
+                    {
+                        mogoGrabber.setMogoGrabbed(!mogoGrabber.getMogoGrabbed());
+                        if (mogoGrabber.getMogoGrabbed())
+                            mainController.rumble(".");
+                    }
                 }
 
-                // Conveyor
-                conveyor.setMogoGrabbed(mogoGrabber.isMogoGrabbed());
-                conveyor.setArmLowered(false);
-                conveyor.setPaused(false);
-                conveyor.moveAutomatic(rightY);
-                conveyor.setRingSorting(RingType::NONE);
+                // Goal Rush
+                if (goalRushInput)
+                {
+                    goalRushSystem.setExtended(!goalRushSystem.getExtended());
+                    if (goalRushSystem.getExtended())
+                        mainController.rumble("...");
+                }
 
-                // Move Chassis
-                chassis.move(leftY, leftX);
+                // Slow Mode
+                double speedMultiplier = slowInput ? 0.5 : 1.0;
+
+                // Conveyor
+                conveyor.setMogoGrabbed(mogoGrabber.getMogoGrabbed());
+                conveyor.setRingSorting((colorSortInput || isSkills) ? opponentRingType : RingType::NONE);
+                conveyor.setArmLowered(intakeSystem.getArmPosition() == IntakeSystem::ArmPosition::BOTTOM_RING); // Always allow the conveyor to move
+                conveyor.moveAutomatic(pickupInput ? 1.0 : rightY);
+                conveyor.setPaused(false);
+
+                // Drive normally
+                chassis.move(leftY * speedMultiplier, combinedX * speedMultiplier);
 
                 // Delay to prevent the CPU from being overloaded
                 pros::delay(20);
@@ -166,6 +216,10 @@ namespace devils
 
         ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 1);
         ADIPneumatic intakeClawPneumatic = ADIPneumatic("IntakeClawPneumatic", 2);
+        ADIPneumatic goalRushDeployPneumatic = ADIPneumatic("GoalRushDeployPneumatic", 3);
+        ADIPneumatic goalRushClampPneumatic = ADIPneumatic("GoalRushClampPneumatic", 4);
+
+        ADIDigitalInput mogoRushSensor = ADIDigitalInput("MogoSensor", 8);
 
         // Subsystems
         TankChassis chassis = TankChassis(leftMotors, rightMotors);
@@ -173,6 +227,8 @@ namespace devils
         MogoGrabSystem mogoGrabber = MogoGrabSystem(mogoPneumatic);
         IntakeSystem intakeSystem = IntakeSystem(intakeClawPneumatic, intakeArmMotors);
         PerpendicularSensorOdometry odometry = PerpendicularSensorOdometry(verticalSensor, horizontalSensor, DEAD_WHEEL_RADIUS);
+        GoalRushSystem goalRushSystem = GoalRushSystem(goalRushDeployPneumatic, goalRushClampPneumatic, mogoRushSensor);
+        SymmetricControl symmetricControl = SymmetricControl(leftMotors, rightMotors);
 
         // Auto
         VBOdom vbOdom = VBOdom("PJ", odometry);
@@ -181,6 +237,7 @@ namespace devils
         std::vector<Routine> routines = {
             {0, "Match (end center)", true},
             {1, "Match (end side)", true},
+            {2, "Skills", false},
         };
         // Renderer
         OptionsRenderer optionsRenderer = OptionsRenderer("PepperJack", routines, &autoOptions);

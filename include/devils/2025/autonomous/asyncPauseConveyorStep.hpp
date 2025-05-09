@@ -8,11 +8,9 @@ namespace devils
     {
     public:
         AsyncPauseConveyorStep(ConveyorSystem &conveyor,
-                               uint32_t delay,
-                               uint32_t duration)
+                               uint32_t delay)
             : conveyor(conveyor),
-              delay(delay),
-              duration(duration)
+              delay(delay)
         {
         }
 
@@ -20,33 +18,28 @@ namespace devils
         {
             delayTimer.setDuration(delay);
             delayTimer.start();
-
-            durationTimer.setDuration(delay + duration);
-            durationTimer.start();
         }
 
         void onUpdate() override
         {
-            // Finished
-            if (durationTimer.finished())
+            if (delayTimer.finished())
                 conveyor.setPaused(false);
+        }
 
-            // In Progress
-            else if (delayTimer.finished())
-                conveyor.setPaused(true);
+        void onStop() override
+        {
+            conveyor.setPaused(true);
         }
 
         bool checkFinished() override
         {
-            return durationTimer.finished();
+            return delayTimer.finished();
         }
 
     private:
         ConveyorSystem &conveyor;
         uint32_t delay;
-        uint32_t duration;
 
         Timer delayTimer = Timer(0);
-        Timer durationTimer = Timer(0);
     };
 }

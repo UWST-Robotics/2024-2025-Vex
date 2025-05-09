@@ -61,7 +61,7 @@ namespace devils
             Pose transformedPose = tryTransformPose(pose);
 
             // Return a new `AutoJumpToStep` with the given pose
-            return std::make_unique<AutoJumpToStep>(odom, transformedPose);
+            return std::make_shared<AutoJumpToStep>(odom, transformedPose);
         }
 
         /**
@@ -88,7 +88,7 @@ namespace devils
         AutoStepPtr pause(uint32_t duration)
         {
             velocity = 0.0;
-            return std::make_unique<AutoPauseStep>(duration);
+            return std::make_shared<AutoPauseStep>(duration);
         }
 
         /**
@@ -100,6 +100,7 @@ namespace devils
          * @param finalVelocity The final velocity to drive at in inches per second. Speed is carried over from the previous step.
          * @param strength The strength of the bezier curve (inches)
          * @param constraints The constraints for the trajectory
+         * @param options The options for the drive step
          * @returns A pointer to the created step
          */
         AutoStepPtr driveToTrajectory(
@@ -109,13 +110,14 @@ namespace devils
             bool isReversed = false,
             double finalVelocity = 0,
             double strength = 10.0,
-            TrajectoryConstraints constraints = {48, 64})
+            TrajectoryConstraints constraints = {56, 64},
+            AutoRamseteStep::Options options = AutoRamseteStep::Options::defaultOptions)
         {
             // Create a new pose
             Pose targetPose = Pose(x, y, Units::degToRad(rotation));
 
             // Return a new `AutoRamseteStep` with the given pose
-            return driveToTrajectoryPose(targetPose, isReversed, finalVelocity, strength, constraints);
+            return driveToTrajectoryPose(targetPose, isReversed, finalVelocity, strength, constraints, options);
         }
 
         /**
@@ -125,6 +127,7 @@ namespace devils
          * @param finalVelocity The final velocity to drive at in inches per second. Speed is carried over from the previous step.
          * @param strength The strength of the bezier curve (inches)
          * @param constraints The constraints for the trajectory
+         * @param options The options for the drive step
          * @returns A pointer to the created step
          */
         AutoStepPtr driveToTrajectoryPose(
@@ -132,7 +135,8 @@ namespace devils
             bool isReversed = false,
             double finalVelocity = 0,
             double strength = 10.0,
-            TrajectoryConstraints constraints = {48, 64})
+            TrajectoryConstraints constraints = {48, 64},
+            AutoRamseteStep::Options options = AutoRamseteStep::Options::defaultOptions)
         {
             // Transform the pose
             Pose fromPose = tryTransformPose(this->pose);
@@ -157,7 +161,7 @@ namespace devils
             velocity = finalVelocity;
 
             // Make a new `AutoRamseteStep` with the given trajectory
-            return std::make_unique<AutoRamseteStep>(chassis, odom, trajectory);
+            return std::make_shared<AutoRamseteStep>(chassis, odom, trajectory, options);
         }
 
         /**
@@ -203,7 +207,7 @@ namespace devils
             Pose transformedPose = tryTransformPose(pose);
 
             // Return a new `AutoBoomerangStep` with the given pose
-            return std::make_unique<AutoTimeoutStep>(std::make_unique<AutoBoomerangStep>(chassis, odom, transformedPose, options), timeout);
+            return std::make_shared<AutoTimeoutStep>(std::make_shared<AutoBoomerangStep>(chassis, odom, transformedPose, options), timeout);
         }
 
         /**
@@ -241,7 +245,7 @@ namespace devils
         //                            pose.rotation);
 
         //     // Return a new `AutoDriveStep` with the given pose
-        //     return std::make_unique<AutoTimeoutStep>(std::make_unique<AutoDriveStep>(chassis, odom, targetPose, options), timeout);
+        //     return std::make_shared<AutoTimeoutStep>(std::make_shared<AutoDriveStep>(chassis, odom, targetPose, options), timeout);
         // }
 
         /**
@@ -263,7 +267,7 @@ namespace devils
             Pose transformedPose = tryTransformPose(pose);
 
             // Return a new `AutoRotateToStep` with the given heading
-            return std::make_unique<AutoTimeoutStep>(std::make_unique<AutoRotateToStep>(chassis, odom, transformedPose.rotation, options), timeout);
+            return std::make_shared<AutoTimeoutStep>(std::make_shared<AutoRotateToStep>(chassis, odom, transformedPose.rotation, options), timeout);
         }
 
         /**

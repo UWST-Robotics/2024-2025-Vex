@@ -39,7 +39,6 @@ namespace devils
         // VEXBridge
         VEXBridge bridge = VEXBridge();
 
-
         // Hardware
         SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-6, 7, -8, 9, -10});
         SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {16, -17, 18, -19, 20});
@@ -53,8 +52,17 @@ namespace devils
         TankChassisOdom odometry = TankChassisOdom(chassis, 1.375, 11);
         // OdomSource &odometry = chassis;
 
+        // Vision
+        // DevilCV camera = DevilCV("red");
+        // VisionTargetOdom ringOdom = VisionTargetOdom(
+        //     odometry,
+        //     std::make_shared<ICamera>(camera),
+        //     DevilCV::VISION_WIDTH_FOV,
+        //     100);
+
         // NT
-        VBOdom vbOdom = VBOdom("TankOdom", odometry);
+        VBOdom tankOdom = VBOdom("TankOdom", odometry);
+        // VBOdom ringOdom = VBOdom("RingOdom", ringOdom);
 
         // Auto Options
         RobotAutoOptions autoOptions = RobotAutoOptions();
@@ -62,8 +70,7 @@ namespace devils
             {0, "Match 1", true},
             {1, "Match 2", true},
             {2, "Skills 1", false},
-            {3, "Skills 2", false}
-        };
+            {3, "Skills 2", false}};
         // Renderer
         OptionsRenderer optionsRenderer = OptionsRenderer("Robin", routines, &autoOptions);
     };
