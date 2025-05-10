@@ -205,15 +205,15 @@ namespace devils
         // Hardware
         // VEXBridge bridge = VEXBridge();
 
-        SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-1, 3, -6, 2, -7});
-        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {10, -9, 5, -8, 21});
-        SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {-19, 20});
+        SmartMotorGroup leftMotors = SmartMotorGroup("LeftMotors", {-11, 3, -12, 4, -1});
+        SmartMotorGroup rightMotors = SmartMotorGroup("RightMotors", {6, -9, 5, -10, 21});
+        SmartMotorGroup conveyorMotors = SmartMotorGroup("ConveyorMotors", {-19, 8});
         SmartMotorGroup intakeArmMotors = SmartMotorGroup("IntakeArmMotors", {-17, 18});
 
         RotationSensor verticalSensor = RotationSensor("VerticalOdom", 13);
-        RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 16);
+        RotationSensor horizontalSensor = RotationSensor("HorizontalOdom", 20);
 
-        OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 11);
+        OpticalSensor conveyorSensor = OpticalSensor("ConveyorSensor", 16);
         InertialSensor imu = InertialSensor("IMU", 15);
 
         ADIPneumatic mogoPneumatic = ADIPneumatic("MogoPneumatic", 1);

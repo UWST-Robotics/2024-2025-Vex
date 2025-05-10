@@ -84,7 +84,7 @@ namespace devils
     private:
         static constexpr double HORIZONTAL_DEADZONE = 0.5;     // deadzone for the joystick
         static constexpr double HORIZONTAL_MULTIPLIER = 0.005; // %
-        static constexpr double HORIZONTAL_ENCODER_SPEED = 3;  // ticks per iteration
+        static constexpr double HORIZONTAL_ENCODER_SPEED = 2;  // ticks per iteration
         static constexpr double ENCODER_MAX_OFFSET = 100;      // ticks
         static constexpr bool IS_REVERSED = true;              // true if the motors are reversed
 

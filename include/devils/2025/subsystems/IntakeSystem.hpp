@@ -26,7 +26,7 @@ namespace devils
         /// @brief Represents the angles of the intake arm for each position.
         struct ArmPositionAngles
         {
-            double bottomRing = 50;
+            double bottomRing = 46;
             double intake = 119;
             double secondRing = 150;
             double fourthRing = 400;

@@ -95,7 +95,7 @@ namespace devils
                 rightX *= 0.7;
 
                 // Intake Arm
-                if (lowArmInput)
+                if (lowArmInput || goalRushSystem.getExtended())
                     intakeSystem.setArmPosition(IntakeSystem::BOTTOM_RING);
                 else if (midArmInput)
                     intakeSystem.setArmPosition(IntakeSystem::ALLIANCE_STAKE);
@@ -147,7 +147,9 @@ namespace devils
                 }
 
                 // Goal Rush
-                if (goalRushInput)
+                if (goalRushInput &&
+                    (lowArmInput || goalRushSystem.getExtended()) &&
+                    !ptoMode)
                 {
                     goalRushSystem.setExtended(!goalRushSystem.getExtended());
                     if (goalRushSystem.getExtended())
@@ -156,7 +158,7 @@ namespace devils
 
                 // PTO Safety
                 if (isPTOSafetyEnabled)
-                    togglePTOInput = togglePTOInput && highArmInput;
+                    togglePTOInput = togglePTOInput && highArmInput && !goalRushSystem.getExtended();
 
                 // PTO Toggle
                 bool shouldTogglePTO = togglePTOInput && !wasTogglePTOInput;
@@ -165,6 +167,9 @@ namespace devils
                 {
                     // Switch to PTO Mode
                     ptoMode = true;
+
+                    // Bring In Goal Rush
+                    goalRushSystem.setExtended(false);
 
                     // Toggle PTO
                     isPTOEnabled = !isPTOEnabled;
@@ -191,8 +196,13 @@ namespace devils
                 // Move Chassis
                 if (isPTOEnabled)
                 {
+                    // Speed multiplier
+                    double speedMultiplier = 1.0;
+                    if (mogoArmInput)
+                        speedMultiplier = 0.3;
+
                     // Drive symmetrically
-                    symmetricControl.drive(leftY, -leftX);
+                    symmetricControl.drive(leftY * speedMultiplier, -leftX);
                 }
                 else
                 {
