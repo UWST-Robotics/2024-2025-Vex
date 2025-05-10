@@ -56,7 +56,7 @@ namespace devils
             // Wall Stake Ring
             pjRoutine.rotateTo(200)->run();
             conveyor.setPaused(true);
-            pjRoutine.driveToTrajectory(-62, -2, 200, false, 0, 1)->run();
+            pjRoutine.driveToTrajectory(-61.5, -2, 200, false, 0, 1)->run();
             conveyor.setPaused(false);
             pjRoutine.pause(300)->run();
             pjRoutine.driveToTrajectory(-56, 0, 200, true, 0, 1)->run();
@@ -119,11 +119,11 @@ namespace devils
             {
                 conveyor.setPaused(true);
                 pjRoutine.rotateTo(135)->run();
-                pjRoutine.driveToTrajectory(-14, 15, 150, true, 0, 12)->run();
+                pjRoutine.driveToTrajectory(-10, 15, 150, true, 0, 12)->run();
 
                 // Clear rings out of the way
-                pjRoutine.rotateTo(50)->run();
-                pjRoutine.rotateTo(140)->run();
+                // pjRoutine.rotateTo(50)->run();
+                // pjRoutine.rotateTo(140)->run();
             }
             else
             {

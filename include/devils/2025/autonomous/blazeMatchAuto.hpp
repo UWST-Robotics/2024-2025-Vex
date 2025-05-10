@@ -118,11 +118,12 @@ namespace devils
 
                 // Grab Mogo
                 goalRushSystem.setExtended(false);
-                pjRoutine.pause(2500)->run(); // <-- Wait for mogo to stop oscillating
+                pjRoutine.pause(3000)->run(); // <-- Wait for mogo to stop oscillating
                 pjRoutine.driveToTrajectory(-12, isBlue ? -54 : -50, 189, true, 0, 4, slowConstraints)->run();
                 mogoGrabber.setMogoGrabbed(true);
 
                 // Ring 1
+                conveyor.setPaused(true);
                 intake.setArmPosition(IntakeSystem::BOTTOM_RING);
                 pjRoutine.driveToTrajectory(-48, -46, 160, false, 12, 6)->run();
                 pjRoutine.driveToTrajectory(-56, -38, 160, false, 0, 2)->run();
@@ -135,7 +136,7 @@ namespace devils
             pjRoutine.rotateTo(220)->run();
             intake.setArmPosition(IntakeSystem::ALLIANCE_STAKE);
             pjRoutine.pause(100)->run(); // <-- Wait for rotate to finish
-            pjRoutine.driveToTrajectory(hasMogo ? -67 : -65, -62, 220, false, 0, 4, slowConstraints)->run();
+            pjRoutine.driveToTrajectory(hasMogo ? -69 : -65, -62, 220, false, 0, 4, slowConstraints)->run();
             conveyorStep->setTargetSpeed(0.7);
             conveyor.setPaused(false);
             pjRoutine.pause(4000)->run(); // <-- Wait for corner to clear
@@ -146,7 +147,7 @@ namespace devils
             intake.setArmPosition(IntakeSystem::ALLIANCE_STAKE);
             pjRoutine.driveToTrajectory(-50, hasMogo ? 0 : -1.5, 180, false, 0, 12)->run();
             pjRoutine.rotateTo(180)->run();
-            pjRoutine.driveToTrajectory(-66, hasMogo ? 0 : -1.5, 180, false, 0, 6)->run();
+            pjRoutine.driveToTrajectory(-67, hasMogo ? 0 : -1.5, 180, false, 0, 6)->run();
             intake.setClawGrabbed(false);
             intake.setArmPosition(IntakeSystem::NEUTRAL_STAKE);
             pjRoutine.driveToTrajectory(-60, hasMogo ? 0 : -1.5, 180, true, 0, 1)->run();
@@ -157,7 +158,7 @@ namespace devils
             // Finish Corner
             pjRoutine.driveToTrajectory(-42, 0, 180, true, 0, 2)->run();
             intake.setArmPosition(IntakeSystem::INTAKE);
-            pjRoutine.driveToTrajectory(-64, 50, 90, false, 0, 8, slowConstraints)->run();
+            pjRoutine.driveToTrajectory(-50, 50, 90, false, 0, 8, slowConstraints)->run();
 
             // Stop Async Steps
             intakeStep->stop();
