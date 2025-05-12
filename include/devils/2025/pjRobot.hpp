@@ -168,8 +168,14 @@ namespace devils
                 double speedMultiplier = slowInput ? 0.5 : 1.0;
 
                 // Conveyor
+                if (isSkills && colorSortInput)
+                    conveyor.setRingSorting(RingType::NONE);
+                else if (isSkills || colorSortInput)
+                    conveyor.setRingSorting(opponentRingType);
+                else
+                    conveyor.setRingSorting(RingType::NONE);
+
                 conveyor.setMogoGrabbed(mogoGrabber.getMogoGrabbed());
-                conveyor.setRingSorting((colorSortInput || isSkills) ? opponentRingType : RingType::NONE);
                 conveyor.setArmLowered(intakeSystem.getArmPosition() == IntakeSystem::ArmPosition::BOTTOM_RING); // Always allow the conveyor to move
                 conveyor.moveAutomatic(pickupInput ? 1.0 : rightY);
                 conveyor.setPaused(false);

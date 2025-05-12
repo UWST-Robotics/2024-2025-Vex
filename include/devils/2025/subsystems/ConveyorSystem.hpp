@@ -98,7 +98,7 @@ namespace devils
                 stallTimer.stop();
 
             // Start zoom timer if we have a ring
-            bool shouldZoom = isRingDetected && isForwards && hasMogo;
+            bool shouldZoom = isRingDetected && isForwards && hasMogo && canZoom;
             if (shouldZoom && !zoomTimer.running())
                 zoomTimer.start();
 
@@ -286,6 +286,11 @@ namespace devils
             this->isMogoDelayEnabled = isEnabled;
         }
 
+        void setZoomEnabled(bool isEnabled)
+        {
+            this->canZoom = isEnabled;
+        }
+
     private:
         //      SENSOR OPTIONS
 
@@ -375,6 +380,7 @@ namespace devils
         bool isRejectingRing = false;
         bool isPaused = false;
         bool isMogoDelayEnabled = true;
+        bool canZoom = true;
         double cooldownSpeed = 0;
         RingType sortRingColor = RingType::NONE;
         std::vector<double> hookPositions = {0, 51};

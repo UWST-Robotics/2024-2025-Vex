@@ -166,16 +166,19 @@ namespace devils
             intakeOnce(conveyor, pjRoutine);
 
             // Drop Mogo
-            pjRoutine.driveToTrajectory(50, -50, 315, true, 0, 2)->run();
+            pjRoutine.driveToTrajectory(53, -50, 315, true, 0, 2)->run();
             pjRoutine.rotateTo(135)->run();
             mogoGrabber.setMogoGrabbed(false);
-            pjRoutine.driveToTrajectory(60, -60, 135, true, 0, 2)->run();
-            pjRoutine.driveToTrajectory(50, -50, 135, false, 0, 2)->run();
-            pjRoutine.driveToTrajectory(60, -60, 135, true, 0, 2)->run();
+            pjRoutine.driveToTrajectory(63, -60, 135, true, 0, 2)->run();
+            pjRoutine.driveToTrajectory(53, -50, 135, false, 0, 2)->run();
+            pjRoutine.driveToTrajectory(63, -60, 135, true, 0, 2)->run();
 
             // Climb
-            intake.setArmPosition(IntakeSystem::ArmPosition::NEUTRAL_STAKE);
-            pjRoutine.driveToTrajectory(16, -16, 135, false, 0, 2)->run();
+            intake.setArmPosition(IntakeSystem::ArmPosition::UP);
+            pjRoutine.driveToTrajectory(0, 0, 135, false, 12, 2, fastConstraints)->run();
+            intake.setArmPosition(IntakeSystem::ArmPosition::INTAKE);
+            pjRoutine.pause(500)->run();
+            intake.setArmPosition(IntakeSystem::ArmPosition::UP);
 
             /*
             pjRoutine.setPose(32, -12, 180)->run();
@@ -209,7 +212,6 @@ namespace devils
             conveyor.setPaused(false);
             pjRoutine.pause(100)->run();
 
-            // TODO: Fix Memory Leak Here
             auto pauseConveyorStep = std::make_shared<AsyncPauseConveyorStep>(conveyor, duration);
             pauseConveyorStep->runAsync();
         }

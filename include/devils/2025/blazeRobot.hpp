@@ -7,6 +7,7 @@
 #include "subsystems/MogoGrabSystem.hpp"
 #include "subsystems/HornLEDSystem.hpp"
 #include "autonomous/BlazeMatchAuto.hpp"
+#include "autonomous/BlazeSkillsAuto.hpp"
 
 namespace devils
 {
@@ -45,6 +46,8 @@ namespace devils
             case 0:
                 BlazeMatchAuto::runMatch(chassis, odometry, intakeSystem, conveyor, mogoGrabber, goalRushSystem, isBlue);
                 break;
+            case 1:
+                BlazeSkillsAuto::runSkills(chassis, odometry, intakeSystem, conveyor, mogoGrabber);
             }
         }
 
@@ -76,7 +79,6 @@ namespace devils
                 bool lowArmInput = mainController.get_digital(DIGITAL_B);
                 bool midArmInput = mainController.get_digital(DIGITAL_Y);
                 bool highArmInput = mainController.get_digital(DIGITAL_X);
-                bool mogoArmInput = mainController.get_digital(DIGITAL_DOWN);
                 bool neutralStakeDownInput = mainController.get_digital(DIGITAL_RIGHT);
 
                 bool clawInput = mainController.get_digital_new_press(DIGITAL_R1) || mainController.get_digital_new_press(DIGITAL_R2);
@@ -84,6 +86,8 @@ namespace devils
 
                 bool goalRushInput = mainController.get_digital_new_press(DIGITAL_A);
                 bool togglePTOInput = mainController.get_digital(DIGITAL_UP);
+
+                bool dropInput = mainController.get_digital(DIGITAL_DOWN);
 
                 // Curve Joystick Inputs for improved control
                 leftY = JoystickCurve::curve(leftY, 3.0, 0.1, 0.15);
@@ -122,7 +126,7 @@ namespace devils
                     bool shouldGrab = !intakeSystem.getClawGrabbed();
                     intakeSystem.setClawGrabbed(shouldGrab);
 
-                    if (!shouldGrab)
+                    if (shouldGrab)
                         mainController.rumble("..");
                 }
 
@@ -196,13 +200,10 @@ namespace devils
                 // Move Chassis
                 if (isPTOEnabled)
                 {
-                    // Speed multiplier
-                    double speedMultiplier = 1.0;
-                    if (mogoArmInput)
-                        speedMultiplier = 0.3;
-
-                    // Drive symmetrically
-                    symmetricControl.drive(leftY * speedMultiplier, -leftX);
+                    if (dropInput)
+                        symmetricControl.drive(-0.1, 0);
+                    else
+                        symmetricControl.drive(leftY, -leftX);
                 }
                 else
                 {
@@ -268,7 +269,8 @@ namespace devils
 
         RobotAutoOptions autoOptions = RobotAutoOptions();
         std::vector<Routine> routines = {
-            {0, "Match", true}};
+            {0, "Match", true},
+            {1, "Skills", false}};
         // Renderer
         OptionsRenderer optionsRenderer = OptionsRenderer("Blaze", routines, &autoOptions);
     };

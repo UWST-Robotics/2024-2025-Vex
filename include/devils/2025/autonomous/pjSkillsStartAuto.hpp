@@ -62,7 +62,7 @@ namespace devils
             pjRoutine.pause(200)->run();
 
             // Mogo
-            pjRoutine.driveToTrajectory(-67, -0.5, 0, true, 0, 2, fastConstraints, sensitiveRamsete)->run();
+            pjRoutine.driveToTrajectory(-68, -0.5, 0, true, 0, 2, fastConstraints, sensitiveRamsete)->run();
             chassis.stop();
             pjRoutine.pause(400)->run();
             mogoGrabber.setMogoGrabbed(true);
@@ -77,9 +77,9 @@ namespace devils
             mogoGrabber.setMogoGrabbed(true);
 
             // Ring 3
-            pjRoutine.rotateTo(35)->run();
-            pjRoutine.driveToTrajectory(0, 60, 0, false, 0, 6)->run();
-            pjRoutine.driveToTrajectory(-6, 60, 0, false, 6, 6)->run();
+            // pjRoutine.rotateTo(35)->run();
+            // pjRoutine.driveToTrajectory(0, 60, 0, false, 0, 6)->run();
+            // pjRoutine.driveToTrajectory(-6, 60, 0, false, 6, 6)->run();
             chassis.stop();
 
             // Ring 3

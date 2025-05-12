@@ -234,19 +234,22 @@ namespace devils
          * @param timeout The timeout in milliseconds
          * @param options The options for the drive step
          */
-        // AutoStepPtr drive(
-        //     double distance,
-        //     uint32_t timeout = 2000,
-        //     AutoDriveStep::Options options = AutoDriveStep::Options::defaultOptions)
-        // {
-        //     // Create a new pose
-        //     Pose targetPose = Pose(pose.x + distance * std::cos(pose.rotation),
-        //                            pose.y + distance * std::sin(pose.rotation),
-        //                            pose.rotation);
+        AutoStepPtr driveTrajectory(
+            double distance,
+            bool isReversed = false,
+            double finalVelocity = 0,
+            double strength = 10.0,
+            TrajectoryConstraints constraints = {48, 64},
+            AutoRamseteStep::Options options = AutoRamseteStep::Options::defaultOptions)
+        {
+            // Create a new pose
+            Pose targetPose = Pose(pose.x + distance * std::cos(pose.rotation),
+                                   pose.y + distance * std::sin(pose.rotation),
+                                   pose.rotation);
 
-        //     // Return a new `AutoDriveStep` with the given pose
-        //     return std::make_shared<AutoTimeoutStep>(std::make_shared<AutoDriveStep>(chassis, odom, targetPose, options), timeout);
-        // }
+            // Return a new `AutoDriveStep` with the given pose
+            return driveToTrajectoryPose(targetPose, isReversed, finalVelocity, strength, constraints, options);
+        }
 
         /**
          * Rotates the robot to a given heading
