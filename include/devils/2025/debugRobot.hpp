@@ -19,18 +19,32 @@ namespace devils
 
         void opcontrol() override
         {
-            blazeRoutine->runAsync();
+            VEXBridge::set<double>("TestValue", 0.0);
+            while (true)
+            {
+                auto value = VEXBridge::get<double>("TestValue", 0.0);
+                printf("TestValue: %f\n", value);
+
+                pros::delay(1000);
+            }
         }
 
         // Network Tables
-        VEXBridge bridge = VEXBridge(0);
+        VEXBridge bridge = VEXBridge();
 
         // Dummy Chassis
         DummyChassis dummyChassis = DummyChassis();
-        AutoStepList *blazeRoutine = AutoFactory::createTestAuto(dummyChassis);
-        NTOdom dummyOdomNT = NTOdom("DummyOdom", dummyChassis);
+        // AutoStepList *blazeRoutine = AutoFactory::createTestAuto(dummyChassis);
+        // VBOdom vbOdom = VBOdom("DummyOdom", dummyChassis);
 
+        RobotAutoOptions autoOptions = RobotAutoOptions();
+        std::vector<Routine> routines = {
+            {0, "Match 1", true},
+            {1, "Match 2", true},
+            {2, "Skills 1", false},
+            {3, "Skills 2", false}
+        };
         // Renderer
-        EyesRenderer eyes = EyesRenderer();
+        OptionsRenderer optionsRenderer = OptionsRenderer("Debug", routines, &autoOptions);
     };
 }

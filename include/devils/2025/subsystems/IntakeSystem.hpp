@@ -13,20 +13,27 @@ namespace devils
         /// @brief Represents the possible positions of the intake arm.
         enum ArmPosition
         {
-            BOTTOM_RING,    // Grabs rings off the ground
-            INTAKE,         // Slightly elevated to allow for intake
-            FOURTH_RING,    // Grabs the 4th ring off a stack, used for autonomous
-            ALLIANCE_STAKE, // Raises the arm to the shorter alliance (red/blue) stakes
-            NEUTRAL_STAKE,  // Raises the arm to the taller neutral stakes
+            BOTTOM_RING,         // Grabs rings off the ground
+            INTAKE,              // Slightly elevated to allow for intake
+            SECOND_RING,         // Grabs the 2nd ring off a stack, used for autonomous
+            FOURTH_RING,         // Grabs the 4th ring off a stack, used for autonomous
+            ALLIANCE_STAKE,      // Raises the arm to the shorter alliance (red/blue) stakes
+            NEUTRAL_STAKE,       // Raises the arm to the taller neutral stakes
+            ABOVE_NEUTRAL_STAKE, // Raises the arm above the neutral stakes
+            UP
         };
 
+        /// @brief Represents the angles of the intake arm for each position.
         struct ArmPositionAngles
         {
-            double bottomRing = -0.06;    // rad
-            double intake = -0.21;        // rad
-            double fourthRing = -0.45;    // rad
-            double allianceStake = -1.05; // rad
-            double neutralStake = -1.6;   // rad
+            double bottomRing = 41;
+            double intake = 119;
+            double secondRing = 150;
+            double fourthRing = 400;
+            double allianceStake = 640;
+            double neutralStake = 1000;
+            double aboveNeutralStake = 1050;
+            double up = 1100;
         };
 
         /**
@@ -35,12 +42,11 @@ namespace devils
          * @param armMotors The motors controlling the arm.
          * @param rotationSensor The sensor measuring the rotation of the arm.
          */
-        IntakeSystem(ADIPneumatic &grabberPneumatic, SmartMotorGroup &armMotors, RotationSensor &rotationSensor)
+        IntakeSystem(ADIPneumatic &grabberPneumatic, SmartMotorGroup &armMotors)
             : grabberPneumatic(grabberPneumatic),
-              armMotors(armMotors),
-              rotationSensor(rotationSensor)
+              armMotors(armMotors)
         {
-            rotationSensor.setPosition(0);
+            armMotors.setPosition(0);
         }
 
         /**
@@ -111,7 +117,7 @@ namespace devils
          * Sets the parameters for the arm PID controller.
          * @param params The parameters to set.
          */
-        void setArmPID(PIDParams params)
+        void setArmPID(PIDController::Options params)
         {
             armPID = PIDController(params);
         }
@@ -129,7 +135,7 @@ namespace devils
         /**
          * Converts the arm position to target angle.
          * @param position The position to convert.
-         * @return The cooresponding angle in radians.
+         * @return The cooresponding angle in encoder positions.
          */
         double convertPositionToAngle(ArmPosition position)
         {
@@ -139,12 +145,18 @@ namespace devils
                 return armPositionAngles.bottomRing;
             case INTAKE:
                 return armPositionAngles.intake;
+            case SECOND_RING:
+                return armPositionAngles.secondRing;
             case FOURTH_RING:
                 return armPositionAngles.fourthRing;
             case ALLIANCE_STAKE:
                 return armPositionAngles.allianceStake;
             case NEUTRAL_STAKE:
                 return armPositionAngles.neutralStake;
+            case ABOVE_NEUTRAL_STAKE:
+                return armPositionAngles.aboveNeutralStake;
+            case UP:
+                return armPositionAngles.up;
             }
             return 0;
         }
@@ -168,15 +180,9 @@ namespace devils
          */
         void moveMotorToAngle(SmartMotor *motor, double angle)
         {
-            // Fail if the sensor is not connected
-            if (!rotationSensor.isConnected())
-            {
-                motor->moveVoltage(0);
-                return;
-            }
-
-            double currentPosition = rotationSensor.getAngle();
-            double error = Units::diffRad(angle, currentPosition);
+            // Get the current position of the motor
+            double currentPosition = motor->getPosition();
+            double error = angle - currentPosition;
 
             // PID Control
             double speed = armPID.update(error);
@@ -189,19 +195,17 @@ namespace devils
         }
 
     private:
-        static constexpr double DECEL_DISTANCE = M_PI * 0.2; // rad
-        static constexpr double MAX_SPEED = 0.2;             // %
-        static constexpr double MIN_SPEED = -0.6;            // %
+        static constexpr double MAX_SPEED = 1.0;  // %
+        static constexpr double MIN_SPEED = -0.6; // %
 
         // State
         ArmPositionAngles armPositionAngles = ArmPositionAngles();
         ArmPosition targetPosition = BOTTOM_RING;
-        PIDController armPID = PIDController(1.8, 0, 80);
+        PIDController armPID = PIDController(0.006, 0, 0.1);
         bool isSpeedClampDisabled = false;
 
         // Hardware
         ADIPneumatic &grabberPneumatic;
         SmartMotorGroup &armMotors;
-        RotationSensor &rotationSensor;
     };
 }

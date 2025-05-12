@@ -2,13 +2,13 @@
 
 #include <vector>
 #include "path.hpp"
-#include "structs/splinePose.hpp"
+#include "splinePose.hpp"
 #include "../geometry/lerp.hpp"
 
 namespace devils
 {
     /**
-     * Represents a path that is interpolated using cubic splines.
+     * Cubic spline interpolated path
      */
     class SplinePath : public Path
     {
@@ -16,11 +16,13 @@ namespace devils
         /**
          * Creates a new instance of a spline path using a list of SplinePoses.
          * @param poses The list of poses to interpolate between
+         * @param isReversed True if the path is reversed
          * @return The spline path
          */
-        SplinePath(std::vector<SplinePose> poses)
+        SplinePath(std::vector<SplinePose> poses, bool isReversed = false)
+            : isReversed(isReversed),
+              poses(poses)
         {
-            this->poses = poses;
         }
 
         /**
@@ -28,14 +30,18 @@ namespace devils
          * @param from The starting pose
          * @param to The ending pose
          * @param delta Distance of the entry and exit anchor points in inches
+         * @param isReversed True if the path is reversed
          * @return The spline path
          */
-        static SplinePath *makeArc(Pose from, Pose to, double delta = 18.0)
+        static SplinePath makeArc(Pose from, Pose to, double delta = 18.0, bool isReversed = false)
         {
+            if (isReversed)
+                delta *= -1;
+
             std::vector<SplinePose> poses;
             poses.push_back(SplinePose(from.x, from.y, from.rotation, delta, delta));
             poses.push_back(SplinePose(to.x, to.y, to.rotation, delta, delta));
-            return new SplinePath(poses);
+            return SplinePath(poses, isReversed);
         }
 
         /**
@@ -65,12 +71,32 @@ namespace devils
 
             // Interpolate between the two poses
             // using cubic interpolation
-            return Lerp::cubicPoints(
+            Pose interpolatedPose = Lerp::cubicPoints(
                 prevPose,
                 prevAnchor,
                 nextAnchor,
                 nextPose,
                 dt);
+
+            Pose interpolatedPosePrime = Lerp::cubicPoints(
+                prevPose,
+                prevAnchor,
+                nextAnchor,
+                nextPose,
+                dt + DELTA_INDEX);
+
+            // Calculate rotation
+            // This is the instantaneous derivative of the pose at the given index
+            double rotation = std::atan2(
+                interpolatedPosePrime.y - interpolatedPose.y,
+                interpolatedPosePrime.x - interpolatedPose.x);
+            interpolatedPose.rotation = rotation;
+
+            // Reverse the rotation if the path is reversed
+            if (isReversed)
+                interpolatedPose.rotation = Units::normalizeRadians(interpolatedPose.rotation + M_PI);
+
+            return interpolatedPose;
         }
 
         /**
@@ -83,6 +109,13 @@ namespace devils
         }
 
     private:
+        /// @brief Step size used to calculate pose rotation
+        static constexpr double DELTA_INDEX = 0.0001;
+
+        /// @brief True if the path is reversed
+        bool isReversed = false;
+
+        /// @brief The list of poses to interpolate between
         std::vector<SplinePose> poses;
     };
 }

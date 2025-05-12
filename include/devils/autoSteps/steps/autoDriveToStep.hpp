@@ -1,18 +1,18 @@
 #pragma once
 #include <string>
 #include "pros/rtos.hpp"
-#include "../common/autoStep.hpp"
+#include "../autoStep.hpp"
 #include "../../utils/math.hpp"
 #include "../../odom/odomSource.hpp"
 #include "../../chassis/chassisBase.hpp"
-#include "../../utils/pidController.hpp"
+#include "../../controller/pidController.hpp"
 #include "../../utils/timer.hpp"
-#include "../../odom/poseVelocityCalculator.hpp"
 
 namespace devils
 {
     /**
-     * Drives the robot to a specific pose.
+     * Drives the robot linearly to a specific pose.
+     * Rotates the robot to face the target pose, disregarding target rotation.
      */
     class AutoDriveToStep : public AutoStep
     {
@@ -20,22 +20,25 @@ namespace devils
         struct Options
         {
             /// @brief The PID parameters for translation. Uses delta inches as the error.
-            PIDParams translationPID = PIDParams{0.1, 0.0, 0.0};
+            PIDController::Options translationPID = {0.1, 0.0, 0.0};
 
             /// @brief The PID parameters for rotation. Uses delta radians as the error.
-            PIDParams rotationPID = PIDParams{0.05, 0.0, 0.0};
+            PIDController::Options rotationPID = {0.05, 0.0, 0.0};
+
+            /// @brief THe minimum speed in %
+            double minSpeed = 0.0;
 
             /// @brief The maximum speed in %
             double maxSpeed = 0.5;
 
-            /// @brief The distance to the goal in inches
-            double goalDist = 2.0;
+            /// @brief The maximum final distance to the target in inches
+            double goalDist = 6.0;
 
-            /// @brief The maximum speed of the robot in in/s
-            double goalSpeed = 2.0;
+            /// @brief The maximum final speed of the robot in in/s. (Defaults to no limit)
+            double goalSpeed = std::numeric_limits<double>::max();
 
-            /// @brief The minimum distance from the target to apply rotation
-            double minDistanceToRotate = 2.0;
+            /// @brief The minimum distance from the target to apply rotation. If we are closer than this, we will not rotate to avoid oscillation.
+            double minDistanceToRotate = 1.0;
 
             /// @brief The default options for the drive step.
             static Options defaultOptions;
@@ -57,21 +60,14 @@ namespace devils
               odomSource(odomSource),
               targetPose(targetPose),
               options(options),
-              translationPID(options.translationPID),
-              rotationPID(options.rotationPID)
+              rotationPID(options.rotationPID),
+              translationPID(options.translationPID)
         {
         }
 
         void onStart() override
         {
-            // Toggle Finished
-            this->isAtGoal = false;
-
-            // Start Pose
-            startPose = odomSource.getPose();
-
             // Reset PID Controllers
-            translationPID.reset();
             rotationPID.reset();
         }
 
@@ -82,44 +78,36 @@ namespace devils
             Vector2 currentVelocity = odomSource.getVelocity();
 
             // Calculate distance to start and target
-            double distanceToStart = currentPose.distanceTo(startPose);
-            double distanceToTarget = Math::distanceOnLine(
-                startPose,
-                targetPose,
-                currentPose);
+            double distanceToTarget = currentPose.distanceTo(targetPose);
 
-            // Calculate Dot Product
-            double dot = cos(currentPose.rotation) *
-                             (targetPose.x - currentPose.x) +
-                         sin(currentPose.rotation) *
-                             (targetPose.y - currentPose.y);
-
-            // Reverse if needed
-            distanceToTarget *= std::copysign(1.0, dot);
-
-            // Check if we reached the goal
-            bool isAtGoalPose = fabs(distanceToTarget) < options.goalDist;
-            bool isAtGoalVelocity = currentVelocity.magnitude() < options.goalSpeed;
-            this->isAtGoal = isAtGoalPose && isAtGoalVelocity;
-
-            // Calculate Speed
-            double speed = translationPID.update(distanceToTarget);
-            speed = std::clamp(speed, -options.maxSpeed, options.maxSpeed);
-
-            // Calculate Angle
+            // Calculate target angle
             double targetAngleRads = std::atan2(
                 targetPose.y - currentPose.y,
                 targetPose.x - currentPose.x);
 
-            if (dot < 0)
-                targetAngleRads += M_PI; // Goal point is behind us, target the opposite direction
+            // Calculate Dot Product
+            double currentDotTarget = cos(currentPose.rotation) *
+                                          (targetPose.x - currentPose.x) +
+                                      sin(currentPose.rotation) *
+                                          (targetPose.y - currentPose.y);
 
-            double angleDiff = Math::angleDiff(targetAngleRads, currentPose.rotation);
+            // Drive in reverse if the goal is behind us
+            if (currentDotTarget < 0)
+            {
+                distanceToTarget = -distanceToTarget;
+                targetAngleRads += M_PI;
+            }
+
+            // Calculate Forward Speed
+            double speed = getSpeed(distanceToTarget);
 
             // Calculate Turn Speed
             double turnSpeed = 0;
             if (std::fabs(distanceToTarget) > options.minDistanceToRotate)
             {
+                // Difference in angle
+                double angleDiff = Math::angleDiff(targetAngleRads, currentPose.rotation);
+
                 turnSpeed = rotationPID.update(angleDiff);
                 turnSpeed = std::clamp(turnSpeed, -options.maxSpeed, options.maxSpeed);
             }
@@ -136,19 +124,42 @@ namespace devils
 
         bool checkFinished() override
         {
-            return isAtGoal;
+            // Get Current State
+            Pose currentPose = odomSource.getPose();
+
+            // Calculate distance to target pose
+            double distanceToTarget = currentPose.distanceTo(targetPose);
+
+            // Check if we reached the goal
+            return fabs(distanceToTarget) < options.goalDist;
         }
 
     protected:
-        // State
-        Pose startPose = Pose();
-        bool isAtGoal = false;
+        /**
+         * Gets the speed at a given distance to the target.
+         * @param distanceToTarget The distance to the target in inches
+         * @returns The target speed in inches per second
+         */
+        virtual double getSpeed(double distanceToTarget)
+        {
+            // Calculate output speed
+            double outputSpeed = translationPID.update(distanceToTarget);
+
+            // Apply max speed
+            outputSpeed = std::clamp(outputSpeed, -options.maxSpeed, options.maxSpeed);
+
+            // Apply min speed
+            if (std::fabs(outputSpeed) < options.minSpeed)
+                outputSpeed = std::copysign(options.minSpeed, outputSpeed);
+
+            return outputSpeed;
+        }
 
         // Params
         ChassisBase &chassis;
         OdomSource &odomSource;
-        PIDController translationPID;
         PIDController rotationPID;
+        PIDController translationPID;
         Pose targetPose = Pose();
         Options options;
     };

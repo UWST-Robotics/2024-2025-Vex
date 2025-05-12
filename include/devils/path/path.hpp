@@ -5,6 +5,9 @@
 
 namespace devils
 {
+    /**
+     * Represents a continuous list of connected points that can be interpolated.
+     */
     struct Path
     {
         /**

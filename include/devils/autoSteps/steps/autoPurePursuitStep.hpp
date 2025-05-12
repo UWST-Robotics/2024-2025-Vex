@@ -1,6 +1,6 @@
 #pragma once
 #include "pros/rtos.hpp"
-#include "../common/autoStep.hpp"
+#include "../autoStep.hpp"
 #include "../../chassis/chassisBase.hpp"
 #include "../../odom/odomSource.hpp"
 #include "../../path/path.hpp"
@@ -83,6 +83,9 @@ namespace devils
 
         bool checkFinished() override
         {
+            // Check against the target pose, not the lookahead pose
+            AutoDriveToStep::targetPose = path->getPoseAt(path->getLength() - 1);
+
             return AutoDriveToStep::checkFinished();
         }
 

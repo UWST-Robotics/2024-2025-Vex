@@ -2,8 +2,9 @@
 
 #include <cstdint>
 #include <cstddef>
+#include "buffer.h"
 
-namespace vexbridge
+namespace vexbridge::utils
 {
     /**
      * Reads data sequentially from a buffer.
@@ -15,11 +16,9 @@ namespace vexbridge
         /**
          * Creates a new buffer reader.
          * @param buffer The buffer to read from.
-         * @param length The length of the buffer.
          */
-        BufferReader(uint8_t *buffer, size_t length)
-            : buffer(buffer),
-              length(length)
+        BufferReader(const Buffer &buffer)
+            : buffer(buffer)
         {
         }
 
@@ -27,7 +26,7 @@ namespace vexbridge
          * Sets the reader position
          * @param offset The new offset in bytes
          */
-        void setOffset(size_t offset)
+        void setOffset(const size_t offset)
         {
             this->offset = offset;
         }
@@ -36,9 +35,18 @@ namespace vexbridge
          * Gets the current reader position
          * @return The current offset in bytes
          */
-        size_t getOffset()
+        size_t getOffset() const
         {
             return offset;
+        }
+
+        /**
+         * Gets the number of bytes available to read.
+         * @return The number of bytes available to read.
+         */
+        size_t getBytesAvailable() const
+        {
+            return buffer.size() - offset;
         }
 
         /**
@@ -47,7 +55,7 @@ namespace vexbridge
          */
         uint8_t readUInt8()
         {
-            if (offset >= length)
+            if (offset >= buffer.size())
                 return 0;
             return buffer[offset++];
         }
@@ -57,18 +65,17 @@ namespace vexbridge
          * @param length The number of bytes to copy.
          * @return The new buffer containing the copied bytes.
          */
-        uint8_t *readBytes(uint16_t length)
+        Buffer readBytes(uint16_t length)
         {
-            if (offset + length > this->length)
-            {
-                offset = this->length;
-                return nullptr;
-            }
+            // Check for buffer overflow
+            if (length > buffer.size() - offset)
+                length = buffer.size() - offset;
 
-            uint8_t *bytes = new uint8_t[length];
+            // Copy the bytes
+            Buffer newBuffer;
             for (uint16_t i = 0; i < length; i++)
-                bytes[i] = readUInt8();
-            return bytes;
+                newBuffer.push_back(readUInt8());
+            return newBuffer;
         }
 
         /**
@@ -161,8 +168,8 @@ namespace vexbridge
         std::string readString16()
         {
             uint16_t stringLength = readUInt16BE();
-            if (stringLength > length - offset)
-                stringLength = length - offset;
+            if (stringLength > buffer.size() - offset)
+                stringLength = buffer.size() - offset;
 
             std::string str = "";
             for (uint16_t i = 0; i < stringLength; i++)
@@ -178,9 +185,12 @@ namespace vexbridge
          */
         std::string readString8()
         {
+            // Read the string length
             uint8_t stringLength = readUInt8();
-            if (stringLength > length - offset)
-                stringLength = length - offset;
+
+            // Check for buffer overflow
+            if (stringLength > buffer.size() - offset)
+                stringLength = buffer.size() - offset;
 
             std::string str = "";
             for (uint8_t i = 0; i < stringLength; i++)
@@ -193,14 +203,13 @@ namespace vexbridge
          * Checks if there is more data to read.
          * @return True if there is more data to read.
          */
-        bool hasData()
+        bool hasData() const
         {
-            return offset < length;
+            return offset < buffer.size();
         }
 
     private:
-        uint8_t *buffer;
-        size_t length;
+        const Buffer &buffer;
         size_t offset = 0;
     };
 }

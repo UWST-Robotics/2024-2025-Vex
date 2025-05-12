@@ -32,30 +32,17 @@ namespace devils
             lastUpdateTimestamp = pros::millis();
         }
 
-        Vector2 &getVelocity() override
-        {
-            return PoseVelocityCalculator::getVelocity();
-        }
-
-        double getAngularVelocity() override
-        {
-            return PoseVelocityCalculator::getAngularVelocity();
-        }
-
         /**
          * Updates the odometry from vertical and horizontal tracking wheels.
          */
         void onUpdate() override
         {
-
             // Get Sensor Angles in Degrees
             double verticalAngle = verticalSensor.getAngle();
-            if (errno != 0)
-                return;
+            bool isVerticalSensorError = (errno != 0);
 
             double horizontalAngle = horizontalSensor.getAngle();
-            if (errno != 0)
-                return;
+            bool isHorizontalSensorError = (errno != 0);
 
             // Get Delta Time
             uint32_t deltaT = lastUpdateTimestamp - pros::millis();
@@ -80,14 +67,24 @@ namespace devils
                 }
             }
 
+            // Get Delta Distance
+            double deltaVertical = vertical - lastVertical;
+            double deltaHorizontal = horizontal - lastHorizontal;
+
+            // Check for sensor errors
+            if (!isVerticalSensorError)
+                lastVertical = vertical;
+            if (!isHorizontalSensorError)
+                lastHorizontal = horizontal;
+
             // Apply Sensor Offsets
             if (verticalSensorOffset != nullptr &&
                 horizontalSensorOffset != nullptr)
             {
                 // Calculate radius of rotation for each sensor
                 // We only care about the x and y components since the sensors are perpendicular to the other axis
-                double verticalOffsetRadius = std::fabs(verticalSensorOffset->x);
-                double horizontalOffsetRadius = std::fabs(horizontalSensorOffset->y);
+                double verticalOffsetRadius = verticalSensorOffset->x;
+                double horizontalOffsetRadius = horizontalSensorOffset->y;
 
                 // Calculate Arc Length
                 // Arc Length = r * theta
@@ -95,15 +92,15 @@ namespace devils
                 double horizontalArcLength = horizontalOffsetRadius * deltaRotation;
 
                 // Subtract Arc Length
-                vertical -= verticalArcLength;
-                horizontal -= horizontalArcLength;
+                deltaVertical -= verticalArcLength;
+                deltaHorizontal -= horizontalArcLength;
             }
 
-            // Get Delta Distance
-            double deltaVertical = vertical - lastVertical;
-            double deltaHorizontal = horizontal - lastHorizontal;
-            lastVertical = vertical;
-            lastHorizontal = horizontal;
+            // Check for sensor errors
+            if (isVerticalSensorError)
+                deltaVertical = 0;
+            if (isHorizontalSensorError)
+                deltaHorizontal = 0;
 
             // Calculate trigonometric values
             double rotation = currentPose.rotation;
@@ -118,13 +115,13 @@ namespace devils
             currentPose.y += deltaY;
 
             // Update Velocity
-            updateVelocity(currentPose);
+            PoseVelocityCalculator::updateVelocity(currentPose);
         }
 
         /**
          * Gets the current pose of the robot.
          */
-        Pose &getPose() override
+        Pose getPose() override
         {
             return currentPose;
         }
@@ -133,7 +130,7 @@ namespace devils
          * Sets the current pose of the robot.
          * @param pose The pose to set the robot to.
          */
-        void setPose(Pose &pose) override
+        void setPose(Pose pose) override
         {
             currentPose = pose;
 
@@ -161,6 +158,11 @@ namespace devils
         {
             this->verticalSensorOffset = &verticalSensorOffset;
             this->horizontalSensorOffset = &horizontalSensorOffset;
+        }
+
+        PoseVelocity getVelocity() override
+        {
+            return PoseVelocityCalculator::getVelocity();
         }
 
     private:

@@ -2,7 +2,7 @@
 
 #include "pros/rtos.hpp"
 
-namespace vexbridge
+namespace vexbridge::utils
 {
     /**
      * Represents a daemon that runs in the background while the user program is running.
@@ -12,13 +12,9 @@ namespace vexbridge
     class Daemon
     {
     public:
-        Daemon() : daemonTask([=]
+        Daemon() : daemonTask([=, this]
                               { runTask(); })
         {
-        }
-        ~Daemon()
-        {
-            daemonTask.remove();
         }
 
     protected:
@@ -35,12 +31,27 @@ namespace vexbridge
         void runTask()
         {
             while (true)
-                update();
+            {
+                try
+                {
+                    update();
+                }
+                catch (const std::exception &e)
+                {
+                    printf("Daemon exception: %s\n", e.what());
+                    pros::delay(REVIVE_DELAY);
+                }
+            }
         }
 
+        // Disable copy and assignment
         Daemon(const Daemon &) = delete;
         Daemon &operator=(const Daemon &) = delete;
 
-        pros::Task daemonTask;
+        // Constants
+        static constexpr uint32_t REVIVE_DELAY = 1000;
+
+        // The task that runs the daemon
+        const pros::Task daemonTask;
     };
 };

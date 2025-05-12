@@ -1,10 +1,10 @@
 #pragma once
 #include "pros/rtos.hpp"
-#include "../common/autoStep.hpp"
+#include "../autoStep.hpp"
 #include "../../odom/odomSource.hpp"
 #include "../../chassis/chassisBase.hpp"
 #include "../../utils/math.hpp"
-#include "../../utils/pidController.hpp"
+#include "../../controller/pidController.hpp"
 #include "../../odom/poseVelocityCalculator.hpp"
 
 namespace devils
@@ -18,19 +18,19 @@ namespace devils
         struct Options
         {
             /// @brief The PID parameters to snap to an angle. Uses delta radians as the error.
-            PIDParams pidParams = PIDParams{0.1, 0.0, 0.0};
-
-            /// @brief The maximum speed in %
-            double maxSpeed = 0.3;
+            PIDController::Options pidParams = {0.1, 0.0, 0.0};
 
             /// @brief The minimum speed in %
             double minSpeed = 0.1;
 
+            /// @brief The maximum speed in %
+            double maxSpeed = 0.6;
+
             /// @brief The distance to the goal in radians
             double goalDist = 0.015;
 
-            /// @brief The maximum speed of the robot in rad/s
-            double goalSpeed = 0.01;
+            /// @brief The maximum goal speed of the robot in rad/s. (Defaults to no limit)
+            double goalSpeed = std::numeric_limits<double>::max();
 
             /// @brief Setting this to false will rotate to the absolute angle instead of the minimum distance.
             bool useMinimumDistance = true;
@@ -77,7 +77,7 @@ namespace devils
         {
             // Get Current Pose
             Pose currentPose = odomSource.getPose();
-            double currentVelocity = odomSource.getAngularVelocity();
+            double currentVelocity = odomSource.getVelocity().rotation;
 
             // Calculate distance to start and target
             double currentAngle = currentPose.rotation;

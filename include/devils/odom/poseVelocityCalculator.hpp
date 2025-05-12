@@ -9,24 +9,20 @@ namespace devils
     {
     public:
         /**
-         * Gets the linear velocity of the robot in inches per second.
-         * @return The linear velocity of the robot in inches per second.
+         * Gets current velocity of the robot.
+         * @return The current velocity of the robot as a `PoseVelocity`.
          */
-        virtual Vector2 &getVelocity()
+        virtual PoseVelocity getVelocity()
         {
-            return linearVelocity;
-        }
-
-        /**
-         * Gets the angular velocity of the robot in radians per second.
-         * @return The angular velocity of the robot in radians per second.
-         */
-        virtual double getAngularVelocity()
-        {
-            return angularVelocity;
+            return currentVelocity;
         }
 
     protected:
+        /**
+         * Updates the current velocity of the robot.
+         * Should be run whenever the current `pose` is updated.
+         * @param pose The current pose of the robot.
+         */
         void updateVelocity(Pose pose)
         {
             // Calculate Time Delta
@@ -50,12 +46,15 @@ namespace devils
 
             // Calculate Linear Velocity
             Vector2 positionDelta = pose - lastPose;
-            linearVelocity.x = positionDelta.x / dt;
-            linearVelocity.y = positionDelta.y / dt;
+            double linearVelocityX = positionDelta.x / dt;
+            double linearVelocityY = positionDelta.y / dt;
 
             // Calculate Angular Velocity
             double angleDelta = pose.rotation - lastPose.rotation;
-            angularVelocity = angleDelta / dt;
+            double angularVelocity = angleDelta / dt;
+
+            // Update Velocity
+            currentVelocity = PoseVelocity(linearVelocityX, linearVelocityY, angularVelocity);
 
             // Update Last Pose
             lastPose = pose;
@@ -63,8 +62,7 @@ namespace devils
 
     private:
         // Current state
-        Vector2 linearVelocity = Vector2();
-        double angularVelocity = 0;
+        PoseVelocity currentVelocity = PoseVelocity();
 
         // Last state
         uint32_t lastTimestamp = 0;

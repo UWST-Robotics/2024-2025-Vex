@@ -117,35 +117,17 @@ namespace devils
          * Normalizes the pose
          * @return The normalized pose
          */
-        Pose normalize()
+        Pose normalize() const
         {
             double mag = magnitude();
             return {x / mag, y / mag, rotation};
         }
 
         /**
-         * Linearly interpolates between two poses
-         * Starts with the current pose and interpolates to the end pose
-         * @param endPose The end pose
-         * @param t The time to interpolate to. 0 is the current pose, 1 is the end pose.
-         * @return The interpolated pose
-         */
-        Pose lerp(Pose endPose, double t)
-        {
-            // Calculate the interpolated pose
-            Pose interpolatedPose;
-            interpolatedPose.x = std::lerp(x, endPose.x, t);
-            interpolatedPose.y = std::lerp(y, endPose.y, t);
-            interpolatedPose.rotation = std::lerp(rotation, endPose.rotation, t);
-
-            return interpolatedPose;
-        }
-
-        /**
          * Prints the pose to a string
          * @return The pose as a string
          */
-        const std::string toString()
+        std::string toString() const
         {
             return "Pose(" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(rotation) + ")";
         }

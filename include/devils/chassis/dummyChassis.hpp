@@ -31,9 +31,9 @@ namespace devils
 
         void move(double forward, double turn, double strafe = 0) override
         {
-            forward = std::clamp(forward, -1.0, 1.0) * forwardSpeed;
-            turn = std::clamp(turn, -1.0, 1.0) * turnSpeed;
-            strafe = std::clamp(strafe, -1.0, 1.0) * strafeSpeed;
+            forward = std::clamp(forward, -1.0, 1.0);
+            turn = std::clamp(turn, -1.0, 1.0);
+            strafe = std::clamp(strafe, -1.0, 1.0);
 
             lastForward = forward;
             lastTurn = turn;
@@ -58,24 +58,19 @@ namespace devils
             updateVelocity(currentPose);
         }
 
-        void setPose(Pose &pose) override
+        void setPose(Pose pose) override
         {
             currentPose = pose;
         }
 
-        Pose &getPose() override
+        Pose getPose() override
         {
             return currentPose;
         }
 
-        Vector2 &getVelocity() override
+        PoseVelocity getVelocity() override
         {
             return PoseVelocityCalculator::getVelocity();
-        }
-
-        double getAngularVelocity() override
-        {
-            return PoseVelocityCalculator::getAngularVelocity();
         }
 
     private:

@@ -7,32 +7,10 @@ namespace devils
     class EyesRenderer : Runnable
     {
     public:
-        EyesRenderer() : Runnable(50)
+        EyesRenderer(lv_obj_t *parent) : Runnable(50)
         {
-            root = lv_obj_create(NULL);
-            lv_scr_load(root);
+            this->parent = parent;
 
-            eyesGroup = lv_obj_create(root);
-            lv_obj_set_size(eyesGroup, 340, 200);
-            lv_obj_align(eyesGroup, LV_ALIGN_CENTER, 0, 0);
-            lv_obj_set_pos(eyesGroup, 0, 0);
-            lv_obj_set_style_radius(eyesGroup, 0, 0);
-            lv_obj_set_style_border_width(eyesGroup, 0, 0);
-            lv_obj_set_style_bg_color(eyesGroup, lv_color_make(3, 36, 53), 0);
-            lv_obj_set_scrollbar_mode(eyesGroup, LV_SCROLLBAR_MODE_OFF);
-
-            leftEye = makeEye(-100, 0, 120);
-            rightEye = makeEye(100, 0, 120);
-            leftEyebrow = makeEyebrow(-100, -85, 0, 130);
-            rightEyebrow = makeEyebrow(100, -110, 0, 130);
-
-            lv_obj_set_style_bg_color(root, lv_color_make(3, 36, 53), 0);
-
-            runAsync();
-        }
-        ~EyesRenderer()
-        {
-            lv_obj_del(root);
         }
 
         void onUpdate() override
@@ -44,6 +22,46 @@ namespace devils
                 eyesGroup,
                 std::cos(t * 0.1) * 20,
                 0);
+        }
+
+        void render() {
+            fullScreenContainer = lv_obj_create(parent);
+            lv_obj_set_size(fullScreenContainer, lv_pct(100), lv_pct(100));
+            eyesGroup = lv_obj_create(fullScreenContainer);
+            lv_obj_set_size(eyesGroup, 340, 200);
+            lv_obj_align(eyesGroup, LV_ALIGN_CENTER, 0, 0);
+            lv_obj_set_pos(eyesGroup, 0, 0);
+            lv_obj_set_style_radius(eyesGroup, 0, 0);
+            lv_obj_set_style_border_width(eyesGroup, 0, 0);
+            lv_obj_set_style_bg_color(fullScreenContainer, lv_color_make(3, 36, 53), 0);
+            lv_obj_set_style_bg_opa(eyesGroup, 0, 0);
+            lv_obj_set_scrollbar_mode(eyesGroup, LV_SCROLLBAR_MODE_OFF);
+            
+
+            leftEye = makeEye(-100, 0, 120);
+            rightEye = makeEye(100, 0, 120);
+            leftEyebrow = makeEyebrow(-100, -85, 0, 130);
+            rightEyebrow = makeEyebrow(100, -110, 0, 130);
+
+            lv_obj_set_style_bg_color(parent, lv_color_make(3, 36, 53), 0);
+
+            lv_obj_add_event_cb(fullScreenContainer, handleDestroy, LV_EVENT_LONG_PRESSED, this);
+            lv_obj_add_event_cb(eyesGroup, handleDestroy, LV_EVENT_LONG_PRESSED, this);
+            lv_obj_add_event_cb(leftEye, handleDestroy, LV_EVENT_LONG_PRESSED, this);
+            lv_obj_add_event_cb(rightEye, handleDestroy, LV_EVENT_LONG_PRESSED, this);
+            lv_obj_add_event_cb(leftEyebrow, handleDestroy, LV_EVENT_LONG_PRESSED, this);
+            lv_obj_add_event_cb(rightEyebrow, handleDestroy, LV_EVENT_LONG_PRESSED, this);
+
+
+
+            runAsync();
+
+        }
+
+        void destroy()
+        {
+            stop();
+            lv_obj_del(fullScreenContainer);
         }
 
     private:
@@ -83,11 +101,32 @@ namespace devils
             return eyebrow;
         }
 
-        lv_obj_t *root;
+        static void handleDestroy(lv_event_t *e)
+        {
+            // get target object
+            EyesRenderer *renderer = static_cast<EyesRenderer *>(lv_event_get_user_data(e));
+            renderer->destroy();
+
+            
+        }
+
+        static void removeObject(lv_obj_t *obj)
+        {
+            if (obj != nullptr)
+            {
+                lv_obj_del(obj);
+                obj = nullptr;
+            }
+        }
+
+        lv_obj_t *parent;
+        lv_obj_t *fullScreenContainer;
         lv_obj_t *eyesGroup;
         lv_obj_t *leftEye;
         lv_obj_t *rightEye;
         lv_obj_t *leftEyebrow;
         lv_obj_t *rightEyebrow;
+
     };
+    
 }

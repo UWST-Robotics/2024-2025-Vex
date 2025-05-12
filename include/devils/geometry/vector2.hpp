@@ -98,7 +98,7 @@ namespace devils
          * @param other The other vector
          * @return The dot product of the two vectors
          */
-        double dot(const Vector2 &other)
+        double dot(const Vector2 &other) const
         {
             return x * other.x + y * other.y;
         }
@@ -108,7 +108,7 @@ namespace devils
          * @param other The other vector
          * @return The distance between the two vectors
          */
-        double distanceTo(const Vector2 &other)
+        double distanceTo(const Vector2 &other) const
         {
             return std::sqrt(std::pow(other.x - x, 2) + std::pow(other.y - y, 2));
         }
@@ -117,7 +117,7 @@ namespace devils
          * Calculates the magnitude of the vector
          * @return The magnitude of the vector
          */
-        double magnitude()
+        double magnitude() const
         {
             return std::sqrt(std::pow(x, 2) + std::pow(y, 2));
         }
@@ -126,7 +126,7 @@ namespace devils
          * Normalizes the vector
          * @return The normalized vector
          */
-        Vector2 normalize()
+        Vector2 normalize() const
         {
             double mag = magnitude();
             return {x / mag, y / mag};
@@ -136,7 +136,7 @@ namespace devils
          * Prints the vector to a string
          * @return The vector as a string
          */
-        const std::string toString()
+        std::string toString() const
         {
             return "(" + std::to_string(x) + ", " + std::to_string(y) + ")";
         }

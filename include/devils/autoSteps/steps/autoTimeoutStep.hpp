@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include "pros/rtos.hpp"
-#include "../common/autoStep.hpp"
+#include "../autoStep.hpp"
 #include "../../utils/timer.hpp"
 
 namespace devils
@@ -18,9 +18,9 @@ namespace devils
          * @param duration The duration of the step in milliseconds.
          */
         AutoTimeoutStep(
-            AutoStep *autoStep,
+            AutoStepPtr autoStep,
             uint32_t duration)
-            : autoStep(autoStep),
+            : autoStep(std::move(autoStep)),
               timer(duration)
         {
         }
@@ -31,13 +31,15 @@ namespace devils
             timer.start();
 
             // Start Auto Step
-            autoStep->onStart();
+            if (autoStep)
+                autoStep->onStart();
         }
 
         void onUpdate() override
         {
             // Update Auto Step
-            autoStep->onUpdate();
+            if (autoStep)
+                autoStep->onUpdate();
         }
 
         void onStop() override
@@ -46,17 +48,27 @@ namespace devils
             timer.stop();
 
             // Stop Auto Step
-            autoStep->onStop();
+            if (autoStep)
+                autoStep->onStop();
         }
 
         bool checkFinished() override
         {
-            return timer.finished() || autoStep->checkFinished();
+            // Check Timer
+            if (timer.finished())
+                return true;
+
+            // Check Auto Step
+            if (autoStep)
+                return autoStep->checkFinished();
+
+            // Otherwise, return true
+            return true;
         }
 
     protected:
         // Params
-        AutoStep *autoStep;
+        AutoStepPtr autoStep;
         Timer timer;
     };
 }

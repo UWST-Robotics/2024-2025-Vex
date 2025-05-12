@@ -1,6 +1,6 @@
 #pragma once
 #include "pros/rtos.hpp"
-#include "../common/autoStep.hpp"
+#include "../autoStep.hpp"
 #include "../../utils/timer.hpp"
 #include "../../chassis/chassisBase.hpp"
 

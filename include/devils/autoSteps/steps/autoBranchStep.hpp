@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/autoStep.hpp"
+#include "../autoStep.hpp"
 
 namespace devils
 {
@@ -63,7 +63,7 @@ namespace devils
         bool checkFinished() override
         {
             // Check if the correct step is finished
-            getActiveStep()->checkFinished();
+            return getActiveStep()->checkFinished();
         }
 
     private:

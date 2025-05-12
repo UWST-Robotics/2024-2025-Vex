@@ -70,6 +70,38 @@ namespace devils
         }
 
         /**
+         * Returns the minimum of two values by magnitude.
+         * @param valueA The first value.
+         * @param valueB The second value.
+         * @return The value with the minimum magnitude.
+         */
+        static double minMagnitude(
+            double valueA,
+            double valueB)
+        {
+            if (std::abs(valueA) < std::abs(valueB))
+                return valueA;
+            else
+                return valueB;
+        }
+
+        /**
+         * Returns the maximum of two values by magnitude.
+         * @param valueA The first value.
+         * @param valueB The second value.
+         * @return The value with the maximum magnitude.
+         */
+        static double maxMagnitude(
+            double valueA,
+            double valueB)
+        {
+            if (std::abs(valueA) > std::abs(valueB))
+                return valueA;
+            else
+                return valueB;
+        }
+
+        /**
          * Interpolates a value along a sigmoid curve.
          * @param x The input value.
          * @param kCurve The curve factor. Must be greater than 1.
@@ -90,6 +122,7 @@ namespace devils
 
         /**
          * Modulus function that works with negative numbers.
+         * For example, -1 % 3 = 2 and -1 % -3 = 1.
          * @param a The dividend.
          * @param b The divisor.
          * @return The remainder.
@@ -97,6 +130,25 @@ namespace devils
         static double signedMod(double a, double b)
         {
             return a - b * std::floor(a / b);
+        }
+
+        /**
+         * Clamps a value between a minimum and maximum.
+         * Allows for a deadband around zero such that negative values are clamped to -min and positive values are clamped to +min.
+         * @param value The value to clamp.
+         * @param min The minimum value.
+         * @param max The maximum value.
+         * @return The clamped value.
+         */
+        static double deadbandClamp(
+            const double value,
+            const double min,
+            const double max)
+        {
+            if (value >= 0)
+                return std::clamp(value, min, max);
+            else
+                return std::clamp(value, -max, -min);
         }
 
         /**

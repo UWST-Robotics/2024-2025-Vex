@@ -19,7 +19,7 @@ namespace devils
          * Gets whether the mogo is grabbed.
          * @return True if the mogo is grabbed, false otherwise.
          */
-        bool isMogoGrabbed()
+        bool getMogoGrabbed()
         {
             return mogoPneumatic.getExtended();
         }

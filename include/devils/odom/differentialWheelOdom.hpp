@@ -37,7 +37,7 @@ namespace devils
         /**
          * Gets the current pose of the robot.
          */
-        Pose &getPose() override
+        Pose getPose() override
         {
             return currentPose;
         }
@@ -46,7 +46,7 @@ namespace devils
          * Sets the current pose of the robot.
          * @param pose The pose to set the robot to.
          */
-        void setPose(Pose &pose) override
+        void setPose(Pose pose) override
         {
             currentPose = pose;
         }
@@ -86,17 +86,12 @@ namespace devils
             currentPose.rotation += deltaRotation;
 
             // Update Velocity
-            updateVelocity(currentPose);
+            PoseVelocityCalculator::updateVelocity(currentPose);
         }
 
-        Vector2 &getVelocity() override
+        PoseVelocity getVelocity() override
         {
             return PoseVelocityCalculator::getVelocity();
-        }
-
-        double getAngularVelocity() override
-        {
-            return PoseVelocityCalculator::getAngularVelocity();
         }
 
     private:

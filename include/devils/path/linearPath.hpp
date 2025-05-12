@@ -7,17 +7,18 @@
 
 namespace devils
 {
+    /**
+     * Linearly interpolated path
+     */
     class LinearPath : public Path
     {
     public:
         /**
-         * Creates a new instance of a linear path using a start and end pose.
-         * @param startPose The starting pose of the path
-         * @param endPose The ending pose of the path
+         * Creates a new instance of a linear path using a list of poses.
+         * @param poses The list of poses to interpolate between
          */
-        LinearPath(Pose startPose, Pose endPose)
-            : startPose(startPose),
-              endPose(endPose)
+        LinearPath(std::vector<Pose> poses)
+            : poses(poses)
         {
         }
 
@@ -25,21 +26,25 @@ namespace devils
         {
             // Check OOB
             if (index <= 0)
-                return startPose;
-            if (index >= 1)
-                return endPose;
+                return poses.front();
+            if (index >= poses.size() - 1)
+                return poses.back();
+
+            // Get the two poses to interpolate between
+            Pose prevPose = poses[(int)index];
+            Pose nextPose = poses[(int)index + 1];
 
             // Interpolate between the two poses
-            return Lerp::linearPoints(startPose, endPose, index);
+            double t = index - (int)index;
+            return Lerp::linearPoints(prevPose, nextPose, t);
         }
 
         double getLength() override
         {
-            return 2;
+            return poses.size();
         }
 
     private:
-        Pose startPose;
-        Pose endPose;
+        std::vector<Pose> poses;
     };
 }
