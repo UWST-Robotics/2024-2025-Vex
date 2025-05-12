@@ -84,6 +84,9 @@
 #include "display/optionsRenderer.hpp"
 #include "display/eyesRenderer.hpp"
 
+// Led
+#include "lights/ledStrip.hpp"
+
 // VEXBridge
 #include "../vexbridge/vexbridge.h"
 #include "vexbridge/vbOdom.hpp"

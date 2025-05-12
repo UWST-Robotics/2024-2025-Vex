@@ -8,6 +8,7 @@
 #include "autonomous/pjSkillsAuto.hpp"
 #include "autonomous/pjSkillsStartAuto.hpp"
 #include "autonomous/testAuto.hpp"
+#include "pros/adi.hpp"
 
 namespace devils
 {
@@ -55,6 +56,7 @@ namespace devils
             // Default State
             intakeSystem.setArmPosition(IntakeSystem::INTAKE);
             mogoGrabber.setMogoGrabbed(false);
+
 
             // Skills Startup
             bool isSkills = autoOptions.routine.id == 2;
@@ -226,6 +228,9 @@ namespace devils
         ADIPneumatic goalRushClampPneumatic = ADIPneumatic("GoalRushClampPneumatic", 4);
 
         ADIDigitalInput mogoRushSensor = ADIDigitalInput("MogoSensor", 8);
+
+        // LED Strips
+        LEDStrip ledStrip = LEDStrip(9);
 
         // Subsystems
         TankChassis chassis = TankChassis(leftMotors, rightMotors);

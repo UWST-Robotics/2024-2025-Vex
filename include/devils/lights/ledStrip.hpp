@@ -1,27 +1,48 @@
-
-#include <pros/adi.hpp>
+#pragma once
+#include "pros/adi.hpp"
 
 #pragma once
 
 namespace devils
 {
+    enum StripAction {
+        PULSE_BLUE = 50,
+        WAVE_BLUE = 250,
+        WAVE_GREEN = 450,
+        PULSE_GREEN = 550,
+        PULSE_RED = 650,
+
+    };
+
     class LEDStrip
     {
     public:
-        LEDStrip(char* name, int pin, int length) : strip(pin, length)
+        LEDStrip(int port) : ledStrip(port)
         {
-            this->name = name;
-        }
+            this->pulseBlue();
+        };
 
-        void set_color(uint32_t color)
+        void pulseBlue()
         {
-            strip.set_all(color);
+            ledStrip.set_value(PULSE_BLUE);
         }
-
+        void waveBlue()
+        {
+            ledStrip.set_value(WAVE_BLUE);
+        }
+        void pulseRed()
+        {
+            ledStrip.set_value(PULSE_GREEN);
+        }
+        void waveGreen()
+        {
+            ledStrip.set_value(WAVE_GREEN);
+        }
+        void pulseGreen()
+        {
+            ledStrip.set_value(PULSE_RED);
+        }
     private:
-        char* name;
-        int pin;
-        int length;
-        pros::adi::Led strip;
+        pros::ADIMotor ledStrip;
     };
 }
