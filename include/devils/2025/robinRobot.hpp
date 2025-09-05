@@ -8,7 +8,7 @@
 namespace devils
 {
     /**
-     * Represents a Robin robot and all of its subsystems.
+     * Represents a Robin robot and all of its subsystems
      */
     struct RobinRobot : public Robot
     {
