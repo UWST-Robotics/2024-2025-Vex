@@ -6,8 +6,8 @@
 #include "subsystems/GoalRushSystem.hpp"
 #include "subsystems/MogoGrabSystem.hpp"
 #include "subsystems/HornLEDSystem.hpp"
-#include "autonomous/BlazeMatchAuto.hpp"
-#include "autonomous/BlazeSkillsAuto.hpp"
+#include "autonomous/blazeMatchAuto.hpp"
+#include "autonomous/blazeSkillsAuto.hpp"
 
 namespace devils
 {

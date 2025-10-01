@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include "vexbridge.hpp"
+#include "vexBridge.hpp"
 
 namespace vexbridge
 {

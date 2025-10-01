@@ -1,7 +1,7 @@
 #pragma once
 
 #include "smartMotorGroup.hpp"
-#include "vexbridge/vexBridge.h"
+#include "vexbridge/vexbridge.h"
 
 namespace devils
 {

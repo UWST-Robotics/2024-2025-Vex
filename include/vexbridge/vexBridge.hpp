@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cstring>
-#include "table/ValueTable.hpp"
-#include "table/LabelTable.hpp"
+#include "table/valueTable.hpp"
+#include "table/labelTable.hpp"
 #include "serial/drivers/usbSerialDriver.hpp"
 #include "serial/serialSocket.hpp"
 #include "serial/serialWriter.hpp"
