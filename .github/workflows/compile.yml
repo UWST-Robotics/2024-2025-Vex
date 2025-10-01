@@ -17,7 +17,7 @@ jobs:
       run: sudo apt-get install git python3 pip tar wget -y > /dev/null
 
     - name: kjflkja
-      run: ls
+      run: pwd
 
     - name: Get gcc-arm-none-eabi toolchain
       run: wget -nv https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
