@@ -18,14 +18,17 @@ jobs:
 
     - name: Get gcc-arm-none-eabi toolchain
       run: wget -nv https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
-      
+      working-directory: /
+
     - name: Unzip gcc-arm-none-eabi toolchain
       run: tar -xjf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+      working-directory: /
 
-    - name: Add custom directory to PATH (Bash)
+    - name: Add custom directory to GITHUB_PATH (Bash)
       run: echo "/gcc-arm-none-eabi-10.3-2021.10/bin" >> $GITHUB_PATH
 
-
+    - name: Add custom directory to PATH (Bash)
+      run: PATH="$PATH:/gcc-arm-none-eabi-10.3-2021.10/bin"
 
     - name: Install pros
       run: python3 -m pip install pros-cli > /dev/null
