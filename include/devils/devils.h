@@ -88,6 +88,6 @@
 #include "lights/ledStrip.hpp"
 
 // VEXBridge
-#include "vexbridge/vexbridge.h"
+#include "../vexbridge/vexbridge.h"
 #include "vexbridge/vbOdom.hpp"
 #include "vexbridge/vbPath.hpp"
