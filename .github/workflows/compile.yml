@@ -33,4 +33,4 @@ jobs:
 
     - name: Compile Project
       run: ls
-      working-directory: /home/runner/work/2025-2025-Vex
+      working-directory: /home/runner/work/
