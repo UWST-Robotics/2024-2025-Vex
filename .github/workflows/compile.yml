@@ -17,10 +17,10 @@ jobs:
       run: sudo apt-get install git python3 pip tar wget -y
 
     - name: Get gcc-arm-none-eabi toolchain
-      run: wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+      run: wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2 > /dev/null
       
     - name: Unzip gcc-arm-none-eabi toolchain
-      run: tar -xjvf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+      run: tar -xjvf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2 > /dev/null
 
     - name: Add custom directory to PATH (Bash)
       run: echo "/gcc-arm-none-eabi-10.3-2021.10/bin" >> $GITHUB_PATH
