@@ -25,11 +25,23 @@ jobs:
     - name: Add custom directory to PATH (Bash)
       run: echo "/gcc-arm-none-eabi-10.3-2021.10/bin" >> $GITHUB_PATH
 
+    - name: Add custom directory to PATH (Bash)
+      run: echo "/gcc-arm-none-eabi-10.3-2021.10/bin" >> $_PATH
+
     - name: Install pros
       run: python3 -m pip install pros-cli > /dev/null
 
     - name: Disable Pros Monitoring
       run: pros --use-analytics false
+
+    - name: PATH
+      run: echo $PATH
+
+    - name: GITHUB_PATH
+      run: echo $GITHUB_PATH
+
+    - name: kjflkja
+      run: ls /
 
     - name: Compile Project
       run: pros make
