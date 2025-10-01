@@ -1,0 +1,36 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Compile Web Application
+
+on:
+  pull_request:
+    types: [opened, synchronize, edited]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: apt-get install git python3 pip tar wget -y
+
+    - name: Get gcc-arm-none-eabi toolchain
+      run: wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+      
+    - name: Unzip gcc-arm-none-eabi toolchain
+      run: tar -xjvf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+
+    - name: Add custom directory to PATH (Bash)
+      run: echo "/gcc-arm-none-eabi-10.3-2021.10/bin" >> $GITHUB_PATH
+
+    - name: Install pros
+      run: python3 -m pip install pros-cli
+
+    - name: Disable Pros Monitoring
+      run: pros --use-analytics false
+
+    - name: Compile Project
+      run: ls
+      working-directory: /home/runner/work/2025-2025-Vex/my-repo
