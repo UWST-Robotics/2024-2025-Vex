@@ -26,7 +26,7 @@ jobs:
       run: echo "/gcc-arm-none-eabi-10.3-2021.10/bin" >> $GITHUB_PATH
 
     - name: Install pros
-      run: python3 -m pip install pros-cli
+      run: python3 -m pip install pros-cli > /dev/null
 
     - name: Disable Pros Monitoring
       run: pros --use-analytics false
