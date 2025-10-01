@@ -17,7 +17,7 @@ jobs:
       run: sudo apt-get install git python3 pip tar wget -y > /dev/null
 
     - name: Get gcc-arm-none-eabi toolchain
-      run: wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2 > /dev/null
+      run: wget -nv https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
       
     - name: Unzip gcc-arm-none-eabi toolchain
       run: tar -xjvf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2 > /dev/null
@@ -33,4 +33,4 @@ jobs:
 
     - name: Compile Project
       run: ls
-      working-directory: /home/runner/work/
+      working-directory: /home/runner/work/2024-2025-Vex/
