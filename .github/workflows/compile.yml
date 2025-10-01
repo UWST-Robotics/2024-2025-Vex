@@ -13,24 +13,24 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install dependencies
+    - name: Install dependencies # Installs dependencies for pulling gcc toolchain and installing with pip
       run: sudo apt-get install git python3 pip tar wget -y > /dev/null
 
-    - name: Get gcc-arm-none-eabi toolchain
+    - name: Get gcc-arm-none-eabi toolchain # downloads toolchain file from url
       run: wget -nv https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
 
-    - name: Unzip gcc-arm-none-eabi toolchain
+    - name: Unzip gcc-arm-none-eabi toolchain # Unzips file so that it is usable
       run: tar -xjf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
 
-    - name: Add custom directory to GITHUB_PATH (Bash)
+    - name: Add custom directory to GITHUB_PATH (Bash) # Adds the toolchain's executable to the path so they can be called directly
       run: echo "/home/runner/work/2024-2025-Vex/2024-2025-Vex/gcc-arm-none-eabi-10.3-2021.10/bin" >> $GITHUB_PATH
 
-    - name: Install pros
+    - name: Install pros # Installs pros for compile
       run: python3 -m pip install pros-cli > /dev/null
 
-    - name: Disable Pros Monitoring
+    - name: Disable Pros Monitoring # Since this is a pipeline we do not want to spam their analytics
       run: pros --use-analytics false
 
     - name: Compile Project
       run: pros make
-      working-directory: /home/runner/work/2024-2025-Vex/2024-2025-Vex/
+      working-directory: /home/runner/work/2024-2025-Vex/2024-2025-Vex/ # If the repo name gets changed this will need to change as well
