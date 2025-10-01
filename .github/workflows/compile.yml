@@ -16,8 +16,7 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get install git python3 pip tar wget -y > /dev/null
 
-    - name: kjflkja
-      run: pwd
+
 
     - name: Get gcc-arm-none-eabi toolchain
       run: wget -nv https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
@@ -25,8 +24,11 @@ jobs:
     - name: Unzip gcc-arm-none-eabi toolchain
       run: tar -xjf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
 
+    - name: kjflkja
+      run: ls
+
     - name: Add custom directory to GITHUB_PATH (Bash)
-      run: echo "/gcc-arm-none-eabi-10.3-2021.10/bin" >> $GITHUB_PATH
+      run: echo "/home/runner/work/2024-2025-Vex/2024-2025-Vex/gcc-arm-none-eabi-10.3-2021.10/bin" >> $GITHUB_PATH
 
     # - name: Add custom directory to PATH (Bash)
     #   run: PATH="$PATH:/gcc-arm-none-eabi-10.3-2021.10/bin"
