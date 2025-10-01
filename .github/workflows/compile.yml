@@ -20,7 +20,7 @@ jobs:
       run: wget -nv https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
       
     - name: Unzip gcc-arm-none-eabi toolchain
-      run: tar -xjvf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2 > /dev/null
+      run: tar -xjf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
 
     - name: Add custom directory to PATH (Bash)
       run: echo "/gcc-arm-none-eabi-10.3-2021.10/bin" >> $GITHUB_PATH
@@ -33,4 +33,4 @@ jobs:
 
     - name: Compile Project
       run: ls
-      working-directory: /home/runner/work/2024-2025-Vex/
+      working-directory: /home/runner/work/2024-2025-Vex/2024-2025-Vex/
