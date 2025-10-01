@@ -26,7 +26,7 @@ jobs:
       run: echo "/gcc-arm-none-eabi-10.3-2021.10/bin" >> $GITHUB_PATH
 
     - name: Add custom directory to PATH (Bash)
-      run: echo "/gcc-arm-none-eabi-10.3-2021.10/bin" >> $_PATH
+      run: echo "/gcc-arm-none-eabi-10.3-2021.10/bin" >> $PATH
 
     - name: Install pros
       run: python3 -m pip install pros-cli > /dev/null
