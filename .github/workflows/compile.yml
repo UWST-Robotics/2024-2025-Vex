@@ -32,5 +32,5 @@ jobs:
       run: pros --use-analytics false
 
     - name: Compile Project
-      run: ls
+      run: pros make
       working-directory: /home/runner/work/2024-2025-Vex/2024-2025-Vex/
